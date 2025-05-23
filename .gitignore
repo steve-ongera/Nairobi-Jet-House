@@ -1,0 +1,44 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Django-related
+*.log
+*.pot
+*.pyc
+db.sqlite3  # if you're using SQLite for local dev
+media/      # user-uploaded files
+staticfiles/  # collected static files (run by `collectstatic`)
+
+# Environment variables
+.env
+.env.*
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS-generated
+.DS_Store
+Thumbs.db
+
+# Migrations (optional: keep only if needed)
+# myapplication/migrations/
+#   !myapplication/migrations/__init__.py
+
+# pytest / test cache
+.pytest_cache/
+coverage.xml
+htmlcov/
