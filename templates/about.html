@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}About Us | Nairobi Jet House{% endblock %}
+
+{% block description %}Learn about Nairobi Jet House - your premier private jet charter service offering luxury, safety, and personalized travel experiences across Africa and beyond.{% endblock %}
+
+{% block content %}
+<section class="about-section">
+  <div class="container">
+
+    <div class="about-banner">
+      <img src="{% static 'assets/images/private-jet-classifications-VIP.jpg.webp'%}" alt="Our private jets" class="about-img">
+      
+      <div class="about-banner-content">
+        <h2 style="color:white;" class="h2 section-title">Elevating Your Travel Experience</h2>
+        <p class="about-banner-text">
+          Since 2010, Nairobi Jet House has been redefining luxury air travel across Africa and beyond.
+        </p>
+      </div>
+    </div>
+
+    <div class="about-content">
+
+      <div class="about-grid">
+
+        <div class="about-card">
+          <div class="about-card-icon">
+            <ion-icon name="airplane-outline"></ion-icon>
+          </div>
+          <h3 class="h3 about-card-title">Our Fleet</h3>
+          <p class="about-card-text">
+            We maintain a diverse fleet of modern aircraft, from light jets for quick trips to large cabins for transcontinental comfort.
+          </p>
+        </div>
+
+        <div class="about-card">
+          <div class="about-card-icon">
+            <ion-icon name="shield-checkmark-outline"></ion-icon>
+          </div>
+          <h3 class="h3 about-card-title">Safety First</h3>
+          <p class="about-card-text">
+            Our rigorous safety standards and highly trained crew ensure your peace of mind at every altitude.
+          </p>
+        </div>
+
+        <div class="about-card">
+          <div class="about-card-icon">
+            <ion-icon name="diamond-outline"></ion-icon>
+          </div>
+          <h3 class="h3 about-card-title">Luxury Service</h3>
+          <p class="about-card-text">
+            Experience bespoke catering, premium amenities, and personalized service tailored to your preferences.
+          </p>
+        </div>
+
+      </div>
+
+      <div class="about-detail">
+        <h2 class="h2 section-title">Our Story</h2>
+        <p class="about-text">
+          Founded by aviation enthusiasts, Nairobi Jet House began with a single aircraft and a vision to make private air travel more accessible in East Africa. Today, we operate a growing fleet serving corporate clients, celebrities, and discerning travelers across the continent.
+        </p>
+        <p class="about-text">
+          What sets us apart is our commitment to African hospitality combined with global aviation standards. Our team understands the unique travel needs within the region while maintaining international best practices.
+        </p>
+        <ul class="about-list">
+          <li class="about-item">
+            <ion-icon name="checkmark-circle" class="about-item-icon"></ion-icon>
+            <span class="about-item-text">Over 12,000 successful flights</span>
+          </li>
+          <li class="about-item">
+            <ion-icon name="checkmark-circle" class="about-item-icon"></ion-icon>
+            <span class="about-item-text">Certified by Kenya Civil Aviation Authority</span>
+          </li>
+          <li class="about-item">
+            <ion-icon name="checkmark-circle" class="about-item-icon"></ion-icon>
+            <span class="about-item-text">24/7 operations and support</span>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<section class="team-section">
+  <div class="container">
+
+    <p class="section-subtitle">Meet The Team</p>
+    <h2 class="h2 section-title">Our Aviation Experts</h2>
+
+    <div class="team-grid">
+
+      <div class="team-card">
+        <figure class="team-banner">
+          <img src="{% static 'assets/images/team-1.jpg' %}" alt="Captain James Mwangi">
+        </figure>
+        <h3 class="h3 team-name">Captain James Mwangi</h3>
+        <p class="team-title">Chief Pilot</p>
+        <p class="team-text">
+          With over 15,000 flight hours, Captain Mwangi ensures the highest standards of flight operations.
+        </p>
+      </div>
+
+      <div class="team-card">
+        <figure class="team-banner">
+          <img src="{% static 'assets/images/team-2.jpg' %}" alt="Sarah Kamau">
+        </figure>
+        <h3 class="h3 team-name">Sarah Kamau</h3>
+        <p class="team-title">Client Relations</p>
+        <p class="team-text">
+          Sarah crafts personalized travel experiences for our most discerning clients.
+        </p>
+      </div>
+
+      <div class="team-card">
+        <figure class="team-banner">
+          <img src="{% static 'assets/images/team-3.jpg' %}" alt="David Omondi">
+        </figure>
+        <h3 class="h3 team-name">David Omondi</h3>
+        <p class="team-title">Operations Director</p>
+        <p class="team-text">
+          David coordinates our seamless operations across multiple African destinations.
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<section class="cta" style="background-image: url('{% static 'assets/images/cta-bg.jpg' %}')">
+  <div class="container">
+    <div class="cta-content">
+      <h2 class="h2 section-title">Ready for Your Exclusive Journey?</h2>
+      <p class="section-text">
+        Experience the Nairobi Jet House difference - where African hospitality meets world-class aviation.
+      </p>
+    </div>
+    <button class="btn btn-secondary">Contact Our Team</button>
+  </div>
+</section>
+
+<style>
+  .about-section {
+    padding: 60px 0;
+  }
+  
+  .about-banner {
+    position: relative;
+    margin-bottom: 40px;
+    border-radius: 16px;
+    overflow: hidden;
+
+  }
+  
+  .about-img {
+    width: 100%;
+    height: 400px;
+    object-fit: cover;
+  }
+  
+  .about-banner-content {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    padding: 40px;
+    color: white;
+  }
+  
+  .about-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-bottom: 50px;
+  }
+  
+  .about-card {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    text-align: center;
+  }
+  
+  .about-card-icon {
+    font-size: 48px;
+    color: var(--primary);
+    margin-bottom: 20px;
+  }
+  
+  .about-list {
+    margin-top: 20px;
+  }
+  
+  .about-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .about-item-icon {
+    color: var(--primary);
+    margin-right: 10px;
+  }
+  
+  .team-section {
+    padding: 60px 0;
+    background-color: #f9f9f9;
+  }
+  
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+  }
+  
+  .team-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    text-align: center;
+    padding-bottom: 30px;
+  }
+  
+  .team-banner img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+  }
+  
+  .team-name {
+    margin: 20px 0 5px;
+  }
+  
+  .team-title {
+    color: var(--primary);
+    font-weight: 500;
+    margin-bottom: 15px;
+  }
+  
+  .team-text {
+    padding: 0 20px;
+  }
+</style>
+{% endblock %}

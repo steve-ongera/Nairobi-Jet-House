@@ -28,9 +28,16 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+ 
+
   <link
     href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap"
     rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+ 
 </head>
 
 
@@ -126,7 +133,7 @@
             </li>
 
             <li>
-              <a href="#" class="navbar-link" data-nav-link>about us</a>
+              <a href="{% url 'about-us'%}" class="navbar-link" data-nav-link>about us</a>
             </li>
 
             <li>
@@ -149,7 +156,7 @@
 
         </nav>
 
-        <button class="btn btn-primary">Book Now</button>
+       <button  class="btn btn-primary">Book Now</button>
 
       </div>
     </div>
@@ -180,7 +187,7 @@
           <div class="btn-group">
             <button class="btn btn-primary">Learn more</button>
 
-            <button class="btn btn-secondary">Book now</button>
+            <button id="bookNowButton" class="btn btn-primary">Book Now</button>
           </div>
 
         </div>
@@ -698,8 +705,298 @@
         </div>
       </section>
 
+    
+
     </article>
   </main>
+
+  
+   <!-- Place this MODAL right before closing </body> tag -->
+<!-- Button to trigger modal -->
+
+
+<!-- Custom Modal -->
+<div id="bookJetModal" class="custom-modal">
+  <div class="custom-modal-content">
+    <div class="custom-modal-header">
+      <h5>Request Private Jet Charter</h5>
+      <button type="button" class="custom-close-btn">&times;</button>
+    </div>
+    <div class="custom-modal-body">
+      <form id="jetBookingForm" method="post" action="{% url 'find_aircraft' %}">
+        {% csrf_token %}
+        <div class="form-group">
+          <label>Trip Type</label>
+          <div class="btn-group">
+            <input type="radio" name="trip_type" id="one_way" value="one_way" checked>
+            <label for="one_way" class="btn-option">One Way</label>
+            
+            <input type="radio" name="trip_type" id="round_trip" value="round_trip">
+            <label for="round_trip" class="btn-option">Round Trip</label>
+            
+            <input type="radio" name="trip_type" id="multi_leg" value="multi_leg">
+            <label for="multi_leg" class="btn-option">Multi-leg</label>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-col">
+            <label for="departure_airport">Departure Airport (ICAO)*</label>
+            <input type="text" id="departure_airport" name="departure_airport" required>
+          </div>
+          <div class="form-col">
+            <label for="arrival_airport">Destination Airport (ICAO)*</label>
+            <input type="text" id="arrival_airport" name="arrival_airport" required>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-col">
+            <label for="passenger_count">Passengers*</label>
+            <input type="number" id="passenger_count" name="passenger_count" min="1" required>
+          </div>
+          <div class="form-col">
+            <label for="departure_date">Departure Date*</label>
+            <input type="date" id="departure_date" name="departure_date" required>
+          </div>
+          <div class="form-col">
+            <label for="departure_time">Departure Time*</label>
+            <input type="time" id="departure_time" name="departure_time" required>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-col">
+            <label for="client_name">Your Name*</label>
+            <input type="text" id="client_name" name="client_name" required>
+          </div>
+          <div class="form-col">
+            <label for="client_email">Email*</label>
+            <input type="email" id="client_email" name="client_email" required>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="special_requests">Special Requests</label>
+          <textarea id="special_requests" name="special_requests" rows="3"></textarea>
+        </div>
+      </form>
+    </div>
+    <div class="custom-modal-footer">
+      <button type="button" class="custom-btn secondary">Close</button>
+      <button type="submit" form="jetBookingForm" class="custom-btn primary">Find Available Jets</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS bundle (required for modal functionality) -->
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Get modal elements
+  const modal = document.getElementById('bookJetModal');
+  const openBtn = document.getElementById('bookNowButton');
+  const closeBtn = document.querySelector('.custom-close-btn');
+  const secondaryBtn = document.querySelector('.custom-btn.secondary');
+  
+  // Open modal
+  if (openBtn) {
+    openBtn.addEventListener('click', function() {
+      modal.style.display = 'block';
+      document.body.style.overflow = 'hidden'; // Prevent scrolling
+    });
+  }
+  
+  // Close modal
+  function closeModal() {
+    modal.style.display = 'none';
+    document.body.style.overflow = ''; // Re-enable scrolling
+  }
+  
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (secondaryBtn) secondaryBtn.addEventListener('click', closeModal);
+  
+  // Close when clicking outside modal
+  window.addEventListener('click', function(event) {
+    if (event.target === modal) {
+      closeModal();
+    }
+  });
+});
+</script>
+<!-- jQuery first if needed -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Then Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<style>
+  /* Custom Modal Styles */
+.custom-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.custom-modal-content {
+  background-color: #fff;
+  margin: 5% auto;
+  padding: 0;
+  width: 80%;
+  max-width: 800px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  animation: modalFadeIn 0.3s;
+}
+
+@keyframes modalFadeIn {
+  from {opacity: 0; transform: translateY(-20px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
+.custom-modal-header {
+  background-color: #1a6fc9;
+  color: white;
+  padding: 16px 20px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.custom-modal-header h5 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.custom-close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0 8px;
+}
+
+.custom-modal-body {
+  padding: 20px;
+}
+
+.custom-modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/* Form Styles */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.form-col {
+  flex: 1;
+  min-width: 200px;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+input[type="email"],
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+textarea {
+  min-height: 80px;
+}
+
+.btn-group {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-option {
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  background-color: #f8f9fa;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-option:hover {
+  background-color: #e9ecef;
+}
+
+input[type="radio"] {
+  display: none;
+}
+
+input[type="radio"]:checked + .btn-option {
+  background-color: #1a6fc9;
+  color: white;
+  border-color: #155a9e;
+}
+
+/* Button Styles */
+.custom-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.custom-btn.primary {
+  background-color: #1a6fc9;
+  color: white;
+}
+
+.custom-btn.primary:hover {
+  background-color: #155a9e;
+}
+
+.custom-btn.secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.custom-btn.secondary:hover {
+  background-color: #5a6268;
+}
+</style>
+
 
 
 
@@ -813,6 +1110,7 @@
     <ion-icon name="chevron-up-outline"></ion-icon>
   </a>
 
+  
 
 
 
@@ -828,6 +1126,11 @@
   <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
   <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 
+  
+
 </body>
+
+  
+
 
 </html>

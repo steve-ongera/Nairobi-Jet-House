@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <div class="card border-0 shadow">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">Available Aircraft</h4>
+          <small>From {{ departure_airport.icao_code }} to {{ arrival_airport.icao_code }} on {{ departure_datetime|date:"M d, Y H:i" }}</small>
+        </div>
+        
+        <div class="card-body">
+          {% if aircraft_list %}
+            <div class="list-group">
+              {% for aircraft in aircraft_list %}
+              <div class="list-group-item list-group-item-action mb-3 rounded">
+                <div class="row align-items-center">
+                  <div class="col-md-3">
+                    {% if aircraft.interior_images.first %}
+                    <img src="{{ aircraft.interior_images.first.image.url }}" 
+                         class="img-fluid rounded" 
+                         alt="{{ aircraft.model_name }}">
+                    {% else %}
+                    <div class="bg-light rounded" style="height: 100px; width: 100%;"></div>
+                    {% endif %}
+                  </div>
+                  
+                  <div class="col-md-6">
+                    <h5>{{ aircraft.model_name }}</h5>
+                    <p class="mb-1">
+                      <i class="fas fa-users"></i> {{ aircraft.aircraft_type.passenger_capacity }} passengers<br>
+                      <i class="fas fa-plane"></i> {{ aircraft.registration_number }}<br>
+                      <i class="fas fa-clock"></i> {{ aircraft.minimum_hours }}h minimum
+                    </p>
+                    <p class="text-muted small">{{ aircraft.aircraft_type.description }}</p>
+                  </div>
+                  
+                  <div class="col-md-3 text-end">
+                    <h5>${{ aircraft.hourly_rate|floatformat:2 }}/hour</h5>
+                    <form method="post" action="{% url 'create_booking' %}">
+                      {% csrf_token %}
+                      <input type="hidden" name="aircraft_id" value="{{ aircraft.id }}">
+                      <input type="hidden" name="departure_icao" value="{{ departure_airport.icao_code }}">
+                      <input type="hidden" name="arrival_icao" value="{{ arrival_airport.icao_code }}">
+                      <input type="hidden" name="departure_datetime" value="{{ departure_datetime|date:'c' }}">
+                      <input type="hidden" name="passenger_count" value="{{ passenger_count }}">
+                      <input type="hidden" name="trip_type" value="{{ trip_type }}">
+                      <input type="hidden" name="client_email" value="{{ client_email }}">
+                      <input type="hidden" name="client_name" value="{{ client_name }}">
+                      <input type="hidden" name="special_requests" value="{{ special_requests }}">
+                      <button type="submit" class="btn btn-primary btn-sm">Select</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="alert alert-warning">
+              No aircraft available matching your criteria. Please try different dates or airports.
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
