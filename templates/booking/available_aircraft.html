@@ -1,3 +1,665 @@
+
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% load static %}
+
+{% block title %}Available Aircraft - {{ departure_airport.name }} to {{ arrival_airport.name }}{% endblock %}
+
+
+{% block content %}
+
+<style>
+:root {
+  --primary-color: #2c3e50;
+  --secondary-color: #3498db;
+  --accent-color: #e74c3c;
+  --success-color: #27ae60;
+  --warning-color: #f39c12;
+  --light-bg: #f8f9fa;
+  --border-color: #dee2e6;
+  --text-muted: #6c757d;
+  --shadow-light: 0 2px 10px rgba(0,0,0,0.1);
+  --shadow-medium: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.search-summary {
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: white;
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+}
+
+.search-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.search-detail-item {
+  text-align: center;
+  padding: 1rem;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+}
+
+.search-detail-item h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.search-detail-item p {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.results-count {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+
+.filter-controls {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--border-color);
+  background: white;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+}
+
+.filter-btn:hover {
+  border-color: var(--secondary-color);
+  background: var(--secondary-color);
+  color: white;
+}
+
+.filter-btn.active {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.aircraft-grid {
+  display: grid;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.aircraft-card {
+  background: white;
+  border-radius: 15px;
+  box-shadow: var(--shadow-light);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 1px solid var(--border-color);
+}
+
+.aircraft-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-medium);
+}
+
+.aircraft-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  padding: 2rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.aircraft-info h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.aircraft-type {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+
+.aircraft-specs {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.spec-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.spec-icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+}
+
+.pricing-info {
+  text-align: right;
+}
+
+.price-main {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.price-details {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.aircraft-body {
+  padding: 2rem;
+}
+
+.aircraft-features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.feature-group h4 {
+  color: var(--primary-color);
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.feature-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.feature-list li {
+  padding: 0.5rem 0;
+  color: var(--text-muted);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.feature-list li:last-child {
+  border-bottom: none;
+}
+
+.availability-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.status-available {
+  background: rgba(39, 174, 96, 0.1);
+  color: var(--success-color);
+}
+
+.status-limited {
+  background: rgba(243, 156, 18, 0.1);
+  color: var(--warning-color);
+}
+
+.aircraft-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+}
+
+.btn {
+  padding: 0.75rem 2rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+}
+
+.btn-primary {
+  background: var(--secondary-color);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--secondary-color);
+  color: var(--secondary-color);
+}
+
+.btn-outline:hover {
+  background: var(--secondary-color);
+  color: white;
+}
+
+.no-results {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 15px;
+  box-shadow: var(--shadow-light);
+}
+
+.no-results-icon {
+  font-size: 4rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.no-results h3 {
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+}
+
+.no-results p {
+  color: var(--text-muted);
+  max-width: 600px;
+  margin: 0 auto 2rem;
+  line-height: 1.6;
+}
+
+.modify-search-btn {
+  background: var(--secondary-color);
+  color: white;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.modify-search-btn:hover {
+  background: #2980b9;
+}
+
+.trip-summary {
+  background: var(--light-bg);
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 2rem;
+}
+
+.trip-route {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.route-airport {
+  text-align: center;
+  flex: 1;
+}
+
+.route-airport h4 {
+  margin: 0;
+  color: var(--primary-color);
+  font-size: 1.2rem;
+}
+
+.route-airport p {
+  margin: 0.5rem 0 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.route-arrow {
+  color: var(--secondary-color);
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .search-details {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .aircraft-header {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  
+  .aircraft-features {
+    grid-template-columns: 1fr;
+  }
+  
+  .aircraft-specs {
+    justify-content: center;
+  }
+  
+  .results-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filter-controls {
+    justify-content: center;
+  }
+  
+  .aircraft-actions {
+    flex-direction: column;
+  }
+}
+</style>
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
+
+
+<div class="search-summary">
+  <div class="search-details">
+    <div class="search-detail-item">
+      <h4>Route</h4>
+      <p>{{ departure_airport.city }} → {{ arrival_airport.city }}</p>
+    </div>
+    <div class="search-detail-item">
+      <h4>Departure</h4>
+      <p>{{ departure_datetime|date:"M d, Y" }} at {{ departure_datetime|time:"H:i" }}</p>
+    </div>
+    {% if return_datetime %}
+    <div class="search-detail-item">
+      <h4>Return</h4>
+      <p>{{ return_datetime|date:"M d, Y" }} at {{ return_datetime|time:"H:i" }}</p>
+    </div>
+    {% endif %}
+    <div class="search-detail-item">
+      <h4>Passengers</h4>
+      <p>{{ passenger_count }} {{ passenger_count|pluralize:"passenger,passengers" }}</p>
+    </div>
+    <div class="search-detail-item">
+      <h4>Trip Type</h4>
+      <p>{{ trip_type|replace_underscore }}</p>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="trip-summary">
+    <div class="trip-route">
+      <div class="route-airport">
+        <h4>{{ departure_airport.icao_code }}</h4>
+        <p>{{ departure_airport.name }}<br>{{ departure_airport.city }}, {{ departure_airport.country }}</p>
+      </div>
+      <div class="route-arrow">✈</div>
+      <div class="route-airport">
+        <h4>{{ arrival_airport.icao_code }}</h4>
+        <p>{{ arrival_airport.name }}<br>{{ arrival_airport.city }}, {{ arrival_airport.country }}</p>
+      </div>
+    </div>
+  </div>
+
+  {% if aircraft_list %}
+  <div class="results-header">
+    <div class="results-count">
+      <strong>{{ total_results }}</strong> aircraft available for your trip
+    </div>
+    <div class="filter-controls">
+      <button class="filter-btn active" data-filter="all">All Aircraft</button>
+      <button class="filter-btn" data-filter="jets">Jets</button>
+      <button class="filter-btn" data-filter="turboprops">Turboprops</button>
+      <button class="filter-btn" data-filter="price-low">Price: Low to High</button>
+    </div>
+  </div>
+
+  <div class="aircraft-grid">
+    {% for aircraft_info in aircraft_list %}
+    <div class="aircraft-card" data-category="{{ aircraft_info.aircraft.aircraft_type.name|lower }}">
+      <div class="aircraft-header">
+        <div class="aircraft-info">
+          <h3>{{ aircraft_info.aircraft.model_name }}</h3>
+          <div class="aircraft-type">{{ aircraft_info.aircraft.aircraft_type.name }}</div>
+          <div class="aircraft-specs">
+            <div class="spec-item">
+              <svg class="spec-icon" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM5 8a2 2 0 11-4 0 2 2 0 014 0zM17 8a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+              <span>{{ aircraft_info.aircraft.aircraft_type.passenger_capacity }} seats</span>
+            </div>
+            <div class="spec-item">
+              <svg class="spec-icon" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M8 5a1 1 0 100 2h5.586l-1.293 1.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L13.586 5H8zM12 15a1 1 0 100-2H6.414l1.293-1.293a1 1 0 10-1.414-1.414l-3 3a1 1 0 000 1.414l3 3a1 1 0 001.414-1.414L6.414 15H12z"/>
+              </svg>
+              <span>{{ aircraft_info.aircraft.aircraft_type.range_nautical_miles|floatformat:0 }} nm range</span>
+            </div>
+            <div class="spec-item">
+              <svg class="spec-icon" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+              </svg>
+              <span>{{ aircraft_info.estimated_flight_hours }}h flight time</span>
+            </div>
+          </div>
+        </div>
+        <div class="pricing-info">
+          <p class="price-main">${{ aircraft_info.total_price|floatformat:0 }}</p>
+          <div class="price-details">
+            ${{ aircraft_info.base_price|floatformat:0 }} base price<br>
+            {% if trip_type == 'round_trip' %}× 2 for round trip{% endif %}
+          </div>
+        </div>
+      </div>
+      
+      <div class="aircraft-body">
+        <div class="availability-status {% if aircraft_info.availability_status == 'Available' %}status-available{% else %}status-limited{% endif %}">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+            <circle cx="6" cy="6" r="6"/>
+          </svg>
+          {{ aircraft_info.availability_status }}
+        </div>
+
+        <div class="aircraft-features">
+          <div class="feature-group">
+            <h4>Aircraft Details</h4>
+            <ul class="feature-list">
+              <li><strong>Registration:</strong> {{ aircraft_info.aircraft.registration_number }}</li>
+              <li><strong>Year:</strong> {{ aircraft_info.aircraft.year_manufactured }}</li>
+              <li><strong>Base Airport:</strong> {{ aircraft_info.aircraft.base_airport }}</li>
+              <li><strong>Current Location:</strong> {{ aircraft_info.aircraft.current_location }}</li>
+            </ul>
+          </div>
+          
+          <div class="feature-group">
+            <h4>Performance</h4>
+            <ul class="feature-list">
+              <li><strong>Cruising Speed:</strong> {{ aircraft_info.aircraft.aircraft_type.speed_knots }} knots</li>
+              <li><strong>Maximum Range:</strong> {{ aircraft_info.aircraft.aircraft_type.range_nautical_miles }} nm</li>
+              <li><strong>Hourly Rate:</strong> ${{ aircraft_info.aircraft.hourly_rate }}/hour</li>
+              <li><strong>Minimum Hours:</strong> {{ aircraft_info.aircraft.minimum_hours }}h</li>
+            </ul>
+          </div>
+        </div>
+
+        {% if aircraft_info.aircraft.features %}
+        <div class="feature-group">
+          <h4>Special Features</h4>
+          <p>{{ aircraft_info.aircraft.features }}</p>
+        </div>
+        {% endif %}
+
+        <div class="aircraft-actions">
+          <button class="btn btn-outline" onclick="showAircraftDetails('{{ aircraft_info.aircraft.id }}')">
+            View Details
+          </button>
+          <button class="btn btn-primary" onclick="bookAircraft('{{ aircraft_info.aircraft.id }}')">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zM8 1.918l-.797.161A4.002 4.002 0 0 0 4 6c0 .628-.134 2.197-.459 3.742-.16.767-.376 1.566-.663 2.258h10.244c-.287-.692-.502-1.49-.663-2.258C12.134 8.197 12 6.628 12 6a4.002 4.002 0 0 0-3.203-3.92L8 1.917zM14.22 12c.223.447.481.801.78 1H1c.299-.199.557-.553.78-1C2.68 10.2 3 6.88 3 6c0-2.42 1.72-4.44 4.005-4.901a1 1 0 1 1 1.99 0A5.002 5.002 0 0 1 13 6c0 .88.32 4.2 1.22 6z"/>
+            </svg>
+            Book Now
+          </button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="no-results">
+    <div class="no-results-icon">✈️</div>
+    <h3>No Aircraft Available</h3>
+    <p>
+      We couldn't find any aircraft available for your requested route from 
+      <strong>{{ departure_airport.name }}</strong> to <strong>{{ arrival_airport.name }}</strong> 
+      on <strong>{{ departure_datetime|date:"F d, Y" }}</strong>.
+    </p>
+    <p>
+      This might be due to high demand, aircraft positioning, or maintenance schedules. 
+      Try adjusting your departure date or consider nearby airports.
+    </p>
+    <button class="modify-search-btn" onclick="history.back()">
+      Modify Search
+    </button>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Booking Modal (placeholder) -->
+<div id="bookingModal" class="modal fade" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Complete Your Booking</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Booking form will be implemented here...</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Filter functionality
+document.addEventListener('DOMContentLoaded', function() {
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const aircraftCards = document.querySelectorAll('.aircraft-card');
+  
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      // Remove active class from all buttons
+      filterBtns.forEach(b => b.classList.remove('active'));
+      // Add active class to clicked button
+      this.classList.add('active');
+      
+      const filter = this.dataset.filter;
+      
+      aircraftCards.forEach(card => {
+        if (filter === 'all') {
+          card.style.display = 'block';
+        } else if (filter === 'jets') {
+          const category = card.dataset.category;
+          card.style.display = category.includes('jet') ? 'block' : 'none';
+        } else if (filter === 'turboprops') {
+          const category = card.dataset.category;
+          card.style.display = category.includes('turboprop') ? 'block' : 'none';
+        } else if (filter === 'price-low') {
+          // Sort by price (simplified - in real app, you'd re-query)
+          const container = document.querySelector('.aircraft-grid');
+          const cards = Array.from(aircraftCards);
+          cards.sort((a, b) => {
+            const priceA = parseFloat(a.querySelector('.price-main').textContent.replace(/[$,]/g, ''));
+            const priceB = parseFloat(b.querySelector('.price-main').textContent.replace(/[$,]/g, ''));
+            return priceA - priceB;
+          });
+          cards.forEach(card => container.appendChild(card));
+        }
+      });
+    });
+  });
+});
+
+function showAircraftDetails(aircraftId) {
+  // Implement aircraft details modal or page
+  console.log('Show details for aircraft:', aircraftId);
+  // You can implement this to show more details, images, etc.
+}
+
+function bookAircraft(aircraftId) {
+  // Implement booking flow
+  console.log('Book aircraft:', aircraftId);
+  
+  // Create booking form data
+  const bookingData = {
+    aircraft_id: aircraftId,
+    departure_airport: '{{ departure_airport.icao_code }}',
+    arrival_airport: '{{ arrival_airport.icao_code }}',
+    departure_datetime: '{{ departure_datetime|date:"c" }}',
+    {% if return_datetime %}return_datetime: '{{ return_datetime|date:"c" }}',{% endif %}
+    passenger_count: {{ passenger_count }},
+    trip_type: '{{ trip_type }}',
+    client_name: '{{ client_name }}',
+    client_email: '{{ client_email }}',
+    special_requests: '{{ special_requests }}'
+  };
+  
+  // You can redirect to booking page or show booking modal
+  // For now, let's redirect to a booking page with parameters
+  const params = new URLSearchParams(bookingData);
+  window.location.href = `/book-aircraft/?${params.toString()}`;
+}
+
+// Smooth scroll to top when filtering
+function scrollToTop() {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+}
+</script>
+{% endblock %}
+{% comment %}
+
 {% extends 'base.html' %}
 {% load static %}
 
@@ -68,3 +730,5 @@
   </div>
 </div>
 {% endblock %}
+
+{% endcomment %}
