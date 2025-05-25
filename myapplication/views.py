@@ -4,6 +4,10 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from .models import Aircraft, AircraftType, Availability, Airport
 from django.contrib import messages
+from django.http import JsonResponse
+from django.db.models import Q
+from django.db import models
+
 
 def find_aircraft(request):
     if request.method == 'POST':
@@ -62,7 +66,50 @@ def find_aircraft(request):
 
 
 def index(request):
-    return render(request, 'index.html')  # Make sure you create templates/index.html
+    # Get all airports for the dropdown, ordered by name for better UX
+    airports = Airport.objects.all().order_by('name')
+    
+    # Optional: Get aircraft types if you want to show them in the form later
+    aircraft_types = AircraftType.objects.all().order_by('name')
+    
+    context = {
+        'airports': airports,
+        'aircraft_types': aircraft_types,
+    }
+    return render(request, 'index.html', context)
+
+
+# Optional: Add this view for AJAX search functionality
+def search_airports(request):
+    """
+    AJAX endpoint to search airports by name or city
+    Useful if you have many airports and want to implement search-as-you-type
+    """
+    query = request.GET.get('q', '')
+    if len(query) >= 2:  # Only search if at least 2 characters
+        airports = Airport.objects.filter(
+            models.Q(name__icontains=query) | 
+            models.Q(city__icontains=query) |
+            models.Q(icao_code__icontains=query) |
+            models.Q(iata_code__icontains=query)
+        ).order_by('name')[:20]  # Limit to 20 results
+        
+        airport_data = [
+            {
+                'id': airport.icao_code,
+                'name': airport.name,
+                'city': airport.city,
+                'country': airport.country,
+                'icao': airport.icao_code,
+                'iata': airport.iata_code or '',
+                'display': f"{airport.name} ({airport.city}, {airport.country}) - {airport.icao_code}"
+            }
+            for airport in airports
+        ]
+        
+        return JsonResponse({'airports': airport_data})
+    
+    return JsonResponse({'airports': []})
 
 def about_us(request):
     return render(request, 'about.html')  # Make sure you create templates/index.html

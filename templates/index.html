@@ -728,6 +728,7 @@
 
 
 <!-- Custom Modal -->
+<!-- Custom Modal -->
 <div id="bookJetModal" class="custom-modal">
   <div class="custom-modal-content">
     <div class="custom-modal-header">
@@ -753,12 +754,34 @@
         
         <div class="form-row">
           <div class="form-col">
-            <label for="departure_airport">Departure Airport (ICAO)*</label>
-            <input type="text" id="departure_airport" name="departure_airport" required>
+            <label for="departure_airport">Departure Airport*</label>
+            <select id="departure_airport" name="departure_airport" class="airport-select" required>
+              <option value="">Select departure airport...</option>
+              {% for airport in airports %}
+                <option value="{{ airport.icao_code }}" 
+                        data-iata="{{ airport.iata_code|default:'' }}"
+                        data-city="{{ airport.city }}"
+                        data-country="{{ airport.country }}">
+                  {{ airport.name }} ({{ airport.city }}, {{ airport.country }}) - {{ airport.icao_code }}
+                  {% if airport.iata_code %}/{{ airport.iata_code }}{% endif %}
+                </option>
+              {% endfor %}
+            </select>
           </div>
           <div class="form-col">
-            <label for="arrival_airport">Destination Airport (ICAO)*</label>
-            <input type="text" id="arrival_airport" name="arrival_airport" required>
+            <label for="arrival_airport">Destination Airport*</label>
+            <select id="arrival_airport" name="arrival_airport" class="airport-select" required>
+              <option value="">Select destination airport...</option>
+              {% for airport in airports %}
+                <option value="{{ airport.icao_code }}" 
+                        data-iata="{{ airport.iata_code|default:'' }}"
+                        data-city="{{ airport.city }}"
+                        data-country="{{ airport.country }}">
+                  {{ airport.name }} ({{ airport.city }}, {{ airport.country }}) - {{ airport.icao_code }}
+                  {% if airport.iata_code %}/{{ airport.iata_code }}{% endif %}
+                </option>
+              {% endfor %}
+            </select>
           </div>
         </div>
         
@@ -777,6 +800,18 @@
           </div>
         </div>
         
+        <!-- Return date fields for round trip -->
+        <div id="return_fields" class="form-row" style="display: none;">
+          <div class="form-col">
+            <label for="return_date">Return Date</label>
+            <input type="date" id="return_date" name="return_date">
+          </div>
+          <div class="form-col">
+            <label for="return_time">Return Time</label>
+            <input type="time" id="return_time" name="return_time">
+          </div>
+        </div>
+        
         <div class="form-row">
           <div class="form-col">
             <label for="client_name">Your Name*</label>
@@ -790,7 +825,8 @@
         
         <div class="form-group">
           <label for="special_requests">Special Requests</label>
-          <textarea id="special_requests" name="special_requests" rows="3"></textarea>
+          <textarea id="special_requests" name="special_requests" rows="3" 
+                    placeholder="Any special requirements, dietary restrictions, or preferences..."></textarea>
         </div>
       </form>
     </div>
@@ -801,36 +837,151 @@
   </div>
 </div>
 
-<!-- Bootstrap JS bundle (required for modal functionality) -->
- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<style>
+/* Enhanced styling for airport dropdowns */
+.airport-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: white;
+  font-size: 14px;
+  max-height: 200px;
+}
 
+.airport-select:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* Make select dropdowns searchable on mobile */
+.airport-select option {
+  padding: 8px;
+}
+
+#return_fields {
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+  margin-top: 15px;
+}
+
+/* Loading state for AJAX search */
+.airport-select.loading {
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEwIDNWN0wxMy41IDMuNUwxMCAzWiIgZmlsbD0iIzk5OSIvPgo8L3N2Zz4K');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Get modal elements
+  // Existing modal functionality
   const modal = document.getElementById('bookJetModal');
   const openBtn = document.getElementById('bookNowButton');
   const closeBtn = document.querySelector('.custom-close-btn');
   const secondaryBtn = document.querySelector('.custom-btn.secondary');
   
+  // Trip type handling
+  const tripTypeRadios = document.querySelectorAll('input[name="trip_type"]');
+  const returnFields = document.getElementById('return_fields');
+  
+  tripTypeRadios.forEach(radio => {
+    radio.addEventListener('change', function() {
+      if (this.value === 'round_trip') {
+        returnFields.style.display = 'flex';
+        document.getElementById('return_date').required = true;
+        document.getElementById('return_time').required = true;
+      } else {
+        returnFields.style.display = 'none';
+        document.getElementById('return_date').required = false;
+        document.getElementById('return_time').required = false;
+      }
+    });
+  });
+  
+  // Prevent selecting same airport for departure and arrival
+  const departureSelect = document.getElementById('departure_airport');
+  const arrivalSelect = document.getElementById('arrival_airport');
+  
+  function updateAirportOptions() {
+    const departureValue = departureSelect.value;
+    const arrivalValue = arrivalSelect.value;
+    
+    // Reset all options to be enabled
+    Array.from(departureSelect.options).forEach(option => {
+      option.disabled = false;
+    });
+    Array.from(arrivalSelect.options).forEach(option => {
+      option.disabled = false;
+    });
+    
+    // Disable selected options in the other dropdown
+    if (departureValue) {
+      const arrivalOption = arrivalSelect.querySelector(`option[value="${departureValue}"]`);
+      if (arrivalOption) arrivalOption.disabled = true;
+    }
+    
+    if (arrivalValue) {
+      const departureOption = departureSelect.querySelector(`option[value="${arrivalValue}"]`);
+      if (departureOption) departureOption.disabled = true;
+    }
+  }
+  
+  departureSelect.addEventListener('change', updateAirportOptions);
+  arrivalSelect.addEventListener('change', updateAirportOptions);
+  
+  // Set minimum date to today
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('departure_date').min = today;
+  document.getElementById('return_date').min = today;
+  
+  // Update return date minimum when departure date changes
+  document.getElementById('departure_date').addEventListener('change', function() {
+    document.getElementById('return_date').min = this.value;
+  });
+  
+  // Form validation
+  document.getElementById('jetBookingForm').addEventListener('submit', function(e) {
+    const departureAirport = document.getElementById('departure_airport').value;
+    const arrivalAirport = document.getElementById('arrival_airport').value;
+    
+    if (departureAirport === arrivalAirport) {
+      e.preventDefault();
+      alert('Please select different departure and arrival airports.');
+      return false;
+    }
+    
+    const tripType = document.querySelector('input[name="trip_type"]:checked').value;
+    if (tripType === 'round_trip') {
+      const departureDate = new Date(document.getElementById('departure_date').value);
+      const returnDate = new Date(document.getElementById('return_date').value);
+      
+      if (returnDate <= departureDate) {
+        e.preventDefault();
+        alert('Return date must be after departure date.');
+        return false;
+      }
+    }
+  });
+  
   // Open modal
   if (openBtn) {
     openBtn.addEventListener('click', function() {
       modal.style.display = 'block';
-      document.body.style.overflow = 'hidden'; // Prevent scrolling
+      document.body.style.overflow = 'hidden';
     });
   }
   
   // Close modal
   function closeModal() {
     modal.style.display = 'none';
-    document.body.style.overflow = ''; // Re-enable scrolling
+    document.body.style.overflow = '';
   }
   
   if (closeBtn) closeBtn.addEventListener('click', closeModal);
   if (secondaryBtn) secondaryBtn.addEventListener('click', closeModal);
   
-  // Close when clicking outside modal
   window.addEventListener('click', function(event) {
     if (event.target === modal) {
       closeModal();
