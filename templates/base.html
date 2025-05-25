@@ -78,23 +78,24 @@
   
   <div class="header-bottom">
     <div class="container">
-      <ul class="social-list" style="display: flex; gap: 15px;">
+      <ul class="social-list" style="display: flex; gap: 12px; padding: 0; list-style: none;">
         <li>
-          <a href="#" class="social-link" style="color: rgba(255, 255, 255, 0.8); text-decoration: none; transition: all 0.2s ease; display: inline-block; font-size: 1.1rem;">
-            <ion-icon name="logo-facebook"></ion-icon>
+          <a href="#" class="social-link" style="background-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); text-decoration: none; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%;">
+            <ion-icon name="logo-facebook" style="font-size: 16px;"></ion-icon>
           </a>
         </li>
         <li>
-          <a href="#" class="social-link" style="color: rgba(255, 255, 255, 0.8); text-decoration: none; transition: all 0.2s ease; display: inline-block; font-size: 1.1rem;">
-            <ion-icon name="logo-twitter"></ion-icon>
+          <a href="#" class="social-link" style="background-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); text-decoration: none; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%;">
+            <ion-icon name="logo-twitter" style="font-size: 16px;"></ion-icon>
           </a>
         </li>
         <li>
-          <a href="#" class="social-link" style="color: rgba(255, 255, 255, 0.8); text-decoration: none; transition: all 0.2s ease; display: inline-block; font-size: 1.1rem;">
-            <ion-icon name="logo-youtube"></ion-icon>
+          <a href="#" class="social-link" style="background-color: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); text-decoration: none; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%;">
+            <ion-icon name="logo-youtube" style="font-size: 16px;"></ion-icon>
           </a>
         </li>
       </ul>
+
       
       <nav class="navbar" data-navbar>
         <div class="navbar-top">
@@ -109,41 +110,42 @@
         
         <ul class="navbar-list" style="display: flex; gap: 10px;">
           <li>
-            <a href="#home" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem;">
+            <a href="{% url 'index'%}" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem;">
               home
             </a>
           </li>
           <li>
-            <a href="#" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem;">
+            <a href="{% url 'about-us'%}" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem;">
               about us
             </a>
           </li>
           <li>
-            <a href="#destination" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem;">
+            <a href="#" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem;">
               destination
             </a>
           </li>
           <li>
-            <a href="#package" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem;">
+            <a href="#" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem;">
               packages
             </a>
           </li>
           <li>
-            <a href="#gallery" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem;">
+            <a href="#" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem;">
               gallery
             </a>
           </li>
           <li>
-            <a href="#contact" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem;">
+            <a href="#" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem;">
               contact us
             </a>
           </li>
         </ul>
       </nav>
       
-      <button class="btn btn-primary" style="background-color: #ffffff; color: #1a4b8c; border: none; padding: 10px 22px; border-radius: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.2s ease; font-size: 0.9rem;">
-        Book Now
-      </button>
+      <button class="btn btn-primary" style="background-color: #ffffff; color: #1a4b8c; border: none; padding: 6px 22px; border-radius: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.2s ease; font-size: 0.9rem;">
+  Book Now
+</button>
+
     </div>
   </div>
 </header>
