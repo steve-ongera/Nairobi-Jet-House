@@ -3,6 +3,7 @@ from django.shortcuts import render , redirect
 from django.utils import timezone
 from datetime import datetime, timedelta
 from .models import Aircraft, AircraftType, Availability, Airport
+from django.contrib import messages
 
 def find_aircraft(request):
     if request.method == 'POST':
@@ -23,7 +24,16 @@ def find_aircraft(request):
         # Calculate end time (assuming 4 hour minimum booking)
         end_datetime = departure_datetime + timedelta(hours=4)
         
-        # Query available aircraft
+        # Get airport details
+        try:
+            departure_airport = Airport.objects.get(icao_code=departure_icao)
+            arrival_airport = Airport.objects.get(icao_code=arrival_icao)
+        except Airport.DoesNotExist:
+            # Handle error - redirect back with error message
+            messages.error(request, 'One or both airports not found. Please check the airport codes.')
+            return redirect('index')
+        
+        # Query available aircraft (only after airports are validated)
         available_aircraft = Aircraft.objects.filter(
             aircraft_type__passenger_capacity__gte=passenger_count,
             current_location=departure_icao,
@@ -32,14 +42,6 @@ def find_aircraft(request):
             availabilities__end_datetime__gte=end_datetime,
             availabilities__is_available=True
         ).distinct().select_related('aircraft_type')
-        
-        # Get airport details
-        try:
-            departure_airport = Airport.objects.get(icao_code=departure_icao)
-            arrival_airport = Airport.objects.get(icao_code=arrival_icao)
-        except Airport.DoesNotExist:
-            # Handle error - maybe redirect back with message
-            pass
         
         context = {
             'aircraft_list': available_aircraft,
@@ -56,7 +58,8 @@ def find_aircraft(request):
         return render(request, 'booking/available_aircraft.html', context)
     
     # If not POST, redirect back
-    return redirect('home')
+    return redirect('index')
+
 
 def index(request):
     return render(request, 'index.html')  # Make sure you create templates/index.html
