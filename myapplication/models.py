@@ -199,3 +199,7 @@ class AircraftTracking(models.Model):
 
     def __str__(self):
         return f"{self.aircraft} at {self.timestamp}"
+    
+class Passenger(models.Model):
+    booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='passengers')
+    name = models.CharField(max_length=100)
