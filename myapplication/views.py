@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.shortcuts import render , redirect
 from django.utils import timezone
 from datetime import datetime, timedelta
-from .models import Aircraft, AircraftType, Availability, Airport
+from .models import *
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Q
@@ -457,6 +457,9 @@ def api_login(request):
             'message': 'An error occurred during login. Please try again.'
         }, status=500)
 
+from decimal import Decimal
+from datetime import timedelta
+
 @require_http_methods(["POST"])
 @login_required
 def create_booking(request):
@@ -486,6 +489,9 @@ def create_booking(request):
         special_requests = data.get('special_requests', '').strip()
         catering_required = data.get('catering_required') == 'on'
         ground_transport = data.get('ground_transport') == 'on'
+        
+        # Commission rate (you may want to set this based on user/business logic)
+        commission_rate = Decimal(data.get('commission_rate', '10.00'))  # Default 10%
         
         # Validation
         errors = []
@@ -566,55 +572,90 @@ def create_booking(request):
                 'message': f'Invalid date format: {str(e)}'
             }, status=400)
         
-        # Calculate pricing (this should match your pricing logic)
-        base_price = aircraft.hourly_rate  # Assuming you have hourly_rate field
-        total_price = base_price
+        # Calculate flight hours (you may need to implement this based on your business logic)
+        def calculate_flight_hours(departure_airport, arrival_airport):
+            # This is a placeholder - implement your actual flight time calculation
+            # You might want to use distance calculation or a lookup table
+            return Decimal('2.5')  # Default 2.5 hours
+        
+        # Calculate pricing
+        base_hourly_rate = aircraft.hourly_rate if hasattr(aircraft, 'hourly_rate') else Decimal('1000.00')
+        flight_hours = calculate_flight_hours(departure_airport, arrival_airport)
+        leg_price = base_hourly_rate * flight_hours
+        
+        # Calculate total price based on trip type
         if trip_type == 'round_trip':
-            total_price *= 2
+            total_price = leg_price * 2
+        else:
+            total_price = leg_price
+        
+        # Calculate commission and owner earnings
+        agent_commission = total_price * (commission_rate / 100)
+        owner_earnings = total_price - agent_commission
         
         # Create booking with transaction
         with transaction.atomic():
-            # Generate booking reference
-            booking_reference = f"BK-{uuid.uuid4().hex[:8].upper()}"
-            
             # Create booking
             booking = Booking.objects.create(
-                user=request.user,
+                client=request.user,  # Changed from 'user' to 'client'
                 aircraft=aircraft,
+                trip_type=trip_type,
+                commission_rate=commission_rate,
+                total_price=total_price,
+                agent_commission=agent_commission,
+                owner_earnings=owner_earnings,
+                special_requests=special_requests,
+                status='pending'
+            )
+            
+            # Create flight legs
+            flight_legs = []
+            
+            # First leg (departure)
+            arrival_datetime = departure_datetime + timedelta(hours=float(flight_hours))
+            first_leg = FlightLeg.objects.create(
+                booking=booking,
                 departure_airport=departure_airport,
                 arrival_airport=arrival_airport,
                 departure_datetime=departure_datetime,
-                return_datetime=return_datetime,
-                trip_type=trip_type,
+                arrival_datetime=arrival_datetime,
+                flight_hours=flight_hours,
                 passenger_count=passenger_count,
-                client_name=client_name,
-                client_email=client_email,
-                client_phone=client_phone,
-                company_name=company_name,
-                departure_time=departure_time,
-                return_time=return_time,
-                special_requests=special_requests,
-                catering_required=catering_required,
-                ground_transport=ground_transport,
-                base_price=base_price,
-                total_price=total_price,
-                booking_reference=booking_reference,
-                status='pending'  # Assuming you have a status field
+                leg_price=leg_price,
+                sequence=1
             )
+            flight_legs.append(first_leg)
             
-            # Create passenger records
-            for i, passenger_data in enumerate(passengers_data):
-                Passenger.objects.create(
+            # Second leg for round trip
+            if trip_type == 'round_trip' and return_datetime:
+                return_arrival_datetime = return_datetime + timedelta(hours=float(flight_hours))
+                second_leg = FlightLeg.objects.create(
                     booking=booking,
-                    name=passenger_data['name'],
-                    date_of_birth=passenger_data['date_of_birth'],
-                    passport_number=passenger_data['passport_number'],
-                    nationality=passenger_data['nationality'],
-                    order=i + 1
+                    departure_airport=arrival_airport,  # Swap airports for return
+                    arrival_airport=departure_airport,
+                    departure_datetime=return_datetime,
+                    arrival_datetime=return_arrival_datetime,
+                    flight_hours=flight_hours,
+                    passenger_count=passenger_count,
+                    leg_price=leg_price,
+                    sequence=2
                 )
+                flight_legs.append(second_leg)
+            
+            # Create passenger records (assuming you have a Passenger model)
+            if hasattr(models, 'Passenger'):  # Check if Passenger model exists
+                for i, passenger_data in enumerate(passengers_data):
+                    models.Passenger.objects.create(
+                        booking=booking,
+                        name=passenger_data['name'],
+                        date_of_birth=passenger_data['date_of_birth'],
+                        passport_number=passenger_data['passport_number'],
+                        nationality=passenger_data['nationality'],
+                        order=i + 1
+                    )
             
             # Log the booking creation
-            logger.info(f"Booking created: {booking_reference} by user {request.user.username}")
+            logger.info(f"Booking created: #{booking.id} by user {request.user.username}")
             
             # You might want to send confirmation email here
             # send_booking_confirmation_email(booking)
@@ -622,9 +663,20 @@ def create_booking(request):
             return JsonResponse({
                 'success': True,
                 'message': 'Booking request submitted successfully',
-                'booking_reference': booking_reference,
                 'booking_id': booking.id,
-                'total_price': float(total_price)
+                'total_price': float(total_price),
+                'agent_commission': float(agent_commission),
+                'owner_earnings': float(owner_earnings),
+                'flight_legs': [
+                    {
+                        'sequence': leg.sequence,
+                        'departure': f"{leg.departure_airport.icao_code}",
+                        'arrival': f"{leg.arrival_airport.icao_code}",
+                        'departure_time': leg.departure_datetime.isoformat(),
+                        'flight_hours': float(leg.flight_hours),
+                        'leg_price': float(leg.leg_price)
+                    } for leg in flight_legs
+                ]
             })
     
     except Exception as e:

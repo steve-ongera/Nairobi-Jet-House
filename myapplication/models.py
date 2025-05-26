@@ -203,3 +203,6 @@ class AircraftTracking(models.Model):
 class Passenger(models.Model):
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='passengers')
     name = models.CharField(max_length=100)
+    nationality =  models.CharField(max_length= 100 , blank= True)
+    date_of_birth= models.DateField(blank= True , null=True)
+    passport_number = models.CharField(max_length= 100 , blank= True)
