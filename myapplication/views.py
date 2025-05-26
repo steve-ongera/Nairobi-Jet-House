@@ -339,8 +339,8 @@ def search_airports(request):
     return JsonResponse({'airports': []})
 
 def about_us(request):
-    return render(request, 'about.html')  # Make sure you create templates/index.html
+    return render(request, 'about.html')
 
 def contact_us(request):
-    return render(request, 'contact-us.html')  # Make sure you create templates/index.html
+    return render(request, 'contact-us.html')  
 
