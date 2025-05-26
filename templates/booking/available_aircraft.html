@@ -7,6 +7,7 @@
 
 
 {% block content %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
 
 <style>
 :root {
@@ -563,7 +564,10 @@
 </div>
 
 <!-- Booking Modal (placeholder) -->
-<div id="bookingModal" class="modal fade" tabindex="-1">
+<!-- Replace the existing booking modal placeholder with this enhanced version -->
+
+<!-- Booking Modal -->
+<div id="bookingModal" class="modal fade" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
@@ -571,11 +575,553 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <p>Booking form will be implemented here...</p>
+        <!-- Loading State -->
+        <div id="bookingLoader" class="text-center py-4" style="display: none;">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-2">Processing your request...</p>
+        </div>
+
+        <!-- Selected Aircraft Summary -->
+        <div id="selectedAircraftSummary" class="card mb-4" style="display: none;">
+          <div class="card-header">
+            <h6 class="mb-0">Selected Aircraft</h6>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <p class="mb-1"><strong>Aircraft:</strong> <span id="selectedAircraftName"></span></p>
+                <p class="mb-1"><strong>Type:</strong> <span id="selectedAircraftType"></span></p>
+                <p class="mb-1"><strong>Registration:</strong> <span id="selectedAircraftReg"></span></p>
+              </div>
+              <div class="col-md-6">
+                <p class="mb-1"><strong>Route:</strong> <span id="selectedRoute"></span></p>
+                <p class="mb-1"><strong>Departure:</strong> <span id="selectedDeparture"></span></p>
+                <p class="mb-1"><strong>Passengers:</strong> <span id="selectedPassengers"></span></p>
+                <p class="mb-0"><strong>Total Price:</strong> <span id="selectedPrice" class="text-primary fw-bold"></span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Booking Form -->
+        <div id="bookingFormContainer" style="display: none;">
+          <form id="bookingForm">
+            <input type="hidden" id="selectedAircraftId" name="aircraft_id">
+            <input type="hidden" name="departure_airport" value="{{ departure_airport.icao_code }}">
+            <input type="hidden" name="arrival_airport" value="{{ arrival_airport.icao_code }}">
+            <input type="hidden" name="departure_datetime" value="{{ departure_datetime|date:'Y-m-d H:i' }}">
+            {% if return_datetime %}
+            <input type="hidden" name="return_datetime" value="{{ return_datetime|date:'Y-m-d H:i' }}">
+            {% endif %}
+            <input type="hidden" name="trip_type" value="{{ trip_type }}">
+            <input type="hidden" name="passenger_count" value="{{ passenger_count }}">
+
+            <!-- Client Information -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="clientName" class="form-label">Full Name *</label>
+                <input type="text" class="form-control" id="clientName" name="client_name" required>
+              </div>
+              <div class="col-md-6">
+                <label for="clientEmail" class="form-label">Email Address *</label>
+                <input type="email" class="form-control" id="clientEmail" name="client_email" required>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="clientPhone" class="form-label">Phone Number *</label>
+                <input type="tel" class="form-control" id="clientPhone" name="client_phone" required>
+              </div>
+              <div class="col-md-6">
+                <label for="companyName" class="form-label">Company Name (Optional)</label>
+                <input type="text" class="form-control" id="companyName" name="company_name">
+              </div>
+            </div>
+
+            <!-- Passenger Details -->
+            <div class="card mb-3">
+              <div class="card-header">
+                <h6 class="mb-0">Passenger Information</h6>
+              </div>
+              <div class="card-body">
+                <div id="passengerDetails">
+                  <!-- Passenger fields will be dynamically generated here -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Flight Preferences -->
+            <div class="card mb-3">
+              <div class="card-header">
+                <h6 class="mb-0">Flight Preferences</h6>
+              </div>
+              <div class="card-body">
+                <div class="row mb-3">
+                  <div class="col-md-6">
+                    <label for="departureTime" class="form-label">Preferred Departure Time</label>
+                    <input type="time" class="form-control" id="departureTime" name="departure_time" value="{{ departure_datetime|time:'H:i' }}">
+                  </div>
+                  {% if trip_type == 'round_trip' %}
+                  <div class="col-md-6">
+                    <label for="returnTime" class="form-label">Preferred Return Time</label>
+                    <input type="time" class="form-control" id="returnTime" name="return_time" value="{{ return_datetime|time:'H:i' }}">
+                  </div>
+                  {% endif %}
+                </div>
+
+                <div class="mb-3">
+                  <label for="specialRequests" class="form-label">Special Requests / Dietary Requirements</label>
+                  <textarea class="form-control" id="specialRequests" name="special_requests" rows="3" placeholder="Any special requests, dietary requirements, or additional services needed..."></textarea>
+                </div>
+
+                <div class="form-check mb-3">
+                  <input class="form-check-input" type="checkbox" id="cateringRequired" name="catering_required">
+                  <label class="form-check-label" for="cateringRequired">
+                    In-flight catering required
+                  </label>
+                </div>
+
+                <div class="form-check mb-3">
+                  <input class="form-check-input" type="checkbox" id="groundTransport" name="ground_transport">
+                  <label class="form-check-label" for="groundTransport">
+                    Ground transportation assistance needed
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Terms and Conditions -->
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" id="agreeTerms" name="agree_terms" required>
+              <label class="form-check-label" for="agreeTerms">
+                I agree to the <a href="#" target="_blank">Terms and Conditions</a> and <a href="#" target="_blank">Privacy Policy</a> *
+              </label>
+            </div>
+
+            <!-- Price Summary -->
+            <div class="card bg-light mb-3">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-6">
+                    <p class="mb-1">Base Price:</p>
+                    <p class="mb-1">Trip Type:</p>
+                    {% if trip_type == 'round_trip' %}
+                    <p class="mb-1">Round Trip Multiplier:</p>
+                    {% endif %}
+                    <hr class="my-2">
+                    <p class="mb-0 fw-bold">Total Amount:</p>
+                  </div>
+                  <div class="col-6 text-end">
+                    <p class="mb-1">$<span id="basePriceDisplay">0</span></p>
+                    <p class="mb-1 text-capitalize">{{ trip_type|replace_underscore }}</p>
+                    {% if trip_type == 'round_trip' %}
+                    <p class="mb-1">× 2</p>
+                    {% endif %}
+                    <hr class="my-2">
+                    <p class="mb-0 fw-bold text-primary">$<span id="totalPriceDisplay">0</span></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary btn-lg" id="submitBookingBtn">
+                <span class="btn-text">Submit Booking Request</span>
+                <span class="btn-spinner" style="display: none;">
+                  <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                  Processing...
+                </span>
+              </button>
+              <small class="text-muted text-center">
+                Your booking request will be reviewed and confirmed within 24 hours.
+              </small>
+            </div>
+          </form>
+        </div>
+
+        <!-- Success Message -->
+        <div id="bookingSuccess" class="text-center py-4" style="display: none;">
+          <div class="mb-3">
+            <svg width="64" height="64" fill="green" viewBox="0 0 16 16">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.061L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+            </svg>
+          </div>
+          <h4>Booking Request Submitted!</h4>
+          <p class="mb-3">Thank you for your booking request. We'll review your request and get back to you within 24 hours with confirmation and payment details.</p>
+          <p><strong>Booking Reference:</strong> <span id="bookingReference"></span></p>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+        </div>
+
+        <!-- Error Message -->
+        <div id="bookingError" class="alert alert-danger" style="display: none;">
+          <h6>Booking Error</h6>
+          <p id="errorMessage"></p>
+          <button type="button" class="btn btn-outline-danger btn-sm" onclick="retryBooking()">Try Again</button>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+<!-- Login Modal -->
+<div id="loginModal" class="modal fade" tabindex="-1" data-bs-backdrop="static">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Login Required</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-3">Please log in to continue with your booking.</p>
+        
+        <form id="loginForm">
+          <div class="mb-3">
+            <label for="loginEmail" class="form-label">Email</label>
+            <input type="email" class="form-control" id="loginEmail" name="email" required>
+          </div>
+          <div class="mb-3">
+            <label for="loginPassword" class="form-label">Password</label>
+            <input type="password" class="form-control" id="loginPassword" name="password" required>
+          </div>
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="rememberMe" name="remember_me">
+            <label class="form-check-label" for="rememberMe">Remember me</label>
+          </div>
+          
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary" id="loginSubmitBtn">
+              <span class="btn-text">Login</span>
+              <span class="btn-spinner" style="display: none;">
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                Logging in...
+              </span>
+            </button>
+          </div>
+        </form>
+        
+        <hr>
+        <div class="text-center">
+          <p class="mb-2">Don't have an account?</p>
+          <button type="button" class="btn btn-outline-primary btn-sm" onclick="showSignupModal()">
+            Create Account
+          </button>
+          <br>
+          <a href="#" class="small">Forgot Password?</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.modal-lg {
+  max-width: 800px;
+}
+
+.card {
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+}
+
+.card-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  padding: 0.75rem 1rem;
+}
+
+.card-header h6 {
+  color: #495057;
+  font-weight: 600;
+}
+
+.btn-spinner {
+  display: inline-flex;
+  align-items: center;
+}
+
+.passenger-group {
+  border: 1px solid #e9ecef;
+  border-radius: 0.375rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background-color: #f8f9fa;
+}
+
+.passenger-group h6 {
+  color: #495057;
+  margin-bottom: 0.75rem;
+}
+
+#bookingError {
+  margin-top: 1rem;
+}
+
+.form-control:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.text-primary {
+  color: #0d6efd !important;
+}
+
+.bg-light {
+  background-color: #f8f9fa !important;
+}
+</style>
+
+<script>
+// Global variables
+let selectedAircraftData = null;
+let pendingBookingData = null;
+
+// Function to open booking modal
+function bookAircraft(aircraftId) {
+    // Find the aircraft in the list
+    const aircraftCards = document.querySelectorAll('.aircraft-card');
+    let aircraftInfo = null;
+    
+    aircraftCards.forEach(card => {
+        const bookBtn = card.querySelector(`button[onclick="bookAircraft('${aircraftId}')"]`);
+        if (bookBtn) {
+            // Extract aircraft data from the card
+            aircraftInfo = {
+                id: aircraftId,
+                name: card.querySelector('h3').textContent,
+                type: card.querySelector('.aircraft-type').textContent,
+                registration: card.querySelector('.feature-list li:first-child').textContent.split(': ')[1],
+                totalPrice: card.querySelector('.price-main').textContent.replace('$', '').replace(',', ''),
+                basePrice: card.querySelector('.price-details').textContent.split('$')[1].split(' ')[0]
+            };
+        }
+    });
+    
+    if (!aircraftInfo) {
+        alert('Aircraft information not found. Please try again.');
+        return;
+    }
+    
+    selectedAircraftData = aircraftInfo;
+    
+    // Check if user is authenticated
+    checkAuthenticationAndProceed();
+}
+
+// Check if user is authenticated
+function checkAuthenticationAndProceed() {
+    fetch('/api/check-auth/')  // You'll need to create this endpoint
+        .then(response => response.json())
+        .then(data => {
+            if (data.authenticated) {
+                // User is logged in, proceed with booking
+                openBookingModal();
+            } else {
+                // User needs to log in
+                openLoginModal();
+            }
+        })
+        .catch(error => {
+            console.error('Auth check error:', error);
+            // Assume not authenticated on error
+            openLoginModal();
+        });
+}
+
+// Open login modal
+function openLoginModal() {
+    const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+    loginModal.show();
+}
+
+// Open booking modal
+function openBookingModal() {
+    // Populate aircraft summary
+    document.getElementById('selectedAircraftName').textContent = selectedAircraftData.name;
+    document.getElementById('selectedAircraftType').textContent = selectedAircraftData.type;
+    document.getElementById('selectedAircraftReg').textContent = selectedAircraftData.registration;
+    document.getElementById('selectedRoute').textContent = '{{ departure_airport.city }} → {{ arrival_airport.city }}';
+    document.getElementById('selectedDeparture').textContent = '{{ departure_datetime|date:"M d, Y H:i" }}';
+    document.getElementById('selectedPassengers').textContent = '{{ passenger_count }} {{ passenger_count|pluralize:"passenger,passengers" }}';
+    document.getElementById('selectedPrice').textContent = '$' + selectedAircraftData.totalPrice;
+    
+    // Set form values
+    document.getElementById('selectedAircraftId').value = selectedAircraftData.id;
+    document.getElementById('basePriceDisplay').textContent = selectedAircraftData.basePrice;
+    document.getElementById('totalPriceDisplay').textContent = selectedAircraftData.totalPrice;
+    
+    // Generate passenger detail fields
+    generatePassengerFields();
+    
+    // Show modal sections
+    document.getElementById('selectedAircraftSummary').style.display = 'block';
+    document.getElementById('bookingFormContainer').style.display = 'block';
+    document.getElementById('bookingSuccess').style.display = 'none';
+    document.getElementById('bookingError').style.display = 'none';
+    
+    // Open modal
+    const bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
+    bookingModal.show();
+}
+
+// Generate passenger detail fields
+function generatePassengerFields() {
+    const passengerCount = {{ passenger_count }};
+    const container = document.getElementById('passengerDetails');
+    container.innerHTML = '';
+    
+    for (let i = 1; i <= passengerCount; i++) {
+        const passengerGroup = document.createElement('div');
+        passengerGroup.className = 'passenger-group';
+        passengerGroup.innerHTML = `
+            <h6>Passenger ${i}</h6>
+            <div class="row">
+                <div class="col-md-6 mb-2">
+                    <label class="form-label">Full Name *</label>
+                    <input type="text" class="form-control" name="passenger_${i}_name" required>
+                </div>
+                <div class="col-md-6 mb-2">
+                    <label class="form-label">Date of Birth</label>
+                    <input type="date" class="form-control" name="passenger_${i}_dob">
+                </div>
+                <div class="col-md-6 mb-2">
+                    <label class="form-label">Passport Number</label>
+                    <input type="text" class="form-control" name="passenger_${i}_passport">
+                </div>
+                <div class="col-md-6 mb-2">
+                    <label class="form-label">Nationality</label>
+                    <input type="text" class="form-control" name="passenger_${i}_nationality">
+                </div>
+            </div>
+        `;
+        container.appendChild(passengerGroup);
+    }
+}
+
+// Handle login form submission
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('loginSubmitBtn');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnSpinner = submitBtn.querySelector('.btn-spinner');
+    
+    // Show loading state
+    btnText.style.display = 'none';
+    btnSpinner.style.display = 'inline-flex';
+    submitBtn.disabled = true;
+    
+    const formData = new FormData(this);
+    
+    fetch('/api/login/', {  // You'll need to create this endpoint
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Close login modal and open booking modal
+            bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
+            setTimeout(() => {
+                openBookingModal();
+            }, 300);
+        } else {
+            alert('Login failed: ' + (data.message || 'Invalid credentials'));
+        }
+    })
+    .catch(error => {
+        console.error('Login error:', error);
+        alert('Login failed. Please try again.');
+    })
+    .finally(() => {
+        // Reset button state
+        btnText.style.display = 'inline';
+        btnSpinner.style.display = 'none';
+        submitBtn.disabled = false;
+    });
+});
+
+// Handle booking form submission
+document.getElementById('bookingForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('submitBookingBtn');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnSpinner = submitBtn.querySelector('.btn-spinner');
+    
+    // Show loading state
+    btnText.style.display = 'none';
+    btnSpinner.style.display = 'inline-flex';
+    submitBtn.disabled = true;
+    
+    const formData = new FormData(this);
+    
+    fetch('/api/create-booking/', {  // You'll need to create this endpoint
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            document.getElementById('bookingFormContainer').style.display = 'none';
+            document.getElementById('bookingReference').textContent = data.booking_reference;
+            document.getElementById('bookingSuccess').style.display = 'block';
+        } else {
+            // Show error message
+            document.getElementById('errorMessage').textContent = data.message || 'An error occurred while processing your booking.';
+            document.getElementById('bookingError').style.display = 'block';
+        }
+    })
+    .catch(error => {
+        console.error('Booking error:', error);
+        document.getElementById('errorMessage').textContent = 'Network error. Please check your connection and try again.';
+        document.getElementById('bookingError').style.display = 'block';
+    })
+    .finally(() => {
+        // Reset button state
+        btnText.style.display = 'inline';
+        btnSpinner.style.display = 'none';
+        submitBtn.disabled = false;
+    });
+});
+
+// Retry booking function
+function retryBooking() {
+    document.getElementById('bookingError').style.display = 'none';
+    document.getElementById('bookingFormContainer').style.display = 'block';
+}
+
+// Get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Optional: Show signup modal function (implement as needed)
+function showSignupModal() {
+    alert('Signup functionality would be implemented here');
+}
+</script>
 {% endblock %}
 
 {% block extra_js %}

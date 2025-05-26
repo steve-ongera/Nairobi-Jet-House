@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Q
 from django.db import models
-
+from django.views.decorators.http import require_http_methods
 
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -344,3 +344,17 @@ def about_us(request):
 def contact_us(request):
     return render(request, 'contact-us.html')  
 
+# In your views.py
+@require_http_methods(["GET"])
+def check_auth(request):
+    return JsonResponse({'authenticated': request.user.is_authenticated})
+
+@require_http_methods(["POST"])
+def api_login(request):
+    # Handle login logic
+    pass
+
+@require_http_methods(["POST"])
+def create_booking(request):
+    # Handle booking creation logic
+    pass
