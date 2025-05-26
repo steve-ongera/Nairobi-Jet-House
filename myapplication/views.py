@@ -344,17 +344,422 @@ def about_us(request):
 def contact_us(request):
     return render(request, 'contact-us.html')  
 
-# In your views.py
+# views.py
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
+from django.utils import timezone
+from django.db import transaction
+import json
+import logging
+import uuid
+from datetime import datetime
+
+# Assuming you have these models - adjust imports based on your actual model structure
+from .models import Aircraft, Booking, Passenger, Airport
+
+logger = logging.getLogger(__name__)
+
 @require_http_methods(["GET"])
 def check_auth(request):
-    return JsonResponse({'authenticated': request.user.is_authenticated})
+    """Check if user is authenticated"""
+    return JsonResponse({
+        'authenticated': request.user.is_authenticated,
+        'user_id': request.user.id if request.user.is_authenticated else None,
+        'username': request.user.username if request.user.is_authenticated else None
+    })
 
 @require_http_methods(["POST"])
 def api_login(request):
-    # Handle login logic
-    pass
+    """Handle user login via API"""
+    try:
+        # Parse JSON data if content-type is application/json
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+            email = data.get('email', '').strip().lower()
+            password = data.get('password', '')
+            remember_me = data.get('remember_me', False)
+        else:
+            # Handle form data
+            email = request.POST.get('email', '').strip().lower()
+            password = request.POST.get('password', '')
+            remember_me = request.POST.get('remember_me') == 'on'
+
+        # Validate input
+        if not email or not password:
+            return JsonResponse({
+                'success': False,
+                'message': 'Email and password are required'
+            }, status=400)
+
+        # Validate email format
+        try:
+            validate_email(email)
+        except ValidationError:
+            return JsonResponse({
+                'success': False,
+                'message': 'Please enter a valid email address'
+            }, status=400)
+
+        # Authenticate user
+        # Note: If you're using email as username, you might need to get user by email first
+        user = authenticate(request, username=email, password=password)
+        
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                
+                # Set session expiry based on remember_me
+                if not remember_me:
+                    request.session.set_expiry(0)  # Session expires when browser closes
+                else:
+                    request.session.set_expiry(1209600)  # 2 weeks
+                
+                logger.info(f"User {user.username} logged in successfully")
+                
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Login successful',
+                    'user': {
+                        'id': user.id,
+                        'username': user.username,
+                        'email': user.email,
+                        'first_name': user.first_name,
+                        'last_name': user.last_name
+                    }
+                })
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Your account has been deactivated. Please contact support.'
+                }, status=403)
+        else:
+            logger.warning(f"Failed login attempt for email: {email}")
+            return JsonResponse({
+                'success': False,
+                'message': 'Invalid email or password'
+            }, status=401)
+
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid JSON data'
+        }, status=400)
+    except Exception as e:
+        logger.error(f"Login error: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'message': 'An error occurred during login. Please try again.'
+        }, status=500)
 
 @require_http_methods(["POST"])
+@login_required
 def create_booking(request):
-    # Handle booking creation logic
-    pass
+    """Handle booking creation"""
+    try:
+        # Parse form data
+        data = request.POST
+        
+        # Extract booking details
+        aircraft_id = data.get('aircraft_id')
+        departure_airport_code = data.get('departure_airport')
+        arrival_airport_code = data.get('arrival_airport')
+        departure_datetime_str = data.get('departure_datetime')
+        return_datetime_str = data.get('return_datetime')
+        trip_type = data.get('trip_type', 'one_way')
+        passenger_count = int(data.get('passenger_count', 1))
+        
+        # Client information
+        client_name = data.get('client_name', '').strip()
+        client_email = data.get('client_email', '').strip().lower()
+        client_phone = data.get('client_phone', '').strip()
+        company_name = data.get('company_name', '').strip()
+        
+        # Flight preferences
+        departure_time = data.get('departure_time')
+        return_time = data.get('return_time')
+        special_requests = data.get('special_requests', '').strip()
+        catering_required = data.get('catering_required') == 'on'
+        ground_transport = data.get('ground_transport') == 'on'
+        
+        # Validation
+        errors = []
+        
+        if not aircraft_id:
+            errors.append("Aircraft selection is required")
+        
+        if not client_name:
+            errors.append("Client name is required")
+        
+        if not client_email:
+            errors.append("Client email is required")
+        else:
+            try:
+                validate_email(client_email)
+            except ValidationError:
+                errors.append("Please enter a valid email address")
+        
+        if not client_phone:
+            errors.append("Phone number is required")
+        
+        if not departure_datetime_str:
+            errors.append("Departure date and time is required")
+        
+        if trip_type == 'round_trip' and not return_datetime_str:
+            errors.append("Return date and time is required for round trip")
+        
+        if passenger_count < 1:
+            errors.append("At least one passenger is required")
+        
+        # Validate passenger information
+        passengers_data = []
+        for i in range(1, passenger_count + 1):
+            passenger_name = data.get(f'passenger_{i}_name', '').strip()
+            passenger_dob = data.get(f'passenger_{i}_dob', '').strip()
+            passenger_passport = data.get(f'passenger_{i}_passport', '').strip()
+            passenger_nationality = data.get(f'passenger_{i}_nationality', '').strip()
+            
+            if not passenger_name:
+                errors.append(f"Passenger {i} name is required")
+            
+            passengers_data.append({
+                'name': passenger_name,
+                'date_of_birth': passenger_dob if passenger_dob else None,
+                'passport_number': passenger_passport,
+                'nationality': passenger_nationality
+            })
+        
+        if errors:
+            return JsonResponse({
+                'success': False,
+                'message': 'Please correct the following errors: ' + '; '.join(errors)
+            }, status=400)
+        
+        # Get related objects
+        try:
+            aircraft = get_object_or_404(Aircraft, id=aircraft_id)
+            departure_airport = get_object_or_404(Airport, icao_code=departure_airport_code)
+            arrival_airport = get_object_or_404(Airport, icao_code=arrival_airport_code)
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Invalid aircraft or airport selection: {str(e)}'
+            }, status=400)
+        
+        # Parse datetime strings
+        try:
+            departure_datetime = datetime.strptime(departure_datetime_str, '%Y-%m-%d %H:%M')
+            departure_datetime = timezone.make_aware(departure_datetime)
+            
+            return_datetime = None
+            if return_datetime_str:
+                return_datetime = datetime.strptime(return_datetime_str, '%Y-%m-%d %H:%M')
+                return_datetime = timezone.make_aware(return_datetime)
+        except ValueError as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Invalid date format: {str(e)}'
+            }, status=400)
+        
+        # Calculate pricing (this should match your pricing logic)
+        base_price = aircraft.hourly_rate  # Assuming you have hourly_rate field
+        total_price = base_price
+        if trip_type == 'round_trip':
+            total_price *= 2
+        
+        # Create booking with transaction
+        with transaction.atomic():
+            # Generate booking reference
+            booking_reference = f"BK-{uuid.uuid4().hex[:8].upper()}"
+            
+            # Create booking
+            booking = Booking.objects.create(
+                user=request.user,
+                aircraft=aircraft,
+                departure_airport=departure_airport,
+                arrival_airport=arrival_airport,
+                departure_datetime=departure_datetime,
+                return_datetime=return_datetime,
+                trip_type=trip_type,
+                passenger_count=passenger_count,
+                client_name=client_name,
+                client_email=client_email,
+                client_phone=client_phone,
+                company_name=company_name,
+                departure_time=departure_time,
+                return_time=return_time,
+                special_requests=special_requests,
+                catering_required=catering_required,
+                ground_transport=ground_transport,
+                base_price=base_price,
+                total_price=total_price,
+                booking_reference=booking_reference,
+                status='pending'  # Assuming you have a status field
+            )
+            
+            # Create passenger records
+            for i, passenger_data in enumerate(passengers_data):
+                Passenger.objects.create(
+                    booking=booking,
+                    name=passenger_data['name'],
+                    date_of_birth=passenger_data['date_of_birth'],
+                    passport_number=passenger_data['passport_number'],
+                    nationality=passenger_data['nationality'],
+                    order=i + 1
+                )
+            
+            # Log the booking creation
+            logger.info(f"Booking created: {booking_reference} by user {request.user.username}")
+            
+            # You might want to send confirmation email here
+            # send_booking_confirmation_email(booking)
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Booking request submitted successfully',
+                'booking_reference': booking_reference,
+                'booking_id': booking.id,
+                'total_price': float(total_price)
+            })
+    
+    except Exception as e:
+        logger.error(f"Booking creation error: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'message': 'An error occurred while processing your booking. Please try again.'
+        }, status=500)
+
+# Alternative login view if you're using email as the username field
+@require_http_methods(["POST"])
+def api_login_with_email(request):
+    """Handle user login via API using email lookup"""
+    try:
+        from django.contrib.auth.models import User
+        
+        # Parse data
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+            email = data.get('email', '').strip().lower()
+            password = data.get('password', '')
+            remember_me = data.get('remember_me', False)
+        else:
+            email = request.POST.get('email', '').strip().lower()
+            password = request.POST.get('password', '')
+            remember_me = request.POST.get('remember_me') == 'on'
+
+        # Validate input
+        if not email or not password:
+            return JsonResponse({
+                'success': False,
+                'message': 'Email and password are required'
+            }, status=400)
+
+        try:
+            validate_email(email)
+        except ValidationError:
+            return JsonResponse({
+                'success': False,
+                'message': 'Please enter a valid email address'
+            }, status=400)
+
+        # Find user by email
+        try:
+            user = User.objects.get(email=email)
+            # Authenticate using username
+            user = authenticate(request, username=user.username, password=password)
+        except User.DoesNotExist:
+            user = None
+
+        if user is not None and user.is_active:
+            login(request, user)
+            
+            if not remember_me:
+                request.session.set_expiry(0)
+            else:
+                request.session.set_expiry(1209600)
+            
+            logger.info(f"User {user.username} logged in successfully via email")
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Login successful',
+                'user': {
+                    'id': user.id,
+                    'username': user.username,
+                    'email': user.email,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name
+                }
+            })
+        else:
+            logger.warning(f"Failed login attempt for email: {email}")
+            return JsonResponse({
+                'success': False,
+                'message': 'Invalid email or password'
+            }, status=401)
+
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'message': 'Invalid JSON data'
+        }, status=400)
+    except Exception as e:
+        logger.error(f"Login error: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'message': 'An error occurred during login. Please try again.'
+        }, status=500)
+
+# Utility function for sending booking confirmation email (optional)
+def send_booking_confirmation_email(booking):
+    """Send booking confirmation email to client"""
+    try:
+        from django.core.mail import send_mail
+        from django.template.loader import render_to_string
+        from django.conf import settings
+        
+        subject = f'Booking Confirmation - {booking.booking_reference}'
+        
+        # Render email template
+        html_message = render_to_string('emails/booking_confirmation.html', {
+            'booking': booking,
+            'passengers': booking.passengers.all()
+        })
+        
+        plain_message = render_to_string('emails/booking_confirmation.txt', {
+            'booking': booking,
+            'passengers': booking.passengers.all()
+        })
+        
+        send_mail(
+            subject,
+            plain_message,
+            settings.DEFAULT_FROM_EMAIL,
+            [booking.client_email],
+            html_message=html_message,
+            fail_silently=False
+        )
+        
+        logger.info(f"Confirmation email sent for booking {booking.booking_reference}")
+        
+    except Exception as e:
+        logger.error(f"Failed to send confirmation email for booking {booking.booking_reference}: {str(e)}")
+
+# URLs.py addition (add these to your urls.py)
+"""
+# Add to your urls.py
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    # ... your existing URLs
+    path('api/check-auth/', views.check_auth, name='check_auth'),
+    path('api/login/', views.api_login, name='api_login'),
+    path('api/create-booking/', views.create_booking, name='create_booking'),
+]
+"""
