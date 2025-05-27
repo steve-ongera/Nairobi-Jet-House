@@ -87,6 +87,11 @@ class Availability(models.Model):
     def __str__(self):
         return f"{self.aircraft} available from {self.start_datetime} to {self.end_datetime}"
 
+import random
+import string
+
+from django.core.validators import MinValueValidator
+
 class Booking(models.Model):
     """Client bookings"""
     TRIP_TYPE_CHOICES = (
@@ -114,6 +119,26 @@ class Booking(models.Model):
     owner_earnings = models.DecimalField(max_digits=12, decimal_places=2)
     payment_status = models.BooleanField(default=False)
     special_requests = models.TextField(blank=True)
+    booking_order_id =  models.CharField(max_length=10, blank=True, null=True)
+    
+    def generate_booking_order_id(self):
+        """Generate a unique 10-character alphanumeric booking order ID"""
+        while True:
+            # Generate 8 random alphanumeric characters + 2 digits
+            letters_digits = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+            # Add 2 more digits at the end
+            digits = ''.join(random.choices(string.digits, k=2))
+            code = letters_digits + digits
+            
+            # Check if code already exists
+            if not Booking.objects.filter(booking_order_id=code).exists():
+                return code
+    
+    def save(self, *args, **kwargs):
+        # Generate booking order ID only if it doesn't exist
+        if not self.booking_order_id:
+            self.booking_order_id = self.generate_booking_order_id()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Booking #{self.id} - {self.client} for {self.aircraft}"
