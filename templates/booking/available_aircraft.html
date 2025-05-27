@@ -433,7 +433,15 @@
         <h4>{{ departure_airport.icao_code }}</h4>
         <p>{{ departure_airport.name }}<br>{{ departure_airport.city }}, {{ departure_airport.country }}</p>
       </div>
-      <div class="route-arrow">✈</div>
+     <div class="route-arrow">
+        <i class="bi bi-airplane-fill" 
+          style="font-size: 1.2em; 
+                  color: inherit; 
+                  transform: rotate(40deg) scaleX(0.9); 
+                  display: inline-block;
+                  transition: transform 0.3s ease;
+                  margin-left: 2px;"></i>
+      </div>
       <div class="route-airport">
         <h4>{{ arrival_airport.icao_code }}</h4>
         <p>{{ arrival_airport.name }}<br>{{ arrival_airport.city }}, {{ arrival_airport.country }}</p>
@@ -545,7 +553,9 @@
   </div>
   {% else %}
   <div class="no-results">
-    <div class="no-results-icon">✈️</div>
+    <div class="no-results-icon">
+      <i class="bi bi-airplane-fill" style="font-size: 2rem; color: #6c757d;"></i>
+    </div>
     <h3>No Aircraft Available</h3>
     <p>
       We couldn't find any aircraft available for your requested route from 
