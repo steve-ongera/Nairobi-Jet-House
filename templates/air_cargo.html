@@ -1,0 +1,767 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Air Cargo Solutions | Nairobi Jet House{% endblock %}
+
+{% block description %}Comprehensive air cargo services including charter freight, scheduled cargo, perishable transport, and logistics solutions across Africa and beyond.{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="breadcrumb-nav">
+  <div class="container">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}"><i class="bi bi-house-door"></i> Home</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Air Cargo</li>
+    </ol>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="cargo-hero">
+  <div class="hero-container">
+    <div class="hero-content">
+      <h1 class="hero-title">Precision Air Cargo Solutions</h1>
+      <p class="hero-subtitle">Reliable freight transportation tailored to your supply chain requirements</p>
+      <div class="hero-cta">
+        <a href="#cargo-services" class="btn btn-primary">Explore Services</a>
+        <a href="tel:+254700000000" class="btn btn-outline">
+          <i class="bi bi-telephone"></i> +254 700 000000
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-item">
+      <span class="stat-number">50+</span>
+      <span class="stat-label">Monthly Cargo Flights</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number">120</span>
+      <span class="stat-label">Tons Capacity</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-number">24/7</span>
+      <span class="stat-label">Operations</span>
+    </div>
+  </div>
+</section>
+
+<!-- Services Section -->
+<section id="cargo-services" class="cargo-services">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-subtitle">Our Capabilities</span>
+      <h2 class="section-title">Comprehensive Cargo Solutions</h2>
+      <div class="section-divider"></div>
+      <p class="section-description">
+        Nairobi Jet House delivers end-to-end air cargo services designed for efficiency, reliability, and compliance with international freight standards.
+      </p>
+    </div>
+
+    <div class="services-grid">
+      <!-- Service 1 -->
+      <div class="service-card">
+        <div class="card-icon">
+          <img src="{% static 'assets/images/cargo-charter.jpg' %}" alt="Cargo Charter Icon">
+        </div>
+        <h3 class="card-title">Cargo Charter</h3>
+        <p class="card-text">
+          Dedicated aircraft for your exclusive freight requirements with complete schedule flexibility.
+        </p>
+        <ul class="service-features">
+          <li><i class="bi bi-check-circle"></i> Full aircraft utilization</li>
+          <li><i class="bi bi-check-circle"></i> Priority routing</li>
+          <li><i class="bi bi-check-circle"></i> Specialized loading equipment</li>
+          <li><i class="bi bi-check-circle"></i> Hazardous materials handling</li>
+        </ul>
+        <a href="#" class="service-link">Request Charter Quote →</a>
+      </div>
+
+      <!-- Service 2 -->
+      <div class="service-card highlight">
+        <div class="card-badge">Most Popular</div>
+        <div class="card-icon">
+          <img src="{% static 'assets/images/ac267a2fa2-1.jpg' %}" alt="Perishable Transport Icon">
+        </div>
+        <h3 class="card-title">Perishable Transport</h3>
+        <p class="card-text">
+          Temperature-controlled logistics for perishable goods with real-time monitoring.
+        </p>
+        <ul class="service-features">
+          <li><i class="bi bi-check-circle"></i> Active cooling systems</li>
+          <li><i class="bi bi-check-circle"></i> Pharma-grade containers</li>
+          <li><i class="bi bi-check-circle"></i> Customs pre-clearance</li>
+          <li><i class="bi bi-check-circle"></i> Express ground handling</li>
+        </ul>
+        <a href="#" class="service-link">Learn About Cold Chain →</a>
+      </div>
+
+      <!-- Service 3 -->
+      <div class="service-card">
+        <div class="card-icon">
+          <img src="{% static 'assets/images/crane-truck-loading.jpg' %}" alt="Heavy Lift Icon">
+        </div>
+        <h3 class="card-title">Heavy & Oversized</h3>
+        <p class="card-text">
+          Specialized transport solutions for outsized and heavyweight cargo loads.
+        </p>
+        <ul class="service-features">
+          <li><i class="bi bi-check-circle"></i> Up to 50-ton capacity</li>
+          <li><i class="bi bi-check-circle"></i> Custom loading systems</li>
+          <li><i class="bi bi-check-circle"></i> Engineering support</li>
+          <li><i class="bi bi-check-circle"></i> Route feasibility studies</li>
+        </ul>
+        <a href="#" class="service-link">Calculate Dimensions →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Fleet Section -->
+<section class="cargo-fleet">
+  <div class="container">
+    <div class="fleet-header">
+      <h2 class="section-title">Specialized Cargo Fleet</h2>
+      <p class="section-description">
+        Our aircraft are equipped with advanced cargo systems and maintained to the highest safety standards.
+      </p>
+    </div>
+
+    <div class="fleet-grid">
+      <div class="fleet-card">
+        <div class="fleet-image">
+          <img src="{% static 'assets/images/cargo-737.jpg' %}" alt="B737 Freighter">
+          <div class="fleet-specs">
+            <span>B737-800F</span>
+            <span>23.9T Capacity</span>
+          </div>
+        </div>
+        <div class="fleet-details">
+          <h3>B737 Freighter</h3>
+          <ul>
+            <li><strong>Range:</strong> 3,200 km</li>
+            <li><strong>Volume:</strong> 141 m³</li>
+            <li><strong>Loading:</strong> Front & Main Deck</li>
+            <li><strong>Special:</strong> AKE/LD7 Containers</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="fleet-card">
+        <div class="fleet-image">
+          <img src="{% static 'assets/images/cargo-atr.jpg' %}" alt="ATR Freighter">
+          <div class="fleet-specs">
+            <span>ATR 72-500F</span>
+            <span>8.5T Capacity</span>
+          </div>
+        </div>
+        <div class="fleet-details">
+          <h3>ATR Freighter</h3>
+          <ul>
+            <li><strong>Range:</strong> 1,500 km</li>
+            <li><strong>Volume:</strong> 75 m³</li>
+            <li><strong>Loading:</strong> Bulk/Single Pallet</li>
+            <li><strong>Special:</strong> Short-Field Capable</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="fleet-card">
+        <div class="fleet-image">
+          <img src="{% static 'assets/images/cargo-caravan.jpg' %}" alt="Caravan Cargo">
+          <div class="fleet-specs">
+            <span>C208B Cargomaster</span>
+            <span>1.5T Capacity</span>
+          </div>
+        </div>
+        <div class="fleet-details">
+          <h3>Cessna Caravan</h3>
+          <ul>
+            <li><strong>Range:</strong> 1,000 km</li>
+            <li><strong>Volume:</strong> 12.7 m³</li>
+            <li><strong>Loading:</strong> Bulk/Single Pallet</li>
+            <li><strong>Special:</strong> Remote Area Ops</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Logistics Section -->
+<section class="logistics-section">
+  <div class="container">
+    <div class="logistics-wrapper">
+      <div class="logistics-content">
+        <span class="section-subtitle">Integrated Solutions</span>
+        <h2 class="section-title">Complete Logistics Management</h2>
+        <p>
+          Our cargo services extend beyond transportation to include comprehensive logistics support:
+        </p>
+        <div class="logistics-features">
+          <div class="feature-item">
+            <i class="bi bi-clipboard2-check"></i>
+            <div>
+              <h4>Customs Clearance</h4>
+              <p>Pre-arranged clearance for faster cargo release</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <i class="bi bi-shield-lock"></i>
+            <div>
+              <h4>Security Screening</h4>
+              <p>TSA-compliant screening facilities</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <i class="bi bi-geo-alt"></i>
+            <div>
+              <h4>Last-Mile Coordination</h4>
+              <p>Seamless ground transportation integration</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="logistics-image">
+        <img src="{% static 'assets/images/cargo-logistics.jpg' %}" alt="Cargo Logistics">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cargo-cta">
+  <div class="container">
+    <div class="cta-card">
+      <div class="cta-content">
+        <h2>Optimize Your Air Freight Operations</h2>
+        <p>Contact our cargo specialists to develop a customized transportation solution</p>
+      </div>
+      <div class="cta-actions">
+        <a href="{% url 'contact-us' %}" class="btn btn-primary">Request Cargo Quote</a>
+        <a href="mailto:cargo@nairobi.jet" class="btn btn-outline">
+          <i class="bi bi-envelope"></i> Email Our Team
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Breadcrumb */
+  .breadcrumb-nav {
+    background: #f8f9fa;
+    padding: 12px 0;
+    border-bottom: 1px solid #e0e3e6;
+  }
+  
+  .breadcrumb {
+    padding: 0;
+    margin: 0;
+    font-size: 0.9rem;
+  }
+  
+  .breadcrumb-item a {
+    color: #1a4b8c;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  
+  .breadcrumb-item.active {
+    color: #6c757d;
+    font-weight: 500;
+  }
+
+  /* Hero Section */
+  .cargo-hero {
+    position: relative;
+    height: 70vh;
+    min-height: 600px;
+    background: url('{% static "assets/images/cargo-hero-bg.jpg" %}') no-repeat center center;
+    background-size: cover;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: #fff;
+  }
+  
+  .hero-container {
+    position: relative;
+    z-index: 2;
+    padding: 0 2rem;
+  }
+  
+  .hero-content {
+    max-width: 800px;
+  }
+  
+  .hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  
+  .hero-subtitle {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    font-weight: 300;
+    opacity: 0.9;
+    max-width: 600px;
+  }
+  
+  .hero-cta {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  
+  .btn-primary {
+    background: #e67e22;
+    color: #fff;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 4px;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+  
+  .btn-primary:hover {
+    background: #d35400;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  }
+  
+  .btn-outline {
+    background: transparent;
+    color: #fff;
+    border: 2px solid rgba(255,255,255,0.3);
+    padding: 10px 25px;
+    border-radius: 4px;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+  
+  .btn-outline:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.7);
+  }
+  
+  .hero-stats {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(26, 75, 140, 0.9);
+    display: flex;
+    justify-content: space-around;
+    padding: 1.5rem 0;
+  }
+  
+  .stat-item {
+    text-align: center;
+    padding: 0 1rem;
+  }
+  
+  .stat-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #e67e22;
+    line-height: 1;
+  }
+  
+  .stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+
+  /* Services Section */
+  .cargo-services {
+    padding: 5rem 0;
+    background: #fff;
+  }
+  
+  .section-header {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 3rem;
+  }
+  
+  .section-subtitle {
+    display: block;
+    color: #e67e22;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  
+  .section-title {
+    font-size: 2.5rem;
+    color: #1a4b8c;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+  }
+  
+  .section-divider {
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(to right, #1a4b8c, #e67e22);
+    margin: 1.5rem auto;
+  }
+  
+  .section-description {
+    color: #5a6c7d;
+    font-size: 1.1rem;
+    line-height: 1.7;
+  }
+  
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+  }
+  
+  .service-card {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 5px 30px rgba(0,0,0,0.05);
+    padding: 2rem;
+    position: relative;
+    transition: all 0.3s ease;
+    border: 1px solid #f0f0f0;
+  }
+  
+  .service-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+    border-color: #e67e22;
+  }
+  
+  .service-card.highlight {
+    border-top: 4px solid #e67e22;
+  }
+  
+  .card-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #e67e22;
+    color: #fff;
+    padding: 0.25rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  
+  .card-icon {
+    margin-bottom: 1.5rem;
+  }
+  
+  .card-icon img {
+    width: 60px;
+    height: auto;
+  }
+  
+  .card-title {
+    font-size: 1.5rem;
+    color: #1a4b8c;
+    margin-bottom: 1rem;
+  }
+  
+  .card-text {
+    color: #5a6c7d;
+    margin-bottom: 1.5rem;
+    line-height: 1.7;
+  }
+  
+  .service-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem;
+  }
+  
+  .service-features li {
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: flex-start;
+    color: #495057;
+    font-size: 0.95rem;
+  }
+  
+  .service-features i {
+    color: #e67e22;
+    margin-right: 0.75rem;
+    font-size: 1rem;
+    margin-top: 0.2rem;
+  }
+  
+  .service-link {
+    color: #1a4b8c;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: color 0.2s;
+  }
+  
+  .service-link:hover {
+    color: #e67e22;
+  }
+
+  /* Fleet Section */
+  .cargo-fleet {
+    padding: 5rem 0;
+    background: #f8fafc;
+  }
+  
+  .fleet-header {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 3rem;
+  }
+  
+  .fleet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+  
+  .fleet-card {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+  }
+  
+  .fleet-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  }
+  
+  .fleet-image {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+  }
+  
+  .fleet-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  
+  .fleet-card:hover .fleet-image img {
+    transform: scale(1.05);
+  }
+  
+  .fleet-specs {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(26, 75, 140, 0.8);
+    color: #fff;
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .fleet-details {
+    padding: 1.5rem;
+  }
+  
+  .fleet-details h3 {
+    color: #1a4b8c;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+  }
+  
+  .fleet-details ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .fleet-details li {
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+    color: #5a6c7d;
+  }
+  
+  .fleet-details strong {
+    color: #1a4b8c;
+    font-weight: 600;
+    display: inline-block;
+    min-width: 100px;
+  }
+
+  /* Logistics Section */
+  .logistics-section {
+    padding: 5rem 0;
+    background: #fff;
+  }
+  
+  .logistics-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+  
+  .logistics-image {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  }
+  
+  .logistics-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  .logistics-features {
+    margin-top: 2rem;
+  }
+  
+  .feature-item {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .feature-item i {
+    font-size: 1.5rem;
+    color: #e67e22;
+    margin-top: 0.25rem;
+  }
+  
+  .feature-item h4 {
+    color: #1a4b8c;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+  }
+  
+  .feature-item p {
+    color: #6c757d;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* CTA Section */
+  .cargo-cta {
+    padding: 5rem 0;
+    background: linear-gradient(135deg, #1a4b8c 0%, #2c5aa0 100%);
+    color: #fff;
+  }
+  
+  .cta-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 3rem;
+    max-width: 1000px;
+    margin: 0 auto;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .cta-content h2 {
+    color: #1a4b8c;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .cta-content p {
+    color: #5a6c7d;
+    font-size: 1.1rem;
+    max-width: 500px;
+  }
+  
+  .cta-actions {
+    display: flex;
+    gap: 1rem;
+  }
+
+  /* Responsive Styles */
+  @media (max-width: 1200px) {
+    .hero-title {
+      font-size: 3rem;
+    }
+  }
+  
+  @media (max-width: 992px) {
+    .logistics-wrapper {
+      grid-template-columns: 1fr;
+    }
+    
+    .logistics-image {
+      order: -1;
+      max-width: 600px;
+      margin: 0 auto 2rem;
+    }
+    
+    .cta-card {
+      flex-direction: column;
+      text-align: center;
+      gap: 2rem;
+    }
+    
+    .cta-actions {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .hero-title {
+      font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+      font-size: 1.2rem;
+    }
+    
+    .section-title {
+      font-size: 2rem;
+    }
+    
+    .cargo-hero {
+      min-height: 500px;
+    }
+    
+    .hero-stats {
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .services-grid, .fleet-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .hero-title {
+      font-size: 2rem;
+    }
+    
+    .hero-cta {
+      flex-direction: column;
+    }
+    
+    .btn-primary, .btn-outline {
+      width: 100%;
+      text-align: center;
+    }
+  }
+</style>
+{% endblock %}

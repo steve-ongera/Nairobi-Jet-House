@@ -350,6 +350,10 @@ def services(request):
 def aircraft_leasing(request):
     return render(request, 'aircraft_leasing.html') 
 
+def air_cargo(request):
+    return render(request, 'air_cargo.html') 
+
+
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 
