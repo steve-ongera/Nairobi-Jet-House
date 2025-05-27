@@ -206,6 +206,7 @@ class Passenger(models.Model):
     nationality =  models.CharField(max_length= 100 , blank= True)
     date_of_birth= models.DateField(blank= True , null=True)
     passport_number = models.CharField(max_length= 100 , blank= True)
+    order = models.PositiveIntegerField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.name} - {self.passport_number or 'No Passport'}"

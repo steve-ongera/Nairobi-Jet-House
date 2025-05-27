@@ -857,16 +857,15 @@ def create_booking(request):
                 flight_legs.append(second_leg)
             
             # Create passenger records (assuming you have a Passenger model)
-            if hasattr(models, 'Passenger'):  # Check if Passenger model exists
-                for i, passenger_data in enumerate(passengers_data):
-                    models.Passenger.objects.create(
-                        booking=booking,
-                        name=passenger_data['name'],
-                        date_of_birth=passenger_data['date_of_birth'],
-                        passport_number=passenger_data['passport_number'],
-                        nationality=passenger_data['nationality'],
-                        order=i + 1
-                    )
+            for i, passenger_data in enumerate(passengers_data):
+                Passenger.objects.create(
+                    booking=booking,
+                    name=passenger_data['name'],
+                    date_of_birth=passenger_data['date_of_birth'],
+                    passport_number=passenger_data['passport_number'],
+                    nationality=passenger_data['nationality']
+                )
+
             
             # Log the booking creation
             logger.info(f"Booking created: #{booking.id} by user {request.user.username}")
