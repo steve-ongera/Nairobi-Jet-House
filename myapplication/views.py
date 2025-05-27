@@ -374,6 +374,20 @@ def check_auth(request):
         'username': request.user.username if request.user.is_authenticated else None
     })
 
+import json
+import logging
+from django.http import JsonResponse
+from django.contrib.auth import authenticate, login
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+logger = logging.getLogger(__name__)
+
+@csrf_exempt  # Add this if you're not handling CSRF tokens properly
 @require_http_methods(["POST"])
 def api_login(request):
     """Handle user login via API"""
@@ -406,12 +420,27 @@ def api_login(request):
                 'message': 'Please enter a valid email address'
             }, status=400)
 
-        # Authenticate user
-        # Note: If you're using email as username, you might need to get user by email first
-        user = authenticate(request, username=email, password=password)
+        # Get user by email first, then authenticate
+        try:
+            user_obj = User.objects.get(email=email)
+            # Use the username field for authentication
+            user = authenticate(request, username=user_obj.username, password=password)
+        except User.DoesNotExist:
+            logger.warning(f"Failed login attempt for email: {email} - User not found")
+            return JsonResponse({
+                'success': False,
+                'message': 'Invalid email or password'
+            }, status=401)
         
         if user is not None:
             if user.is_active:
+                # Check if user is verified (if you're using email verification)
+                if not user.verified:
+                    return JsonResponse({
+                        'success': False,
+                        'message': 'Please verify your email address before logging in.'
+                    }, status=403)
+                
                 login(request, user)
                 
                 # Set session expiry based on remember_me
@@ -430,16 +459,19 @@ def api_login(request):
                         'username': user.username,
                         'email': user.email,
                         'first_name': user.first_name,
-                        'last_name': user.last_name
+                        'last_name': user.last_name,
+                        'user_type': user.user_type,
+                        'verified': user.verified
                     }
                 })
             else:
+                logger.warning(f"Inactive user login attempt: {email}")
                 return JsonResponse({
                     'success': False,
                     'message': 'Your account has been deactivated. Please contact support.'
                 }, status=403)
         else:
-            logger.warning(f"Failed login attempt for email: {email}")
+            logger.warning(f"Failed login attempt for email: {email} - Invalid password")
             return JsonResponse({
                 'success': False,
                 'message': 'Invalid email or password'
