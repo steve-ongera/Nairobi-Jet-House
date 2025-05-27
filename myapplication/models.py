@@ -200,13 +200,36 @@ class AircraftTracking(models.Model):
     def __str__(self):
         return f"{self.aircraft} at {self.timestamp}"
     
+import random
+import string
+from django.db import models
+
 class Passenger(models.Model):
     booking = models.ForeignKey(Booking, on_delete=models.CASCADE, related_name='passengers')
     name = models.CharField(max_length=100)
-    nationality =  models.CharField(max_length= 100 , blank= True)
-    date_of_birth= models.DateField(blank= True , null=True)
-    passport_number = models.CharField(max_length= 100 , blank= True)
-    order = models.PositiveIntegerField(blank=True, null=True)
-
+    nationality = models.CharField(max_length=100, blank=True)
+    date_of_birth = models.DateField(blank=True, null=True)
+    passport_number = models.CharField(max_length=100, blank=True)
+    order = models.CharField(max_length=10, blank=True, unique=True)
+    
+    def generate_order_code(self):
+        """Generate a unique 10-character alphanumeric code"""
+        while True:
+            # Generate 8 random alphanumeric characters + 2 digits
+            letters_digits = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+            # Add 2 more digits at the end
+            digits = ''.join(random.choices(string.digits, k=2))
+            code = letters_digits + digits
+            
+            # Check if code already exists
+            if not Passenger.objects.filter(order=code).exists():
+                return code
+    
+    def save(self, *args, **kwargs):
+        # Generate code only if it doesn't exist
+        if not self.order:
+            self.order = self.generate_order_code()
+        super().save(*args, **kwargs)
+    
     def __str__(self):
         return f"{self.name} - {self.passport_number or 'No Passport'}"
