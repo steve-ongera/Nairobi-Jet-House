@@ -1,0 +1,643 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Aircraft Leasing Solutions | Nairobi Jet House{% endblock %}
+
+{% block description %}Customized aircraft leasing services including dry lease, wet lease, ACMI, and sale-leaseback options for African aviation operators.{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="breadcrumb-wrapper">
+  <div class="container">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}"><i class="bi bi-house-door"></i> Home</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Aircraft Leasing</li>
+    </ol>
+  </div>
+</nav>
+
+<section class="leasing-hero">
+  <div class="hero-overlay"></div>
+  <div class="container">
+    <div class="hero-content">
+      <h1 class="hero-title">Strategic Aircraft Leasing Solutions</h1>
+      <p class="hero-subtitle">Flexible fleet solutions tailored to your operational requirements</p>
+      <a href="#leasing-services" class="btn btn-scroll">Explore Options <i class="bi bi-chevron-down"></i></a>
+    </div>
+  </div>
+</section>
+
+<section id="leasing-services" class="leasing-intro">
+  <div class="container">
+    <div class="section-header text-center">
+      <span class="section-tag">Leasing Expertise</span>
+      <h2 class="section-title">Customized Aircraft Leasing Programs</h2>
+      <div class="section-divider"><span></span></div>
+      <p class="section-description">
+        Nairobi Jet House delivers innovative aircraft leasing solutions designed to optimize your fleet strategy. Whether you need short-term capacity, long-term fleet planning, or capital solutions, our structured leasing programs provide operational flexibility with financial efficiency.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="leasing-services">
+  <div class="container">
+    <div class="leasing-grid">
+      <!-- Leasing Option 1 -->
+      <div class="leasing-card">
+        <div class="card-icon">
+          <img src="{% static 'assets/images/lease-icon-1.webp' %}" alt="Dry Lease Icon" width="60">
+        </div>
+        <h3 class="card-title">Dry Lease Solutions</h3>
+        <div class="card-content">
+          <p>Operational aircraft leasing without crew, maintenance, or insurance included. Ideal for operators with existing infrastructure.</p>
+          <ul class="leasing-features">
+            <li><i class="bi bi-check-circle"></i> Aircraft only - you provide crew/maintenance</li>
+            <li><i class="bi bi-check-circle"></i> 12-60 month lease terms available</li>
+            <li><i class="bi bi-check-circle"></i> Full technical records provided</li>
+            <li><i class="bi bi-check-circle"></i> Customized maintenance reserves</li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <a href="#" class="btn-link">Learn More <i class="bi bi-arrow-right"></i></a>
+        </div>
+      </div>
+
+      <!-- Leasing Option 2 -->
+      <div class="leasing-card featured">
+        <div class="card-badge">Popular</div>
+        <div class="card-icon">
+          <img src="{% static 'assets/images/lease-icon-2.png' %}" alt="Wet Lease Icon" width="60">
+        </div>
+        <h3 class="card-title">Wet Lease & ACMI</h3>
+        <div class="card-content">
+          <p>Complete operational package including aircraft, crew, maintenance, and insurance for immediate deployment.</p>
+          <ul class="leasing-features">
+            <li><i class="bi bi-check-circle"></i> Aircraft + crew + maintenance + insurance</li>
+            <li><i class="bi bi-check-circle"></i> Short-term (1-12 month) solutions</li>
+            <li><i class="bi bi-check-circle"></i> 24-72 hour rapid deployment</li>
+            <li><i class="bi bi-check-circle"></i> Regulatory compliance managed</li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <a href="#" class="btn-link">Learn More <i class="bi bi-arrow-right"></i></a>
+        </div>
+      </div>
+
+      <!-- Leasing Option 3 -->
+      <div class="leasing-card">
+        <div class="card-icon">
+          <img src="{% static 'assets/images/sale-and-lease-back.png' %}" alt="Sale Leaseback Icon" width="60">
+        </div>
+        <h3 class="card-title">Sale & Leaseback</h3>
+        <div class="card-content">
+          <p>Unlock capital from your fleet while maintaining operational control through structured leaseback arrangements.</p>
+          <ul class="leasing-features">
+            <li><i class="bi bi-check-circle"></i> Immediate capital release</li>
+            <li><i class="bi bi-check-circle"></i> Continued operational control</li>
+            <li><i class="bi bi-check-circle"></i> Flexible lease terms</li>
+            <li><i class="bi bi-check-circle"></i> End-of-lease options</li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <a href="#" class="btn-link">Learn More <i class="bi bi-arrow-right"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="leasing-benefits">
+  <div class="container">
+    <div class="benefits-wrapper">
+      <div class="benefits-content">
+        <h2 class="benefits-title">Why Choose Our Leasing Solutions?</h2>
+        <p class="benefits-description">Nairobi Jet House brings specialized expertise to aircraft leasing in the African market, with tailored solutions that address regional operational challenges.</p>
+        
+        <div class="benefits-list">
+          <div class="benefit-item">
+            <div class="benefit-icon">
+              <i class="bi bi-shield-check"></i>
+            </div>
+            <div class="benefit-text">
+              <h4>Regulatory Expertise</h4>
+              <p>Deep understanding of African aviation regulations and compliance requirements</p>
+            </div>
+          </div>
+          
+          <div class="benefit-item">
+            <div class="benefit-icon">
+              <i class="bi bi-graph-up"></i>
+            </div>
+            <div class="benefit-text">
+              <h4>Financial Flexibility</h4>
+              <p>Customized payment structures and competitive lease rates</p>
+            </div>
+          </div>
+          
+          <div class="benefit-item">
+            <div class="benefit-icon">
+              <i class="bi bi-airplane"></i>
+            </div>
+            <div class="benefit-text">
+              <h4>Diverse Fleet</h4>
+              <p>Access to modern aircraft types suitable for regional operations</p>
+            </div>
+          </div>
+          
+          <div class="benefit-item">
+            <div class="benefit-icon">
+              <i class="bi bi-headset"></i>
+            </div>
+            <div class="benefit-text">
+              <h4>Dedicated Support</h4>
+              <p>24/7 operational support and technical assistance</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="benefits-image">
+        <img src="{% static 'assets/images/benefit-icon-advantage-profit-symbol_883533-359.avif' %}" alt="Aircraft Leasing Benefits" class="img-fluid">
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="leasing-cta">
+  <div class="container">
+    <div class="cta-wrapper">
+      <div class="cta-content">
+        <h2 class="cta-title">Ready to Optimize Your Fleet Strategy?</h2>
+        <p class="cta-text">Our leasing specialists will work with you to develop a customized aircraft solution that meets your operational and financial objectives.</p>
+      </div>
+      <div class="cta-action">
+        <a href="{% url 'contact-us' %}" class="btn btn-primary">Request Lease Proposal</a>
+        <a href="tel:+254700000000" class="btn btn-secondary">
+          <i class="bi bi-telephone"></i> Call Our Leasing Team
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Breadcrumb Styles */
+  .breadcrumb-wrapper {
+    background: #f8f9fa;
+    padding: 15px 0;
+    border-bottom: 1px solid #e0e3e6;
+  }
+  
+  .breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    font-size: 0.9rem;
+  }
+  
+  .breadcrumb-item a {
+    color: #1a4b8c;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  
+  .breadcrumb-item a:hover {
+    color: #e67e22;
+  }
+  
+  .breadcrumb-item.active {
+    color: #6c757d;
+    font-weight: 500;
+  }
+  
+  /* Hero Section */
+  .leasing-hero {
+    position: relative;
+    height: 70vh;
+    min-height: 500px;
+    background: url('{% static "assets/images/Website-Banner-12-1024x512.png" %}') no-repeat center center;
+    background-size: cover;
+    display: flex;
+    align-items: center;
+    color: #fff;
+  }
+  
+  .hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+  }
+  
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 800px;
+  }
+  
+  .hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    line-height: 1.2;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  }
+  
+  .hero-subtitle {
+    font-size: 1.5rem;
+    margin-bottom: 30px;
+    font-weight: 300;
+    opacity: 0.9;
+  }
+  
+  .btn-scroll {
+    background: transparent;
+    color: #fff;
+    border: 2px solid #fff;
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+  
+  .btn-scroll:hover {
+    background: rgba(255,255,255,0.1);
+    transform: translateY(3px);
+  }
+  
+  /* Intro Section */
+  .leasing-intro {
+    padding: 80px 0;
+    background: #fff;
+  }
+  
+  .section-header {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .section-tag {
+    display: inline-block;
+    color: #e67e22;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 0.85rem;
+    margin-bottom: 15px;
+  }
+  
+  .section-title {
+    font-size: 2.5rem;
+    color: #1a4b8c;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+  
+  .section-divider {
+    text-align: center;
+    margin: 25px 0;
+  }
+  
+  .section-divider span {
+    display: inline-block;
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(to right, #1a4b8c, #e67e22);
+  }
+  
+  .section-description {
+    color: #5a6c7d;
+    font-size: 1.1rem;
+    line-height: 1.8;
+  }
+  
+  /* Leasing Services Grid */
+  .leasing-services {
+    padding: 0 0 80px;
+    background: #f8fafc;
+  }
+  
+  .leasing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 50px;
+  }
+  
+  .leasing-card {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 30px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  
+  .leasing-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+  }
+  
+  .leasing-card.featured {
+    border-top: 4px solid #e67e22;
+  }
+  
+  .card-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #e67e22;
+    color: #fff;
+    padding: 5px 15px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  
+  .card-icon {
+    padding: 30px 30px 0;
+    text-align: center;
+  }
+  
+  .card-title {
+    font-size: 1.5rem;
+    color: #1a4b8c;
+    padding: 0 30px;
+    margin: 20px 0 15px;
+  }
+  
+  .card-content {
+    padding: 0 30px;
+  }
+  
+  .card-content p {
+    color: #5a6c7d;
+    margin-bottom: 20px;
+    line-height: 1.7;
+  }
+  
+  .leasing-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 25px;
+  }
+  
+  .leasing-features li {
+    margin-bottom: 12px;
+    display: flex;
+    align-items: flex-start;
+    color: #495057;
+    font-size: 0.95rem;
+  }
+  
+  .leasing-features i {
+    color: #e67e22;
+    margin-right: 10px;
+    font-size: 1rem;
+    margin-top: 3px;
+  }
+  
+  .card-footer {
+    padding: 20px 30px;
+    border-top: 1px solid #f0f0f0;
+  }
+  
+  .btn-link {
+    color: #1a4b8c;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: color 0.2s;
+  }
+  
+  .btn-link:hover {
+    color: #e67e22;
+  }
+  
+  .btn-link i {
+    margin-left: 8px;
+    transition: transform 0.2s;
+  }
+  
+  .btn-link:hover i {
+    transform: translateX(3px);
+  }
+  
+  /* Benefits Section */
+  .leasing-benefits {
+    padding: 80px 0;
+    background: #fff;
+  }
+  
+  .benefits-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+    align-items: center;
+  }
+  
+  .benefits-image {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  }
+  
+  .benefits-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  .benefits-title {
+    font-size: 2.2rem;
+    color: #1a4b8c;
+    margin-bottom: 20px;
+  }
+  
+  .benefits-description {
+    color: #5a6c7d;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    margin-bottom: 40px;
+  }
+  
+  .benefits-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+  
+  .benefit-item {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .benefit-icon {
+    width: 50px;
+    height: 50px;
+    background: #f0f7ff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a4b8c;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  
+  .benefit-text h4 {
+    font-size: 1.2rem;
+    color: #1a4b8c;
+    margin-bottom: 5px;
+  }
+  
+  .benefit-text p {
+    color: #6c757d;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+  
+  /* CTA Section */
+  .leasing-cta {
+    padding: 60px 0;
+    background: linear-gradient(135deg, #1a4b8c 0%, #2c5aa0 100%);
+    color: #fff;
+  }
+  
+  .cta-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .cta-title {
+    font-size: 2rem;
+    margin-bottom: 15px;
+  }
+  
+  .cta-text {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    max-width: 500px;
+  }
+  
+  .cta-action {
+    display: flex;
+    gap: 15px;
+  }
+  
+  .btn-primary {
+    background: #fff;
+    color: #1a4b8c;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 5px;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+  
+  .btn-primary:hover {
+    background: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+  
+  .btn-secondary {
+    background: transparent;
+    color: #fff;
+    border: 2px solid rgba(255,255,255,0.3);
+    padding: 13px 25px;
+    border-radius: 5px;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+  
+  .btn-secondary:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.5);
+  }
+  
+  /* Responsive Styles */
+  @media (max-width: 1200px) {
+    .hero-title {
+      font-size: 3rem;
+    }
+    
+    .leasing-grid {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+  }
+  
+  @media (max-width: 992px) {
+    .benefits-wrapper {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+    
+    .benefits-image {
+      order: -1;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .cta-wrapper {
+      flex-direction: column;
+      text-align: center;
+      gap: 30px;
+    }
+    
+    .cta-action {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .hero-title {
+      font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+      font-size: 1.2rem;
+    }
+    
+    .section-title {
+      font-size: 2rem;
+    }
+    
+    .leasing-hero {
+      height: 60vh;
+      min-height: 400px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .leasing-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .hero-title {
+      font-size: 2rem;
+    }
+    
+    .section-title {
+      font-size: 1.8rem;
+    }
+    
+    .cta-action {
+      flex-direction: column;
+      width: 100%;
+    }
+    
+    .btn-primary, .btn-secondary {
+      width: 100%;
+      text-align: center;
+    }
+  }
+</style>
+{% endblock %}

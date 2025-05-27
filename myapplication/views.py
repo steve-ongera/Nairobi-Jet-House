@@ -347,6 +347,9 @@ def contact_us(request):
 def services(request):
     return render(request, 'service.html') 
 
+def aircraft_leasing(request):
+    return render(request, 'aircraft_leasing.html') 
+
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 
