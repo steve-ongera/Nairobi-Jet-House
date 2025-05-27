@@ -32,6 +32,9 @@
   <link href="{% static 'assets/css/messages.css'%}" rel="stylesheet">
   <script src="{% static 'assets/js/messages.js'%}"></script>
 
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+
  
 
   <link
@@ -80,8 +83,9 @@
 
         </a>
 
-        <a href="{% url 'index'%}" class="logo">
-          <img src="{% static 'assets/images/logo.svg'%}" alt="Tourly logo">
+        <a href="{% url 'index'%}" class="logo" style="color: white; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 1.5rem; font-weight: 700; letter-spacing: 1px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+          <i class="bi bi-airplane" style="font-size: 1.2em;"></i>
+          <span>NAIJETS</span>
         </a>
 
         <div class="header-btn-group">
@@ -390,253 +394,257 @@
 
 
 
-      <!-- 
-        - #PACKAGE
-      -->
-
       <section class="package" id="package">
-        <div class="container">
+      <div class="container">
+        <p class="section-subtitle">Popular Packages</p>
+        <h2 class="h2 section-title">Explore Our Jet Packages</h2>
+        <p class="section-text">
+          Fly high in comfort with Nairobi Jet House's tailored air travel plans. Discover luxury, privacy, and unforgettable skies.
+        </p>
 
-          <p class="section-subtitle">Popular Packages</p>
-
-          <h2 class="h2 section-title">Explore Our Jet Packages</h2>
-
-          <p class="section-text">
-            Fly high in comfort with Nairobi Jet House's tailored air travel plans. Discover luxury, privacy, and unforgettable skies.
-          </p>
-
-
-          <ul class="package-list">
-
-            <li>
-              <div class="package-card">
-
-                <figure class="card-banner">
-                  <img src="{% static 'assets/images/packege-1.jpg'%}" alt="Experience The Great Holiday On Beach" loading="lazy">
-                </figure>
-
-                <div class="card-content">
-
-                  <h3 class="h3 card-title">Experience The Great Holiday On Beach</h3>
-
-                  <p class="card-text">
-                    Competitive jet pricing tailored to your travel needs, ensuring value without compromising on luxury and safety.
-                  </p>
-
-
-                  <ul class="card-meta-list">
-
-                    <li class="card-meta-item">
-                      <div class="meta-box">
-                        <ion-icon name="time"></ion-icon>
-
-                        <p class="text">7D/6N</p>
-                      </div>
-                    </li>
-
-                    <li class="card-meta-item">
-                      <div class="meta-box">
-                        <ion-icon name="people"></ion-icon>
-
-                        <p class="text">pax: 10</p>
-                      </div>
-                    </li>
-
-                    <li class="card-meta-item">
-                      <div class="meta-box">
-                        <ion-icon name="location"></ion-icon>
-
-                        <p class="text">Malaysia</p>
-                      </div>
-                    </li>
-
-                  </ul>
-
+        <ul class="package-list">
+          <!-- Package 1 -->
+          <li>
+            <div class="package-card">
+              <figure class="card-banner">
+                <div class="jet-carousel" data-carousel-id="carousel1">
+                  <img src="{% static 'assets/images/jets/jets-1.webp' %}" alt="Luxury Private Jet" class="active" loading="lazy">
+                  <img src="{% static 'assets/images/jets/jets-9.webp' %}" alt="Jet Interior" loading="lazy">
+                  <img src="{% static 'assets/images/jets/jets-6.jpg' %}" alt="Jet in Flight" loading="lazy">
                 </div>
+              </figure>
 
-                <div class="card-price">
+              <div class="card-content">
+                <h3 class="h3 card-title">Premium Luxury Jet Experience</h3>
+                <p class="card-text">
+                  Competitive jet pricing tailored to your travel needs, ensuring value without compromising on luxury and safety.
+                </p>
 
-                  <div class="wrapper">
-
-                    <p class="reviews">(25 reviews)</p>
-
-                    <div class="card-rating">
-                      <ion-icon name="star"></ion-icon>
-                      <ion-icon name="star"></ion-icon>
-                      <ion-icon name="star"></ion-icon>
-                      <ion-icon name="star"></ion-icon>
-                      <ion-icon name="star"></ion-icon>
+                <ul class="card-meta-list">
+                  <li class="card-meta-item">
+                    <div class="meta-box">
+                      <ion-icon name="time"></ion-icon>
+                      <p class="text">7D/6N</p>
                     </div>
-
-                  </div>
-
-                  <p class="price">
-                    $750
-                    <span>/ per person</span>
-                  </p>
-
-                  <button class="btn btn-secondary">Book Now</button>
-
-                </div>
-
-              </div>
-            </li>
-
-            <li>
-              <div class="package-card">
-
-                <figure class="card-banner">
-                  <img src="{% static 'assets/images/packege-2.jpg'%}" alt="Summer Holiday To The Oxolotan River" loading="lazy">
-                </figure>
-
-                <div class="card-content">
-
-                  <h3 class="h3 card-title">Summer Holiday To The Oxolotan River</h3>
-
-                  <p class="card-text">
-                    Transparent jet pricing designed for efficiency, with flexible rates and no hidden fees for your peace of mind.
-                  </p>
-
-
-                  <ul class="card-meta-list">
-
-                    <li class="card-meta-item">
-                      <div class="meta-box">
-                        <ion-icon name="time"></ion-icon>
-
-                        <p class="text">7D/6N</p>
-                      </div>
-                    </li>
-
-                    <li class="card-meta-item">
-                      <div class="meta-box">
-                        <ion-icon name="people"></ion-icon>
-
-                        <p class="text">pax: 10</p>
-                      </div>
-                    </li>
-
-                    <li class="card-meta-item">
-                      <div class="meta-box">
-                        <ion-icon name="location"></ion-icon>
-
-                        <p class="text">Malaysia</p>
-                      </div>
-                    </li>
-
-                  </ul>
-
-                </div>
-
-                <div class="card-price">
-
-                  <div class="wrapper">
-
-                    <p class="reviews">(20 reviews)</p>
-
-                    <div class="card-rating">
-                      <ion-icon name="star"></ion-icon>
-                      <ion-icon name="star"></ion-icon>
-                      <ion-icon name="star"></ion-icon>
-                      <ion-icon name="star"></ion-icon>
-                      <ion-icon name="star"></ion-icon>
+                  </li>
+                  <li class="card-meta-item">
+                    <div class="meta-box">
+                      <ion-icon name="people"></ion-icon>
+                      <p class="text">pax: 10</p>
                     </div>
-
-                  </div>
-
-                  <p class="price">
-                    $520
-                    <span>/ per person</span>
-                  </p>
-
-                  <button class="btn btn-secondary">Book Now</button>
-
-                </div>
-
-              </div>
-            </li>
-
-            <li>
-              <div class="package-card">
-
-                <figure class="card-banner">
-                  <img src="{% static 'assets/images/packege-3.jpg'%}" alt="Santorini Island's Weekend Vacation" loading="lazy">
-                </figure>
-
-                <div class="card-content">
-
-                  <h3 class="h3 card-title">Santorini Island's Weekend Vacation</h3>
-
-                  <p class="card-text">
-                    Discover dynamic jet pricing that matches your schedule and preferences, delivering unmatched luxury at fair prices.
-                  </p>
-
-
-                  <ul class="card-meta-list">
-
-                    <li class="card-meta-item">
-                      <div class="meta-box">
-                        <ion-icon name="time"></ion-icon>
-
-                        <p class="text">7D/6N</p>
-                      </div>
-                    </li>
-
-                    <li class="card-meta-item">
-                      <div class="meta-box">
-                        <ion-icon name="people"></ion-icon>
-
-                        <p class="text">pax: 10</p>
-                      </div>
-                    </li>
-
-                    <li class="card-meta-item">
-                      <div class="meta-box">
-                        <ion-icon name="location"></ion-icon>
-
-                        <p class="text">Malaysia</p>
-                      </div>
-                    </li>
-
-                  </ul>
-
-                </div>
-
-                <div class="card-price">
-
-                  <div class="wrapper">
-
-                    <p class="reviews">(40 reviews)</p>
-
-                    <div class="card-rating">
-                      <ion-icon name="star"></ion-icon>
-                      <ion-icon name="star"></ion-icon>
-                      <ion-icon name="star"></ion-icon>
-                      <ion-icon name="star"></ion-icon>
-                      <ion-icon name="star"></ion-icon>
+                  </li>
+                  <li class="card-meta-item">
+                    <div class="meta-box">
+                      <ion-icon name="location"></ion-icon>
+                      <p class="text">Global Destinations</p>
                     </div>
-
-                  </div>
-
-                  <p class="price">
-                    $660
-                    <span>/ per person</span>
-                  </p>
-
-                  <button class="btn btn-secondary">Book Now</button>
-
-                </div>
-
+                  </li>
+                </ul>
               </div>
-            </li>
 
-          </ul>
+              <div class="card-price">
+                <div class="wrapper">
+                  <p class="reviews">(25 reviews)</p>
+                  <div class="card-rating">
+                    <ion-icon name="star"></ion-icon>
+                    <ion-icon name="star"></ion-icon>
+                    <ion-icon name="star"></ion-icon>
+                    <ion-icon name="star"></ion-icon>
+                    <ion-icon name="star"></ion-icon>
+                  </div>
+                </div>
+                <p class="price">
+                  $750
+                  <span>/ per person</span>
+                </p>
+                <button class="btn btn-secondary">Book Now</button>
+              </div>
+            </div>
+          </li>
 
-          <button class="btn btn-primary">View All Packages</button>
+          <!-- Package 2 -->
+          <li>
+            <div class="package-card">
+              <figure class="card-banner">
+                <div class="jet-carousel" data-carousel-id="carousel2">
+                  <img src="{% static 'assets/images/jets/jets-2.jpg' %}" alt="Business Jet" class="active" loading="lazy">
+                  <img src="{% static 'assets/images/jets/jets-8.webp' %}" alt="Cabin View" loading="lazy">
+                  <img src="{% static 'assets/images/jets/jets-5.jpg' %}" alt="Jet Takeoff" loading="lazy">
+                </div>
+              </figure>
 
-        </div>
-      </section>
+              <div class="card-content">
+                <h3 class="h3 card-title">Executive Business Jet Charter</h3>
+                <p class="card-text">
+                  Transparent jet pricing designed for efficiency, with flexible rates and no hidden fees for your peace of mind.
+                </p>
 
+                <ul class="card-meta-list">
+                  <li class="card-meta-item">
+                    <div class="meta-box">
+                      <ion-icon name="time"></ion-icon>
+                      <p class="text">7D/6N</p>
+                    </div>
+                  </li>
+                  <li class="card-meta-item">
+                    <div class="meta-box">
+                      <ion-icon name="people"></ion-icon>
+                      <p class="text">pax: 8</p>
+                    </div>
+                  </li>
+                  <li class="card-meta-item">
+                    <div class="meta-box">
+                      <ion-icon name="location"></ion-icon>
+                      <p class="text">European Routes</p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="card-price">
+                <div class="wrapper">
+                  <p class="reviews">(20 reviews)</p>
+                  <div class="card-rating">
+                    <ion-icon name="star"></ion-icon>
+                    <ion-icon name="star"></ion-icon>
+                    <ion-icon name="star"></ion-icon>
+                    <ion-icon name="star"></ion-icon>
+                    <ion-icon name="star"></ion-icon>
+                  </div>
+                </div>
+                <p class="price">
+                  $520
+                  <span>/ per person</span>
+                </p>
+                <button class="btn btn-secondary">Book Now</button>
+              </div>
+            </div>
+          </li>
+
+          <!-- Package 3 -->
+          <li>
+            <div class="package-card">
+              <figure class="card-banner">
+                <div class="jet-carousel" data-carousel-id="carousel3">
+                  <img src="{% static 'assets/images/jets/jets-3.webp' %}" alt="VIP Jet" class="active" loading="lazy">
+                  <img src="{% static 'assets/images/jets/jets-7.jpg' %}" alt="Luxury Seating" loading="lazy">
+                  <img src="{% static 'assets/images/jets/jets-4.webp' %}" alt="Aerial View" loading="lazy">
+                </div>
+              </figure>
+
+              <div class="card-content">
+                <h3 class="h3 card-title">VIP Luxury Jet Service</h3>
+                <p class="card-text">
+                  Discover dynamic jet pricing that matches your schedule and preferences, delivering unmatched luxury at fair prices.
+                </p>
+
+                <ul class="card-meta-list">
+                  <li class="card-meta-item">
+                    <div class="meta-box">
+                      <ion-icon name="time"></ion-icon>
+                      <p class="text">7D/6N</p>
+                    </div>
+                  </li>
+                  <li class="card-meta-item">
+                    <div class="meta-box">
+                      <ion-icon name="people"></ion-icon>
+                      <p class="text">pax: 12</p>
+                    </div>
+                  </li>
+                  <li class="card-meta-item">
+                    <div class="meta-box">
+                      <ion-icon name="location"></ion-icon>
+                      <p class="text">Worldwide</p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="card-price">
+                <div class="wrapper">
+                  <p class="reviews">(40 reviews)</p>
+                  <div class="card-rating">
+                    <ion-icon name="star"></ion-icon>
+                    <ion-icon name="star"></ion-icon>
+                    <ion-icon name="star"></ion-icon>
+                    <ion-icon name="star"></ion-icon>
+                    <ion-icon name="star"></ion-icon>
+                  </div>
+                </div>
+                <p class="price">
+                  $660
+                  <span>/ per person</span>
+                </p>
+                <button class="btn btn-secondary">Book Now</button>
+              </div>
+            </div>
+          </li>
+        </ul>
+
+        <button class="btn btn-primary">View All Packages</button>
+      </div>
+    </section>
+
+    <style>
+      .jet-carousel {
+        position: relative;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+        border-radius: 8px;
+      }
+      
+      .jet-carousel img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0;
+        transition: opacity 1s ease-in-out, transform 1s ease-in-out;
+        transform: scale(1.1);
+      }
+      
+      .jet-carousel img.active {
+        opacity: 1;
+        transform: scale(1);
+        z-index: 1;
+      }
+    </style>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Initialize all carousels
+        const carousels = document.querySelectorAll('.jet-carousel');
+        
+        carousels.forEach(carousel => {
+          const images = carousel.querySelectorAll('img');
+          let currentIndex = 0;
+          
+          // Set first image as active
+          images[currentIndex].classList.add('active');
+          
+          // Rotate images every 3 seconds
+          setInterval(() => {
+            images[currentIndex].classList.remove('active');
+            currentIndex = (currentIndex + 1) % images.length;
+            images[currentIndex].classList.add('active');
+          }, 3000);
+        });
+        
+        // Pause on hover
+        carousels.forEach(carousel => {
+          carousel.addEventListener('mouseenter', () => {
+            carousel.dataset.paused = 'true';
+          });
+          
+          carousel.addEventListener('mouseleave', () => {
+            delete carousel.dataset.paused;
+          });
+        });
+      });
+    </script>
 
 
 
