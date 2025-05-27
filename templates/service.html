@@ -1,298 +1,506 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Our Services | Nairobi Jet House{% endblock %}
+{% block title %}Premium Aviation Services | Nairobi Jet House{% endblock %}
 
-{% block description %}Premium private jet services by Nairobi Jet House - charter flights, aircraft management, luxury travel solutions across Africa and worldwide.{% endblock %}
+{% block description %}Comprehensive private aviation services including jet charter, aircraft management, global flight coordination, and VIP membership programs across Africa and worldwide.{% endblock %}
 
 {% block content %}
-<br>
-<br>
-<nav aria-label="breadcrumb" class="breadcrumb-navigation">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url 'index' %}"><i class="bi bi-house-door"></i> Home</a></li>
-    <li class="breadcrumb-item active" aria-current="page">Our Services</li>
-  </ol>
+<nav aria-label="breadcrumb" class="breadcrumb-wrapper">
+  <div class="container">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'index' %}"><i class="bi bi-house-door"></i> Home</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Our Services</li>
+    </ol>
+  </div>
 </nav>
 
-<section class="services-section">
-  <div class="container">
-    <div class="services-banner">
-      <img src="{% static 'assets/images/Website-Banner-18-1024x512.png' %}" alt="Nairobi Jet House Services" class="services-img">
-      <div class="services-banner-content">
-        <h2 class="h2 section-title" style="color:white;">Elevated Travel Experiences</h2>
-        <p class="services-banner-text">
-          Bespoke aviation solutions tailored to your exclusive needs
-        </p>
-      </div>
+<!-- Hero Banner -->
+<section class="services-hero">
+  <div class="hero-container">
+    <img src="{% static 'assets/images/Website-Banner-18-1024x512.png' %}" alt="Nairobi Jet House Services" class="hero-image">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">Exceptional Aviation Services</h1>
+      <p class="hero-subtitle">Tailored solutions for the most discerning travelers</p>
+      <a href="#our-services" class="btn btn-primary">Explore Our Services</a>
     </div>
+  </div>
+</section>
 
+<!-- Services Section -->
+<section id="our-services" class="services-section">
+  <div class="container">
     <div class="section-header">
-      <p class="section-subtitle">What We Offer</p>
-      <h2 class="h2 section-title">Premium Jet Services</h2>
-      <p class="section-text">
-        Nairobi Jet House delivers unmatched private aviation services with the highest standards of safety, luxury, and personalized attention. Our comprehensive suite of aviation solutions is designed to exceed the expectations of discerning clients who demand excellence in every aspect of their travel experience.
+      <span class="section-tag">Our Expertise</span>
+      <h2 class="section-title">Comprehensive Aviation Solutions</h2>
+      <div class="section-divider"></div>
+      <p class="section-description">
+        Nairobi Jet House provides end-to-end private aviation services designed to deliver unparalleled safety, comfort, and convenience. Our experienced team combines operational excellence with meticulous attention to detail to create seamless travel experiences.
       </p>
     </div>
 
     <div class="services-grid">
       <!-- Service 1 -->
       <div class="service-card">
-        <div class="service-icon">
-          <i class="bi bi-airplane-fill"></i>
+        <div class="card-icon">
+          <img src="{% static 'assets/images/jet-charter.jfif' %}" alt="Private Jet Charter Icon" width="60">
         </div>
-        <h3 class="h3 service-title">Private Jet Charter</h3>
-        <p class="service-text">
-          Experience unparalleled luxury with our on-demand aircraft charter services. Our meticulously maintained fleet of premium jets, helicopters, and turboprops ensures seamless travel for any mission profile, from executive meetings to leisure getaways.
-        </p>
-        <ul class="service-features">
-          <li><i class="bi bi-check-circle-fill"></i> 24/7 global availability with dedicated flight coordinators</li>
-          <li><i class="bi bi-check-circle-fill"></i> Exclusive empty leg opportunities at preferred rates</li>
-          <li><i class="bi bi-check-circle-fill"></i> Complex multi-destination itinerary management</li>
-          <li><i class="bi bi-check-circle-fill"></i> Personalized catering and ground transportation</li>
-        </ul>
+        <h3 class="card-title">Private Jet Charter</h3>
+        <div class="card-content">
+          <p>Access our diverse fleet of premium aircraft for on-demand travel anywhere in the world.</p>
+          <ul class="service-features">
+            <li><i class="bi bi-check-circle"></i> 24/7 global availability</li>
+            <li><i class="bi bi-check-circle"></i> Empty leg opportunities</li>
+            <li><i class="bi bi-check-circle"></i> Multi-destination itineraries</li>
+            <li><i class="bi bi-check-circle"></i> Personalized catering</li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <a href="#" class="service-link">Charter Inquiry <i class="bi bi-arrow-right"></i></a>
+        </div>
       </div>
 
       <!-- Service 2 -->
-      <div class="service-card">
-        <div class="service-icon">
-          <i class="bi bi-globe2"></i>
+      <div class="service-card highlight">
+        <div class="card-badge">Popular</div>
+        <div class="card-icon">
+          <img src="{% static 'assets/images/management.png' %}" alt="Aircraft Management Icon" width="60">
         </div>
-        <h3 class="h3 service-title">Global Flight Coordination</h3>
-        <p class="service-text">
-          Navigate complex international aviation requirements with confidence. Our experienced team manages every detail of your journey, from regulatory compliance to ground operations, ensuring smooth passage across all territories.
-        </p>
-        <ul class="service-features">
-          <li><i class="bi bi-check-circle-fill"></i> Specialized African airspace and permit expertise</li>
-          <li><i class="bi bi-check-circle-fill"></i> Streamlined customs and immigration coordination</li>
-          <li><i class="bi bi-check-circle-fill"></i> Strategic fuel planning and cost optimization</li>
-          <li><i class="bi bi-check-circle-fill"></i> Weather monitoring and route optimization</li>
-        </ul>
+        <h3 class="card-title">Aircraft Management</h3>
+        <div class="card-content">
+          <p>Comprehensive management solutions to maximize your aircraft's value and performance.</p>
+          <ul class="service-features">
+            <li><i class="bi bi-check-circle"></i> Maintenance oversight</li>
+            <li><i class="bi bi-check-circle"></i> Crew recruitment</li>
+            <li><i class="bi bi-check-circle"></i> Insurance management</li>
+            <li><i class="bi bi-check-circle"></i> Financial reporting</li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <a href="#" class="service-link">Management Details <i class="bi bi-arrow-right"></i></a>
+        </div>
       </div>
 
       <!-- Service 3 -->
       <div class="service-card">
-        <div class="service-icon">
-          <i class="bi bi-shield-lock-fill"></i>
+        <div class="card-icon">
+          <img src="{% static 'assets/images/flight-coordination.jfif' %}" alt="Flight Coordination Icon" width="60">
         </div>
-        <h3 class="h3 service-title">Aircraft Management</h3>
-        <p class="service-text">
-          Maximize your aircraft investment with our comprehensive management solutions. From regulatory compliance to operational excellence, we handle every aspect of aircraft ownership while you focus on your core business.
-        </p>
-        <ul class="service-features">
-          <li><i class="bi bi-check-circle-fill"></i> Proactive maintenance scheduling and oversight</li>
-          <li><i class="bi bi-check-circle-fill"></i> Professional crew recruitment and training programs</li>
-          <li><i class="bi bi-check-circle-fill"></i> Comprehensive insurance and risk management</li>
-          <li><i class="bi bi-check-circle-fill"></i> Financial reporting and cost analysis</li>
-        </ul>
-      </div>
-
-      <!-- Service 4 -->
-      <div class="service-card">
-        <div class="service-icon">
-          <i class="bi bi-star-fill"></i>
+        <h3 class="card-title">Global Flight Coordination</h3>
+        <div class="card-content">
+          <p>Expert handling of complex international flight operations and logistics.</p>
+          <ul class="service-features">
+            <li><i class="bi bi-check-circle"></i> African airspace expertise</li>
+            <li><i class="bi bi-check-circle"></i> Customs coordination</li>
+            <li><i class="bi bi-check-circle"></i> Fuel optimization</li>
+            <li><i class="bi bi-check-circle"></i> Weather monitoring</li>
+          </ul>
         </div>
-        <h3 class="h3 service-title">VIP Membership Program</h3>
-        <p class="service-text">
-          Join our exclusive membership community and enjoy priority access to our premium services. Our jet card programs offer predictable pricing, guaranteed availability, and personalized benefits tailored to frequent travelers.
-        </p>
-        <ul class="service-features">
-          <li><i class="bi bi-check-circle-fill"></i> Transparent fixed hourly rates with no hidden fees</li>
-          <li><i class="bi bi-check-circle-fill"></i> Guaranteed aircraft availability with priority booking</li>
-          <li><i class="bi bi-check-circle-fill"></i> Bespoke membership benefits and concierge services</li>
-          <li><i class="bi bi-check-circle-fill"></i> Flexible deposit options and usage tracking</li>
-        </ul>
+        <div class="card-footer">
+          <a href="#" class="service-link">Coordination Services <i class="bi bi-arrow-right"></i></a>
+        </div>
       </div>
     </div>
+  </div>
+</section>
 
-    <div class="cta-section">
-      <h3 class="h3 cta-title">Ready to Experience Premium Air Travel?</h3>
-      <p class="cta-description">Contact our aviation specialists to discuss your travel requirements and discover how we can elevate your journey.</p>
-      <a href="{% url 'contact-us' %}" class="btn btn-primary">Request a Quote</a>
+<!-- Fleet Section -->
+<section class="fleet-section">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Our Assets</span>
+      <h2 class="section-title">Premium Aircraft Fleet</h2>
+      <div class="section-divider"></div>
+      <p class="section-description">
+        We maintain a diverse portfolio of aircraft to meet every mission requirement, from short regional hops to intercontinental journeys.
+      </p>
+    </div>
+
+    <div class="fleet-grid">
+      <div class="fleet-card">
+        <div class="fleet-image">
+          <img src="{% static 'assets/images/citation-xls.jfif' %}" alt="Citation XLS">
+          <div class="fleet-overlay">
+            <h3>Citation XLS</h3>
+            <div class="fleet-specs">
+              <span><i class="bi bi-people"></i> 8-9 Passengers</span>
+              <span><i class="bi bi-speedometer2"></i> 2,100 nm Range</span>
+            </div>
+          </div>
+        </div>
+        <div class="fleet-details">
+          <h4>Midsize Jet</h4>
+          <p>Ideal for regional business travel with outstanding cabin comfort and short-field capability.</p>
+          <a href="#" class="btn-link">View Details <i class="bi bi-chevron-right"></i></a>
+        </div>
+      </div>
+
+      <div class="fleet-card">
+        <div class="fleet-image">
+          <img src="{% static 'assets/images/hawker-900xp.jpg' %}" alt="Hawker 900XP">
+          <div class="fleet-overlay">
+            <h3>Hawker 900XP</h3>
+            <div class="fleet-specs">
+              <span><i class="bi bi-people"></i> 7-8 Passengers</span>
+              <span><i class="bi bi-speedometer2"></i> 2,800 nm Range</span>
+            </div>
+          </div>
+        </div>
+        <div class="fleet-details">
+          <h4>Super Midsize</h4>
+          <p>Exceptional performance with spacious stand-up cabin for transcontinental flights.</p>
+          <a href="#" class="btn-link">View Details <i class="bi bi-chevron-right"></i></a>
+        </div>
+      </div>
+
+      <div class="fleet-card">
+        <div class="fleet-image">
+          <img src="{% static 'assets/images/global-6000.jpg' %}" alt="Global 6000">
+          <div class="fleet-overlay">
+            <h3>Global 6000</h3>
+            <div class="fleet-specs">
+              <span><i class="bi bi-people"></i> 12-14 Passengers</span>
+              <span><i class="bi bi-speedometer2"></i> 6,000 nm Range</span>
+            </div>
+          </div>
+        </div>
+        <div class="fleet-details">
+          <h4>Ultra Long Range</h4>
+          <p>Flagship aircraft for intercontinental travel with exceptional cabin amenities.</p>
+          <a href="#" class="btn-link">View Details <i class="bi bi-chevron-right"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="benefits-section">
+  <div class="container">
+    <div class="benefits-wrapper">
+      <div class="benefits-content">
+        <span class="section-tag">Why Choose Us</span>
+        <h2 class="section-title">Unmatched Service Advantages</h2>
+        <div class="benefits-list">
+          <div class="benefit-item">
+            <div class="benefit-icon">
+              <i class="bi bi-shield-check"></i>
+            </div>
+            <div class="benefit-text">
+              <h4>Safety First</h4>
+              <p>IOSA-compliant operations with IS-BAO certification and rigorous safety protocols</p>
+            </div>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-icon">
+              <i class="bi bi-star"></i>
+            </div>
+            <div class="benefit-text">
+              <h4>Five-Star Service</h4>
+              <p>Dedicated concierge team for personalized travel experiences</p>
+            </div>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-icon">
+              <i class="bi bi-clock-history"></i>
+            </div>
+            <div class="benefit-text">
+              <h4>Rapid Response</h4>
+              <p>90% of flight requests confirmed within 2 hours, 24/7 availability</p>
+            </div>
+          </div>
+          <div class="benefit-item">
+            <div class="benefit-icon">
+              <i class="bi bi-globe"></i>
+            </div>
+            <div class="benefit-text">
+              <h4>Global Reach</h4>
+              <p>Access to 5,000+ airports worldwide through our partner network</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="benefits-image">
+        <img src="{% static 'assets/images/service-benefits.jpg' %}" alt="Service Benefits" class="img-fluid">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="testimonials-section">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Client Experiences</span>
+      <h2 class="section-title">What Our Clients Say</h2>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="testimonials-grid">
+      <div class="testimonial-card">
+        <div class="testimonial-content">
+          <div class="rating">
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+          </div>
+          <p>"Nairobi Jet House transformed our corporate travel. Their attention to detail and operational reliability is unmatched in the region."</p>
+        </div>
+        <div class="testimonial-author">
+          <img src="{% static 'assets/images/client1.jpg' %}" alt="Client" class="author-image">
+          <div class="author-info">
+            <h5>James Kariuki</h5>
+            <span>CEO, Pan-African Holdings</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card">
+        <div class="testimonial-content">
+          <div class="rating">
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+            <i class="bi bi-star-fill"></i>
+          </div>
+          <p>"The aircraft management team has reduced our operating costs by 22% while improving dispatch reliability to 99.8%."</p>
+        </div>
+        <div class="testimonial-author">
+          <img src="{% static 'assets/images/client2.jpg' %}" alt="Client" class="author-image">
+          <div class="author-info">
+            <h5>Fatima Abdi</h5>
+            <span>Director, SkyLink Africa</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section class="service-cta">
+  <div class="container">
+    <div class="cta-wrapper">
+      <div class="cta-content">
+        <h2>Ready to Experience Premium Air Travel?</h2>
+        <p>Contact our aviation specialists to discuss your requirements</p>
+      </div>
+      <div class="cta-actions">
+        <a href="{% url 'contact-us' %}" class="btn btn-primary">Request a Quote</a>
+        <a href="tel:+254700000000" class="btn btn-outline">
+          <i class="bi bi-telephone"></i> Call Our Team
+        </a>
+      </div>
     </div>
   </div>
 </section>
 
 <style>
-  .breadcrumb-navigation {
+  /* Breadcrumb */
+  .breadcrumb-wrapper {
     background: #f8f9fa;
-    padding: 15px 0;
-    margin-bottom: 0;
-    border-bottom: 1px solid #e9ecef;
+    padding: 12px 0;
+    border-bottom: 1px solid #e0e3e6;
   }
   
   .breadcrumb {
-    background: transparent;
     padding: 0;
     margin: 0;
-    font-size: 0.95rem;
-  }
-  
-  .breadcrumb-item {
-    color: #6c757d;
+    font-size: 0.9rem;
   }
   
   .breadcrumb-item a {
     color: #1a4b8c;
     text-decoration: none;
-    transition: color 0.2s ease;
-  }
-  
-  .breadcrumb-item a:hover {
-    color: #3498db;
-    text-decoration: underline;
+    transition: color 0.2s;
   }
   
   .breadcrumb-item.active {
-    color: #495057;
+    color: #6c757d;
     font-weight: 500;
   }
-  
-  .breadcrumb-item + .breadcrumb-item::before {
-    content: ">";
-    color: #6c757d;
-    margin: 0 8px;
-  }
 
-  .services-section {
-    padding: 80px 0;
-    background: #ffffff;
-  }
-  
-  .services-banner {
+  /* Hero Section */
+  .services-hero {
     position: relative;
     margin-bottom: 80px;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-    height: 450px;
   }
   
-  .services-img {
+  .hero-container {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+  }
+  
+  .hero-image {
+    width: 100%;
+    height: 500px;
+    object-fit: cover;
+    display: block;
+  }
+  
+  .hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s ease;
+    background: linear-gradient(to right, rgba(26,75,140,0.8) 0%, rgba(26,75,140,0.4) 100%);
   }
   
-  .services-banner:hover .services-img {
-    transform: scale(1.05);
-  }
-  
-  .services-banner-content {
+  .hero-content {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(transparent, rgba(0,0,0,0.85));
-    padding: 50px;
-    color: white;
+    top: 50%;
+    left: 5%;
+    transform: translateY(-50%);
+    max-width: 600px;
+    color: #fff;
+    z-index: 2;
   }
   
-  .services-banner-text {
-    font-size: 1.25rem;
-    margin-top: 15px;
+  .hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
     font-weight: 300;
-    opacity: 0.95;
+    opacity: 0.9;
+  }
+  
+  .btn-primary {
+    background: #e67e22;
+    color: #fff;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 4px;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+  
+  .btn-primary:hover {
+    background: #d35400;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  }
+
+  /* Services Section */
+  .services-section {
+    padding: 80px 0;
+    background: #fff;
   }
   
   .section-header {
     text-align: center;
-    max-width: 900px;
-    margin: 0 auto 70px;
+    max-width: 800px;
+    margin: 0 auto 60px;
   }
   
-  .section-subtitle {
-    color: #1a4b8c;
+  .section-tag {
+    display: inline-block;
+    color: #e67e22;
     font-weight: 700;
-    margin-bottom: 20px;
     text-transform: uppercase;
     letter-spacing: 2px;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    margin-bottom: 15px;
   }
   
   .section-title {
-    font-size: 2.75rem;
-    font-weight: 700;
+    font-size: 2.5rem;
     color: #1a4b8c;
-    margin-bottom: 25px;
+    font-weight: 700;
+    margin-bottom: 20px;
     line-height: 1.2;
   }
   
-  .section-text {
-    font-size: 1.15rem;
+  .section-divider {
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(to right, #1a4b8c, #e67e22);
+    margin: 25px auto;
+  }
+  
+  .section-description {
     color: #5a6c7d;
+    font-size: 1.1rem;
     line-height: 1.7;
-    font-weight: 400;
+    margin: 0 auto;
   }
   
   .services-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 40px;
-    margin-bottom: 80px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-bottom: 60px;
   }
   
   .service-card {
-    background: #ffffff;
-    border: 1px solid #e8ecf0;
-    border-radius: 16px;
-    padding: 40px;
-    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-    position: relative;
+    background: #fff;
+    border-radius: 10px;
     overflow: hidden;
-  }
-  
-  .service-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 4px;
-    background: linear-gradient(90deg, #1a4b8c, #3498db);
-    transition: left 0.4s ease;
-  }
-  
-  .service-card:hover::before {
-    left: 0;
+    box-shadow: 0 5px 30px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    position: relative;
+    border: 1px solid #f0f0f0;
   }
   
   .service-card:hover {
-    transform: translateY(-12px);
-    box-shadow: 0 25px 50px rgba(26, 75, 140, 0.15);
-    border-color: #3498db;
+    transform: translateY(-10px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+    border-color: #e67e22;
   }
   
-  .service-icon {
-    font-size: 3rem;
+  .service-card.highlight {
+    border-top: 4px solid #e67e22;
+  }
+  
+  .card-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #e67e22;
+    color: #fff;
+    padding: 5px 15px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  
+  .card-icon {
+    padding: 30px 30px 0;
+    text-align: center;
+  }
+  
+  .card-title {
+    font-size: 1.5rem;
     color: #1a4b8c;
-    margin-bottom: 25px;
-    transition: color 0.3s ease;
+    padding: 0 30px;
+    margin: 20px 0 15px;
   }
   
-  .service-card:hover .service-icon {
-    color: #3498db;
+  .card-content {
+    padding: 0 30px;
   }
   
-  .service-title {
-    color: #1a4b8c;
-    margin-bottom: 20px;
-    font-size: 1.75rem;
-    font-weight: 700;
-    line-height: 1.3;
-  }
-  
-  .service-text {
+  .card-content p {
     color: #5a6c7d;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     line-height: 1.7;
-    font-size: 1.05rem;
   }
   
   .service-features {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: 0 0 25px;
   }
   
   .service-features li {
@@ -301,112 +509,387 @@
     align-items: flex-start;
     color: #495057;
     font-size: 0.95rem;
-    line-height: 1.5;
   }
   
   .service-features i {
-    color: #3498db;
-    margin-right: 12px;
+    color: #e67e22;
+    margin-right: 10px;
     font-size: 1rem;
-    margin-top: 2px;
-    flex-shrink: 0;
+    margin-top: 3px;
   }
   
-  .cta-section {
-    text-align: center;
-    padding: 60px 40px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-radius: 16px;
-    border: 1px solid #e8ecf0;
+  .card-footer {
+    padding: 20px 30px;
+    border-top: 1px solid #f0f0f0;
   }
   
-  .cta-title {
-    margin-bottom: 15px;
+  .service-link {
     color: #1a4b8c;
-    font-size: 2rem;
-    font-weight: 700;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: color 0.2s;
   }
   
-  .cta-description {
+  .service-link:hover {
+    color: #e67e22;
+  }
+  
+  .service-link i {
+    margin-left: 8px;
+    transition: transform 0.2s;
+  }
+  
+  .service-link:hover i {
+    transform: translateX(3px);
+  }
+
+  /* Fleet Section */
+  .fleet-section {
+    padding: 80px 0;
+    background: #f8fafc;
+  }
+  
+  .fleet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+  }
+  
+  .fleet-card {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+  }
+  
+  .fleet-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  }
+  
+  .fleet-image {
+    position: relative;
+    height: 220px;
+    overflow: hidden;
+  }
+  
+  .fleet-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  
+  .fleet-card:hover .fleet-image img {
+    transform: scale(1.05);
+  }
+  
+  .fleet-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    color: #fff;
+    padding: 20px;
+  }
+  
+  .fleet-overlay h3 {
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+  }
+  
+  .fleet-specs {
+    display: flex;
+    gap: 15px;
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+  
+  .fleet-specs i {
+    margin-right: 5px;
+  }
+  
+  .fleet-details {
+    padding: 20px;
+  }
+  
+  .fleet-details h4 {
+    color: #1a4b8c;
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+  }
+  
+  .fleet-details p {
     color: #5a6c7d;
-    font-size: 1.1rem;
-    margin-bottom: 30px;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
+    margin-bottom: 15px;
+    font-size: 0.95rem;
     line-height: 1.6;
   }
   
-  .btn-primary {
-   
-    padding: 15px 40px;
-    font-size: 1.1rem;
+  .btn-link {
+    color: #1a4b8c;
     font-weight: 600;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    box-shadow: 0 8px 25px rgba(26, 75, 140, 0.3);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    transition: color 0.2s;
   }
   
-  .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 35px rgba(26, 75, 140, 0.4);
+  .btn-link:hover {
+    color: #e67e22;
+  }
+  
+  .btn-link i {
+    margin-left: 5px;
+    transition: transform 0.2s;
+  }
+  
+  .btn-link:hover i {
+    transform: translateX(3px);
+  }
+
+  /* Benefits Section */
+  .benefits-section {
+    padding: 80px 0;
+    background: #fff;
+  }
+  
+  .benefits-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+    align-items: center;
+  }
+  
+  .benefits-image {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  }
+  
+  .benefits-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  .benefits-content {
+    max-width: 500px;
+  }
+  
+  .benefits-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 25px;
+    margin-top: 30px;
+  }
+  
+  .benefit-item {
+    display: flex;
+    gap: 20px;
+  }
+  
+  .benefit-icon {
+    width: 50px;
+    height: 50px;
+    background: #f0f7ff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1a4b8c;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  
+  .benefit-text h4 {
+    font-size: 1.2rem;
+    color: #1a4b8c;
+    margin-bottom: 5px;
+  }
+  
+  .benefit-text p {
+    color: #6c757d;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  /* Testimonials */
+  .testimonials-section {
+    padding: 80px 0;
+    background: #f8fafc;
+  }
+  
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 50px;
+  }
+  
+  .testimonial-card {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    padding: 30px;
+  }
+  
+  .rating {
+    color: #e67e22;
+    margin-bottom: 15px;
+  }
+  
+  .testimonial-content p {
+    font-style: italic;
+    color: #5a6c7d;
+    line-height: 1.7;
+    margin-bottom: 20px;
+  }
+  
+  .testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .author-image {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  
+  .author-info h5 {
+    color: #1a4b8c;
+    margin-bottom: 5px;
+  }
+  
+  .author-info span {
+    color: #6c757d;
+    font-size: 0.9rem;
+  }
+
+  /* CTA Section */
+  .service-cta {
+    padding: 80px 0;
+    background: linear-gradient(135deg, #1a4b8c 0%, #2c5aa0 100%);
+    color: #fff;
+  }
+  
+  .cta-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .cta-content h2 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+  }
+  
+  .cta-content p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+  }
+  
+  .cta-actions {
+    display: flex;
+    gap: 15px;
+  }
+  
+  .btn-outline {
+    background: transparent;
+    color: #fff;
+    border: 2px solid rgba(255,255,255,0.3);
+    padding: 12px 25px;
+    border-radius: 4px;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+  
+  .btn-outline:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.7);
+  }
+
+  /* Responsive Styles */
+  @media (max-width: 1200px) {
+    .hero-title {
+      font-size: 2.5rem;
+    }
     
+    .hero-subtitle {
+      font-size: 1.3rem;
+    }
+  }
+  
+  @media (max-width: 992px) {
+    .benefits-wrapper {
+      grid-template-columns: 1fr;
+    }
+    
+    .benefits-image {
+      order: -1;
+      max-width: 600px;
+      margin: 0 auto 40px;
+    }
+    
+    .cta-wrapper {
+      flex-direction: column;
+      text-align: center;
+      gap: 30px;
+    }
+    
+    .cta-actions {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
   }
   
   @media (max-width: 768px) {
-    .services-section {
-      padding: 40px 0;
+    .hero-image {
+      height: 400px;
     }
     
-    .services-banner {
-      height: 300px;
-      margin-bottom: 50px;
+    .hero-title {
+      font-size: 2rem;
     }
     
-    .services-banner-content {
-      padding: 30px 20px;
-    }
-    
-    .section-title {
-      font-size: 2.25rem;
-    }
-    
-    .services-grid {
-      grid-template-columns: 1fr;
-      gap: 25px;
-      margin-bottom: 50px;
-    }
-    
-    .service-card {
-      padding: 30px 25px;
-    }
-    
-    .service-title {
-      font-size: 1.5rem;
-    }
-    
-    .cta-section {
-      padding: 40px 25px;
-    }
-    
-    .cta-title {
-      font-size: 1.75rem;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .services-grid {
-      grid-template-columns: 1fr;
-    }
-    
-    .service-card {
-      padding: 25px 20px;
+    .hero-subtitle {
+      font-size: 1.1rem;
     }
     
     .section-title {
       font-size: 2rem;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .services-grid, .fleet-grid, .testimonials-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .hero-image {
+      height: 350px;
+    }
+    
+    .hero-content {
+      left: 0;
+      padding: 0 20px;
+      width: 100%;
+    }
+    
+    .btn-primary, .btn-outline {
+      width: 100%;
+      text-align: center;
     }
   }
 </style>
