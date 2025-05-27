@@ -342,7 +342,15 @@ def about_us(request):
     return render(request, 'about.html')
 
 def contact_us(request):
-    return render(request, 'contact-us.html')  
+    return render(request, 'contact-us.html') 
+
+from django.contrib.auth import logout
+from django.shortcuts import redirect
+
+def logout_view(request):
+    logout(request)
+    return redirect('index') 
+
 
 # views.py
 from django.shortcuts import render, get_object_or_404

@@ -9,5 +9,6 @@ urlpatterns = [
     path('search-airports/', views.search_airports, name='search_airports'),
     path('api/check-auth/', views.check_auth, name='check_auth'),
     path('api/login/', views.api_login, name='api_login'),
+    path('logout/', views.logout_view, name='logout'),
     path('api/create-booking/', views.create_booking, name='create_booking'),
 ]
