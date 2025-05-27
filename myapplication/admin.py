@@ -7,7 +7,7 @@ from django.db.models import Count, Sum
 from .models import (
     User, AircraftType, Aircraft, AircraftImage, Airport, 
     Availability, Booking, FlightLeg, PricingRule, 
-    ClientPreferences, OwnerPayout, AircraftTracking
+    ClientPreferences, OwnerPayout, AircraftTracking ,Passenger
 )
 
 
@@ -305,6 +305,11 @@ class AircraftTrackingAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('aircraft')
 
+@admin.register(Passenger)
+class PassengerAdmin(admin.ModelAdmin):
+    list_display = ('name', 'passport_number', 'nationality', 'date_of_birth', 'booking')
+    search_fields = ('name', 'passport_number', 'nationality')
+    list_filter = ('nationality', 'booking')
 
 # Custom admin site configuration
 admin.site.site_header = "Private Jet Booking Administration"

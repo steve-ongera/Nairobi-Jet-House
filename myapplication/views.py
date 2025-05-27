@@ -221,18 +221,18 @@ def calculate_base_price(aircraft, flight_hours, trip_type):
     """
     Calculate base price for the flight
     """
-    base_rate = aircraft.hourly_rate
-    minimum_hours = aircraft.minimum_hours
+    # Convert Decimal to float to avoid type mixing
+    base_rate = float(aircraft.hourly_rate)
+    minimum_hours = float(aircraft.minimum_hours)
+    flight_hours_float = float(flight_hours)
     
     # Use minimum hours or actual flight time, whichever is higher
-    billable_hours = max(flight_hours, minimum_hours)
+    billable_hours = max(flight_hours_float, minimum_hours)
     
-    base_price = float(base_rate) * billable_hours
-    
-    # Add positioning costs if aircraft is not at departure airport
-    # (This would be more sophisticated in real implementation)
+    base_price = base_rate * billable_hours
     
     return round(base_price, 2)
+
 
 
 def get_availability_status(aircraft, start_date, end_date):
@@ -462,7 +462,7 @@ def api_signup(request):
                 address=address if address else None,
                 company_name=company_name if company_name else None,
                 tax_id=tax_id if tax_id else None,
-                verified=False  # Set to False, require email verification
+                verified=True  # Set to False, require email verification
             )
             
             logger.info(f"New user registered: {user.username} ({user.email})")

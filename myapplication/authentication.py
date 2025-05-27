@@ -39,3 +39,4 @@ class EmailOrUsernameModelBackend(ModelBackend):
             return None
         
         return user if self.user_can_authenticate(user) else None
+    
