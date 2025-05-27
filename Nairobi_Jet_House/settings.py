@@ -33,6 +33,13 @@ INSTALLED_APPS = [
 AUTH_USER_MODEL = 'myapplication.User'
 
 
+# Add this to your settings.py
+AUTHENTICATION_BACKENDS = [
+    'myapplication.authentication.EmailOrUsernameModelBackend',  # Replace 'your_app_name' with actual app name
+    'django.contrib.auth.backends.ModelBackend',  # Keep as fallback
+]
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

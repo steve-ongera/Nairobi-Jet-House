@@ -349,7 +349,181 @@ from django.shortcuts import redirect
 
 def logout_view(request):
     logout(request)
+    messages.success(request, "You have been logged out successfully.")
     return redirect('index') 
+
+
+
+import json
+import logging
+from django.http import JsonResponse
+from django.contrib.auth import get_user_model, login
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.password_validation import validate_password
+from django.db import IntegrityError
+
+User = get_user_model()
+logger = logging.getLogger(__name__)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def api_signup(request):
+    """Handle user registration via API"""
+    try:
+        # Parse form data
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip().lower()
+        phone_number = request.POST.get('phone_number', '').strip()
+        password1 = request.POST.get('password1', '')
+        password2 = request.POST.get('password2', '')
+        user_type = request.POST.get('user_type', '')
+        address = request.POST.get('address', '').strip()
+        company_name = request.POST.get('company_name', '').strip()
+        tax_id = request.POST.get('tax_id', '').strip()
+        agree_terms = request.POST.get('agree_terms') == 'on'
+        marketing_emails = request.POST.get('marketing_emails') == 'on'
+        
+        errors = {}
+        
+        # Validate required fields
+        if not first_name:
+            errors['first_name'] = ['First name is required']
+        if not last_name:
+            errors['last_name'] = ['Last name is required']
+        if not username:
+            errors['username'] = ['Username is required']
+        elif len(username) < 3:
+            errors['username'] = ['Username must be at least 3 characters long']
+        if not email:
+            errors['email'] = ['Email is required']
+        if not phone_number:
+            errors['phone_number'] = ['Phone number is required']
+        if not password1:
+            errors['password1'] = ['Password is required']
+        if not password2:
+            errors['password2'] = ['Password confirmation is required']
+        if not user_type:
+            errors['user_type'] = ['Please select an account type']
+        if not agree_terms:
+            errors['agree_terms'] = ['You must agree to the terms and conditions']
+        
+        # Validate email format
+        if email:
+            try:
+                validate_email(email)
+            except ValidationError:
+                errors['email'] = ['Please enter a valid email address']
+        
+        # Validate password match
+        if password1 and password2 and password1 != password2:
+            errors['password2'] = ['Passwords do not match']
+        
+        # Validate password strength
+        if password1:
+            try:
+                validate_password(password1)
+            except ValidationError as e:
+                errors['password1'] = list(e.messages)
+        
+        # Check if username already exists
+        if username and User.objects.filter(username=username).exists():
+            errors['username'] = ['This username is already taken']
+        
+        # Check if email already exists
+        if email and User.objects.filter(email=email).exists():
+            errors['email'] = ['This email is already registered']
+        
+        # Validate user type specific requirements
+        if user_type in ['owner', 'agent'] and not company_name:
+            errors['company_name'] = ['Company name is required for this account type']
+        
+        # Return errors if any
+        if errors:
+            return JsonResponse({
+                'success': False,
+                'errors': errors
+            }, status=400)
+        
+        # Create user
+        try:
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password1,
+                first_name=first_name,
+                last_name=last_name,
+                user_type=user_type,
+                phone_number=phone_number,
+                address=address if address else None,
+                company_name=company_name if company_name else None,
+                tax_id=tax_id if tax_id else None,
+                verified=False  # Set to False, require email verification
+            )
+            
+            logger.info(f"New user registered: {user.username} ({user.email})")
+            
+            # Optionally auto-login the user
+            # login(request, user)
+            
+            return JsonResponse({
+                'success': True,
+                'message': 'Account created successfully! Please check your email for verification.',
+                'user_id': user.id
+            })
+            
+        except IntegrityError as e:
+            logger.error(f"User creation failed: {str(e)}")
+            return JsonResponse({
+                'success': False,
+                'message': 'An account with this information already exists.'
+            }, status=400)
+            
+    except Exception as e:
+        logger.error(f"Signup error: {str(e)}")
+        return JsonResponse({
+            'success': False,
+            'message': 'An error occurred during registration. Please try again.'
+        }, status=500)
+
+@require_http_methods(["GET"])
+def check_username_availability(request):
+    """Check if username is available"""
+    username = request.GET.get('username', '').strip()
+    
+    if not username or len(username) < 3:
+        return JsonResponse({'available': False, 'message': 'Username too short'})
+    
+    available = not User.objects.filter(username=username).exists()
+    
+    return JsonResponse({
+        'available': available,
+        'message': 'Username available' if available else 'Username already taken'
+    })
+
+@require_http_methods(["GET"])
+def check_email_availability(request):
+    """Check if email is available"""
+    email = request.GET.get('email', '').strip().lower()
+    
+    if not email:
+        return JsonResponse({'available': False, 'message': 'Email required'})
+    
+    try:
+        validate_email(email)
+    except ValidationError:
+        return JsonResponse({'available': False, 'message': 'Invalid email format'})
+    
+    available = not User.objects.filter(email=email).exists()
+    
+    return JsonResponse({
+        'available': available,
+        'message': 'Email available' if available else 'Email already registered'
+    })
 
 
 # views.py

@@ -817,6 +817,145 @@
   </div>
 </div>
 
+<!-- Signup Modal -->
+<div id="signupModal" class="modal fade" tabindex="-1" data-bs-backdrop="static">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Create Account</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-3 text-muted">Join us to book your private jet charter flights.</p>
+        
+        <form id="signupForm">
+          <div class="row">
+            <!-- Personal Information -->
+            <div class="col-md-6">
+              <h6 class="border-bottom pb-2 mb-3">Personal Information</h6>
+              
+              <div class="mb-3">
+                <label for="signupFirstName" class="form-label">First Name *</label>
+                <input type="text" class="form-control" id="signupFirstName" name="first_name" required>
+              </div>
+              
+              <div class="mb-3">
+                <label for="signupLastName" class="form-label">Last Name *</label>
+                <input type="text" class="form-control" id="signupLastName" name="last_name" required>
+              </div>
+              
+              <div class="mb-3">
+                <label for="signupEmail" class="form-label">Email Address *</label>
+                <input type="email" class="form-control" id="signupEmail" name="email" required>
+                <div class="form-text">We'll send booking confirmations to this email.</div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="signupPhone" class="form-label">Phone Number *</label>
+                <input type="tel" class="form-control" id="signupPhone" name="phone_number" required>
+              </div>
+              
+              <div class="mb-3">
+                <label for="signupUserType" class="form-label">Account Type *</label>
+                <select class="form-select" id="signupUserType" name="user_type" required>
+                  <option value="">Select account type</option>
+                  <option value="client">Client (Book flights)</option>
+                  <option value="owner">Aircraft Owner</option>
+                  <option value="agent">Booking Agent</option>
+                </select>
+              </div>
+            </div>
+            
+            <!-- Account & Additional Info -->
+            <div class="col-md-6">
+              <h6 class="border-bottom pb-2 mb-3">Account Details</h6>
+              
+              <div class="mb-3">
+                <label for="signupUsername" class="form-label">Username *</label>
+                <input type="text" class="form-control" id="signupUsername" name="username" required>
+                <div class="form-text">Choose a unique username for your account.</div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="signupPassword" class="form-label">Password *</label>
+                <input type="password" class="form-control" id="signupPassword" name="password1" required>
+                <div class="form-text">
+                  <small>Password must be at least 8 characters long.</small>
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label for="signupPassword2" class="form-label">Confirm Password *</label>
+                <input type="password" class="form-control" id="signupPassword2" name="password2" required>
+              </div>
+              
+              <div class="mb-3">
+                <label for="signupAddress" class="form-label">Address</label>
+                <textarea class="form-control" id="signupAddress" name="address" rows="3" placeholder="Street, City, State, Country"></textarea>
+              </div>
+              
+              <!-- Company Info (conditional) -->
+              <div id="companyFields" style="display: none;">
+                <div class="mb-3">
+                  <label for="signupCompany" class="form-label">Company Name</label>
+                  <input type="text" class="form-control" id="signupCompany" name="company_name">
+                </div>
+                
+                <div class="mb-3">
+                  <label for="signupTaxId" class="form-label">Tax ID</label>
+                  <input type="text" class="form-control" id="signupTaxId" name="tax_id">
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Terms & Conditions -->
+          <div class="row mt-3">
+            <div class="col-12">
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="agreeTerms" name="agree_terms" required>
+                <label class="form-check-label" for="agreeTerms">
+                  I agree to the <a href="#" target="_blank">Terms of Service</a> and <a href="#" target="_blank">Privacy Policy</a> *
+                </label>
+              </div>
+              
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="marketingEmails" name="marketing_emails">
+                <label class="form-check-label" for="marketingEmails">
+                  I would like to receive promotional emails and flight deals
+                </label>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Error Display -->
+          <div id="signupError" class="alert alert-danger" style="display: none;">
+            <ul id="signupErrorList" class="mb-0"></ul>
+          </div>
+          
+          <!-- Submit Button -->
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary btn-lg" id="signupSubmitBtn">
+              <span class="btn-text">Create Account</span>
+              <span class="btn-spinner" style="display: none;">
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                Creating Account...
+              </span>
+            </button>
+          </div>
+        </form>
+        
+        <hr>
+        <div class="text-center">
+          <p class="mb-0">Already have an account? 
+            <button type="button" class="btn btn-link p-0" onclick="showLoginModal()">Login here</button>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <style>
 .modal-lg {
   max-width: 800px;
@@ -872,6 +1011,54 @@
 .bg-light {
   background-color: #f8f9fa !important;
 }
+
+/* Additional styles for signup modal */
+#signupModal .modal-dialog {
+  max-width: 900px;
+}
+
+#signupModal .form-label {
+  font-weight: 500;
+  color: #495057;
+}
+
+#signupModal .border-bottom {
+  border-color: #dee2e6 !important;
+}
+
+#signupModal .form-text {
+  font-size: 0.875rem;
+  color: #6c757d;
+}
+
+#signupModal .btn-link {
+  color: #0d6efd;
+  text-decoration: none;
+}
+
+#signupModal .btn-link:hover {
+  text-decoration: underline;
+}
+
+.password-strength {
+  margin-top: 0.25rem;
+}
+
+.password-strength .strength-bar {
+  height: 4px;
+  background-color: #e9ecef;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.password-strength .strength-fill {
+  height: 100%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.strength-weak { background-color: #dc3545; }
+.strength-medium { background-color: #ffc107; }
+.strength-strong { background-color: #28a745; }
 </style>
 
 <script>
@@ -1118,9 +1305,267 @@ function getCookie(name) {
 }
 
 // Optional: Show signup modal function (implement as needed)
+// Show/hide company fields based on user type
+document.getElementById('signupUserType').addEventListener('change', function() {
+    const companyFields = document.getElementById('companyFields');
+    const userType = this.value;
+    
+    if (userType === 'owner' || userType === 'agent') {
+        companyFields.style.display = 'block';
+        // Make company fields required for these user types
+        document.getElementById('signupCompany').required = true;
+    } else {
+        companyFields.style.display = 'none';
+        document.getElementById('signupCompany').required = false;
+        // Clear values when hidden
+        document.getElementById('signupCompany').value = '';
+        document.getElementById('signupTaxId').value = '';
+    }
+});
+
+// Password strength indicator
+document.getElementById('signupPassword').addEventListener('input', function() {
+    const password = this.value;
+    let strength = 0;
+    
+    // Check password criteria
+    if (password.length >= 8) strength++;
+    if (/[a-z]/.test(password)) strength++;
+    if (/[A-Z]/.test(password)) strength++;
+    if (/[0-9]/.test(password)) strength++;
+    if (/[^A-Za-z0-9]/.test(password)) strength++;
+    
+    // Create or update strength indicator
+    let strengthDiv = document.querySelector('.password-strength');
+    if (!strengthDiv) {
+        strengthDiv = document.createElement('div');
+        strengthDiv.className = 'password-strength';
+        strengthDiv.innerHTML = `
+            <div class="strength-bar">
+                <div class="strength-fill"></div>
+            </div>
+            <small class="strength-text"></small>
+        `;
+        this.parentNode.appendChild(strengthDiv);
+    }
+    
+    const strengthFill = strengthDiv.querySelector('.strength-fill');
+    const strengthText = strengthDiv.querySelector('.strength-text');
+    
+    if (password.length === 0) {
+        strengthDiv.style.display = 'none';
+        return;
+    }
+    
+    strengthDiv.style.display = 'block';
+    
+    switch (strength) {
+        case 0:
+        case 1:
+        case 2:
+            strengthFill.style.width = '33%';
+            strengthFill.className = 'strength-fill strength-weak';
+            strengthText.textContent = 'Weak password';
+            strengthText.style.color = '#dc3545';
+            break;
+        case 3:
+        case 4:
+            strengthFill.style.width = '66%';
+            strengthFill.className = 'strength-fill strength-medium';
+            strengthText.textContent = 'Medium password';
+            strengthText.style.color = '#ffc107';
+            break;
+        case 5:
+            strengthFill.style.width = '100%';
+            strengthFill.className = 'strength-fill strength-strong';
+            strengthText.textContent = 'Strong password';
+            strengthText.style.color = '#28a745';
+            break;
+    }
+});
+
+// Password confirmation validation
+document.getElementById('signupPassword2').addEventListener('input', function() {
+    const password = document.getElementById('signupPassword').value;
+    const confirmPassword = this.value;
+    
+    if (confirmPassword && password !== confirmPassword) {
+        this.setCustomValidity('Passwords do not match');
+        this.classList.add('is-invalid');
+    } else {
+        this.setCustomValidity('');
+        this.classList.remove('is-invalid');
+    }
+});
+
+// Handle signup form submission
+document.getElementById('signupForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('signupSubmitBtn');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnSpinner = submitBtn.querySelector('.btn-spinner');
+    const errorDiv = document.getElementById('signupError');
+    const errorList = document.getElementById('signupErrorList');
+    
+    // Hide previous errors
+    errorDiv.style.display = 'none';
+    
+    // Check password confirmation
+    const password = document.getElementById('signupPassword').value;
+    const confirmPassword = document.getElementById('signupPassword2').value;
+    
+    if (password !== confirmPassword) {
+        errorList.innerHTML = '<li>Passwords do not match</li>';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    // Show loading state
+    btnText.style.display = 'none';
+    btnSpinner.style.display = 'inline-flex';
+    submitBtn.disabled = true;
+    
+    const formData = new FormData(this);
+    
+    fetch('/api/signup/', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message and close modal
+            alert('Account created successfully! You can now login.');
+            bootstrap.Modal.getInstance(document.getElementById('signupModal')).hide();
+            
+            // Clear form
+            document.getElementById('signupForm').reset();
+            
+            // Optionally auto-login or show login modal
+            setTimeout(() => {
+                openLoginModal();
+            }, 500);
+        } else {
+            // Show validation errors
+            errorList.innerHTML = '';
+            
+            if (data.errors) {
+                // Handle field-specific errors
+                Object.keys(data.errors).forEach(field => {
+                    data.errors[field].forEach(error => {
+                        const li = document.createElement('li');
+                        li.textContent = `${field.replace('_', ' ')}: ${error}`;
+                        errorList.appendChild(li);
+                    });
+                });
+            } else if (data.message) {
+                const li = document.createElement('li');
+                li.textContent = data.message;
+                errorList.appendChild(li);
+            }
+            
+            errorDiv.style.display = 'block';
+        }
+    })
+    .catch(error => {
+        console.error('Signup error:', error);
+        errorList.innerHTML = '<li>Network error. Please check your connection and try again.</li>';
+        errorDiv.style.display = 'block';
+    })
+    .finally(() => {
+        // Reset button state
+        btnText.style.display = 'inline';
+        btnSpinner.style.display = 'none';
+        submitBtn.disabled = false;
+    });
+});
+
+// Show signup modal function
 function showSignupModal() {
-    alert('Signup functionality would be implemented here');
+    // Hide login modal if it's open
+    const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+    if (loginModal) {
+        loginModal.hide();
+    }
+    
+    // Show signup modal
+    setTimeout(() => {
+        const signupModal = new bootstrap.Modal(document.getElementById('signupModal'));
+        signupModal.show();
+    }, 300);
 }
+
+// Show login modal function (for switching back)
+function showLoginModal() {
+    // Hide signup modal if it's open
+    const signupModal = bootstrap.Modal.getInstance(document.getElementById('signupModal'));
+    if (signupModal) {
+        signupModal.hide();
+    }
+    
+    // Show login modal
+    setTimeout(() => {
+        const loginModal = new bootstrap.Modal(document.getElementById('loginModal'));
+        loginModal.show();
+    }, 300);
+}
+
+// Username availability check (optional)
+let usernameTimeout;
+document.getElementById('signupUsername').addEventListener('input', function() {
+    const username = this.value.trim();
+    const inputField = this;
+    
+    if (username.length < 3) return;
+    
+    clearTimeout(usernameTimeout);
+    usernameTimeout = setTimeout(() => {
+        fetch(`/api/check-username/?username=${encodeURIComponent(username)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.available) {
+                    inputField.classList.remove('is-invalid');
+                    inputField.classList.add('is-valid');
+                } else {
+                    inputField.classList.remove('is-valid');
+                    inputField.classList.add('is-invalid');
+                }
+            })
+            .catch(error => {
+                console.error('Username check error:', error);
+            });
+    }, 500);
+});
+
+// Email availability check (optional)
+let emailTimeout;
+document.getElementById('signupEmail').addEventListener('blur', function() {
+    const email = this.value.trim();
+    const inputField = this;
+    
+    if (!email || !email.includes('@')) return;
+    
+    clearTimeout(emailTimeout);
+    emailTimeout = setTimeout(() => {
+        fetch(`/api/check-email/?email=${encodeURIComponent(email)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.available) {
+                    inputField.classList.remove('is-invalid');
+                } else {
+                    inputField.classList.add('is-invalid');
+                    inputField.setCustomValidity('This email is already registered');
+                }
+            })
+            .catch(error => {
+                console.error('Email check error:', error);
+            });
+    }, 500);
+});
 </script>
 {% endblock %}
 
