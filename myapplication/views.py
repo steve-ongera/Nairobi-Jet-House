@@ -344,6 +344,9 @@ def about_us(request):
 def contact_us(request):
     return render(request, 'contact-us.html') 
 
+def services(request):
+    return render(request, 'service.html') 
+
 from django.contrib.auth import logout
 from django.shortcuts import redirect
 
