@@ -358,6 +358,10 @@ def air_cargo(request):
 def private_jet_charter(request):
     return render(request, 'private_jet_charter.html') 
 
+from django.views.decorators.csrf import csrf_protect
+from django.shortcuts import render, redirect
+
+@csrf_protect
 def group_charter(request):
     if request.method == 'POST':
         group_name = request.POST.get('group_name')
@@ -373,7 +377,7 @@ def group_charter(request):
         )
         return redirect('index')  # or your success page
 
-    return render(request, 'group_charter.html') 
+    return render(request, 'group_charter.html')
 
 from django.contrib.auth import logout
 from django.shortcuts import redirect
