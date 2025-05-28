@@ -198,22 +198,55 @@
             {% csrf_token %}
             
             <div class="form-section">
-                <h4>Service Type</h4>
-                <div class="radio-group">
-                    <label class="radio-option">
-                        <input name="leasing_type" type="radio" value="private_jet" checked>
-                        <span>Private Jet Charter</span>
-                    </label>
-                    <label class="radio-option">
-                        <input name="leasing_type" type="radio" value="group_charter">
-                        <span>Group Air Charter</span>
-                    </label>
-                    <label class="radio-option">
-                        <input name="leasing_type" type="radio" value="aircraft_leasing">
-                        <span>Aircraft Leasing</span>
-                    </label>
-                </div>
-            </div>
+              <h4 style="margin-bottom: 12px; font-size: 1.1rem; color: #333; font-weight: 500;">Service Type</h4>
+              <div style="display: flex; gap: 8px;">
+                  <label style="flex: 1;">
+                      <input name="leasing_type" type="radio" value="private_jet" checked style="display: none;">
+                      <span style="
+                          display: block;
+                          padding: 10px;
+                          text-align: center;
+                          background-color: #1a6fc9;
+                          color: white;
+                          border: 1px solid #155a9e;
+                          border-radius: 4px;
+                          cursor: pointer;
+                          transition: all 0.2s;
+                          font-size: 0.9rem;
+                      ">Private Jet Charter</span>
+                  </label>
+                  
+                  <label style="flex: 1;">
+                      <input name="leasing_type" type="radio" value="group_charter" style="display: none;">
+                      <span style="
+                          display: block;
+                          padding: 10px;
+                          text-align: center;
+                          background-color: #f8f9fa;
+                          border: 1px solid #ddd;
+                          border-radius: 4px;
+                          cursor: pointer;
+                          transition: all 0.2s;
+                          font-size: 0.9rem;
+                      ">Group Air Charter</span>
+                  </label>
+                  
+                  <label style="flex: 1;">
+                      <input name="leasing_type" type="radio" value="aircraft_leasing" style="display: none;">
+                      <span style="
+                          display: block;
+                          padding: 10px;
+                          text-align: center;
+                          background-color: #f8f9fa;
+                          border: 1px solid #ddd;
+                          border-radius: 4px;
+                          cursor: pointer;
+                          transition: all 0.2s;
+                          font-size: 0.9rem;
+                      ">Aircraft Leasing</span>
+                  </label>
+              </div>
+          </div>
             
             <div class="form-section">
                 <h4>Contact Information</h4>
@@ -410,6 +443,47 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         return cookieValue;
+    }
+});
+
+// Shared JavaScript for both radio groups (can be placed once per page)
+document.querySelectorAll('.form-section label').forEach(label => {
+    const span = label.querySelector('span');
+    const radio = label.querySelector('input[type="radio"]');
+    
+    // Click handler
+    label.addEventListener('click', function() {
+        // Reset all options in this group
+        this.closest('.form-section').querySelectorAll('span').forEach(s => {
+            s.style.backgroundColor = '#f8f9fa';
+            s.style.color = 'inherit';
+            s.style.borderColor = '#ddd';
+        });
+        
+        // Style the selected option
+        span.style.backgroundColor = '#1a6fc9';
+        span.style.color = 'white';
+        span.style.borderColor = '#155a9e';
+    });
+    
+    // Hover effects
+    span.addEventListener('mouseenter', function() {
+        if (!radio.checked) {
+            this.style.backgroundColor = '#e9ecef';
+        }
+    });
+    
+    span.addEventListener('mouseleave', function() {
+        if (!radio.checked) {
+            this.style.backgroundColor = '#f8f9fa';
+        }
+    });
+    
+    // Initialize checked state
+    if (radio.checked) {
+        span.style.backgroundColor = '#1a6fc9';
+        span.style.color = 'white';
+        span.style.borderColor = '#155a9e';
     }
 });
 </script>
