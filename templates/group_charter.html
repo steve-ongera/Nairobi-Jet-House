@@ -297,7 +297,8 @@
       </div>
       <div class="cta-form">
         <h3>Group Inquiry</h3>
-        <form>
+        <form method="POST">
+           {% csrf_token %}
           <div class="form-group">
             <input type="text" placeholder="Group Name" required>
           </div>

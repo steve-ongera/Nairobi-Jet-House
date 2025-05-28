@@ -15,6 +15,8 @@ from django.db.models import Q
 from datetime import datetime, timedelta, time
 from django.utils import timezone
 from .models import Aircraft, Airport, Availability
+from django.shortcuts import render, redirect
+from .forms import GroupInquiryForm
 
 def find_aircraft(request):
     if request.method == 'POST':
@@ -357,6 +359,13 @@ def private_jet_charter(request):
     return render(request, 'private_jet_charter.html') 
 
 def group_charter(request):
+    if request.method == 'POST':
+        form = GroupInquiryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('index')  # redirect to a success page
+    else:
+        form = GroupInquiryForm()
     return render(request, 'group_charter.html') 
 
 from django.contrib.auth import logout
@@ -1092,3 +1101,7 @@ def submit_leasing_inquiry(request):
             'status': 'error',
             'message': str(e)
         }, status=400)
+    
+
+
+
