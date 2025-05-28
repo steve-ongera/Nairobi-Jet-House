@@ -298,23 +298,24 @@
       <div class="cta-form">
         <h3>Group Inquiry</h3>
         <form method="POST">
-           {% csrf_token %}
-          <div class="form-group">
-            <input type="text" placeholder="Group Name" required>
+          {% csrf_token %}
+          <div class="form-group mb-3">
+            <input type="text" id="group_name" name="group_name" class="form-control" placeholder="Group Name" required>
           </div>
-          <div class="form-group">
-            <input type="email" placeholder="Contact Email" required>
+          <div class="form-group mb-3">
+            <input type="email" id="contact_email" name="contact_email" class="form-control" placeholder="Contact Email" required>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <input type="number" placeholder="Passenger Count" min="10" required>
+          <div class="form-row d-flex gap-3 mb-3">
+            <div class="form-group flex-fill">
+              <input type="number" id="passenger_count" name="passenger_count" class="form-control" placeholder="Passenger Count" min="10" required>
             </div>
-            <div class="form-group">
-              <input type="text" placeholder="Travel Date(s)" onfocus="(this.type='date')">
+            <div class="form-group flex-fill">
+              <input type="date" id="travel_date" name="travel_date" class="form-control" placeholder="Travel Date(s)" required>
             </div>
           </div>
           <button type="submit" class="btn btn-primary">Request Group Proposal</button>
         </form>
+
       </div>
     </div>
   </div>

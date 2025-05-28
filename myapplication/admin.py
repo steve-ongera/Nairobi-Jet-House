@@ -336,6 +336,18 @@ class AircraftLeasingInquiryAdmin(admin.ModelAdmin):
     search_fields = ('name', 'email', 'company')
     readonly_fields = ('created_at',)
 
+from django.contrib import admin
+from .models import GroupInquiry
+
+@admin.register(GroupInquiry)
+class GroupInquiryAdmin(admin.ModelAdmin):
+    list_display = ('group_name', 'contact_email', 'passenger_count', 'travel_date', 'submitted_at')
+    search_fields = ('group_name', 'contact_email')
+    list_filter = ('travel_date', 'submitted_at')
+    ordering = ('-submitted_at',)
+
+
+
 # Custom admin site configuration
 admin.site.site_header = "Private Jet Booking Administration"
 admin.site.site_title = "Private Jet Admin"

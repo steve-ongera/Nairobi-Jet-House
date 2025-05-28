@@ -360,12 +360,19 @@ def private_jet_charter(request):
 
 def group_charter(request):
     if request.method == 'POST':
-        form = GroupInquiryForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('index')  # redirect to a success page
-    else:
-        form = GroupInquiryForm()
+        group_name = request.POST.get('group_name')
+        contact_email = request.POST.get('contact_email')
+        passenger_count = request.POST.get('passenger_count')
+        travel_date = request.POST.get('travel_date')
+
+        GroupInquiry.objects.create(
+            group_name=group_name,
+            contact_email=contact_email,
+            passenger_count=passenger_count,
+            travel_date=travel_date
+        )
+        return redirect('index')  # or your success page
+
     return render(request, 'group_charter.html') 
 
 from django.contrib.auth import logout
