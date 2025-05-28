@@ -258,3 +258,48 @@ class Passenger(models.Model):
     
     def __str__(self):
         return f"{self.name} - {self.passport_number or 'No Passport'}"
+    
+
+from django.db import models
+
+class AirCargoRequest(models.Model):
+    REQUEST_TYPE_CHOICES = [
+        ('one_way', 'One Way'),
+        ('return', 'Return'),
+        ('multileg', 'Multileg'),
+    ]
+    
+    request_type = models.CharField(max_length=20, choices=REQUEST_TYPE_CHOICES)
+    departure = models.CharField(max_length=100)
+    destination = models.CharField(max_length=100)
+    date = models.DateField()
+    departure_time = models.TimeField(null=True, blank=True)
+    name = models.CharField(max_length=100)
+    company = models.CharField(max_length=100, blank=True)
+    email = models.EmailField()
+    telephone = models.CharField(max_length=20)
+    cargo_details = models.TextField()
+    special_requirements = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Cargo Request #{self.id} - {self.departure} to {self.destination}"
+
+class AircraftLeasingInquiry(models.Model):
+    LEASING_TYPE_CHOICES = [
+        ('private_jet', 'Private Jet Charter'),
+        ('group_charter', 'Group Air Charter'),
+        ('aircraft_leasing', 'Aircraft Leasing'),
+    ]
+    
+    leasing_type = models.CharField(max_length=20, choices=LEASING_TYPE_CHOICES)
+    name = models.CharField(max_length=100)
+    company = models.CharField(max_length=100, blank=True)
+    email = models.EmailField()
+    telephone = models.CharField(max_length=20)
+    requirements = models.TextField()
+    duration = models.CharField(max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"Leasing Inquiry #{self.id} - {self.get_leasing_type_display()}"

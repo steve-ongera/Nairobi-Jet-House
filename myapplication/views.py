@@ -1029,17 +1029,66 @@ def send_booking_confirmation_email(booking):
         
     except Exception as e:
         logger.error(f"Failed to send confirmation email for booking {booking.booking_reference}: {str(e)}")
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+from .models import AirCargoRequest, AircraftLeasingInquiry
+import json
 
-# URLs.py addition (add these to your urls.py)
-"""
-# Add to your urls.py
-from django.urls import path
-from . import views
+@csrf_exempt
+@require_POST
+def submit_cargo_request(request):
+    try:
+        data = json.loads(request.body)
+        
+        cargo_request = AirCargoRequest(
+            request_type=data['request_type'],
+            departure=data['departure'],
+            destination=data['destination'],
+            date=data['date'],
+            departure_time=data.get('departure_time'),
+            name=data['name'],
+            company=data.get('company', ''),
+            email=data['email'],
+            telephone=data['telephone'],
+            cargo_details=data['cargo_details'],
+            special_requirements=data.get('special_requirements', '')
+        )
+        cargo_request.save()
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Your cargo request has been submitted successfully!'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=400)
 
-urlpatterns = [
-    # ... your existing URLs
-    path('api/check-auth/', views.check_auth, name='check_auth'),
-    path('api/login/', views.api_login, name='api_login'),
-    path('api/create-booking/', views.create_booking, name='create_booking'),
-]
-"""
+@csrf_exempt
+@require_POST
+def submit_leasing_inquiry(request):
+    try:
+        data = json.loads(request.body)
+        
+        leasing_inquiry = AircraftLeasingInquiry(
+            leasing_type=data['leasing_type'],
+            name=data['name'],
+            company=data.get('company', ''),
+            email=data['email'],
+            telephone=data['telephone'],
+            requirements=data['requirements'],
+            duration=data.get('duration', '')
+        )
+        leasing_inquiry.save()
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Your leasing inquiry has been submitted successfully!'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=400)
