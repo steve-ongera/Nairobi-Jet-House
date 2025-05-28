@@ -15,10 +15,11 @@
       <img src="{% static 'assets/images/private-jet-classifications-VIP.jpg.webp'%}" alt="Our private jets" class="about-img">
       
       <div class="about-banner-content">
-        <h2 style="color:white;" class="h2 section-title">Elevating Your Travel Experience</h2>
+        <h1 class="banner-title">Elevating Your Travel Experience</h1>
         <p class="about-banner-text">
           Since 2010, Nairobi Jet House has been redefining luxury air travel across Africa and beyond.
         </p>
+        <a href="#contact" class="btn btn-primary">Book Your Flight</a>
       </div>
     </div>
 
@@ -93,6 +94,39 @@
   </div>
 </section>
 
+<!-- New Partners Section -->
+<section class="partners-section">
+  <div class="container">
+    <div class="section-header">
+      <p class="section-subtitle">Our Trusted Partners</p>
+      <h2 class="section-title">Industry Collaborations</h2>
+    </div>
+    
+    <div class="partners-carousel">
+      <div class="partner-track">
+        <div class="partner-logo">
+          <img src="{% static 'assets/images/partners/partner1.webp' %}" alt="Partner 1">
+        </div>
+        <div class="partner-logo">
+          <img src="{% static 'assets/images/partners/partner2.png' %}" alt="Partner 2">
+        </div>
+        <div class="partner-logo">
+          <img src="{% static 'assets/images/partners/partner3.png' %}" alt="Partner 3">
+        </div>
+        <div class="partner-logo">
+          <img src="{% static 'assets/images/partners/partner4.png' %}" alt="Partner 4">
+        </div>
+        <div class="partner-logo">
+          <img src="{% static 'assets/images/partners/partner5.png' %}" alt="Partner 5">
+        </div>
+        <div class="partner-logo">
+          <img src="{% static 'assets/images/partners/partner6.jpg' %}" alt="Partner 6">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="team-section">
   <div class="container">
 
@@ -147,7 +181,9 @@
         Experience the Nairobi Jet House difference - where African hospitality meets world-class aviation.
       </p>
     </div>
-    <button class="btn btn-secondary">Contact Our Team</button>
+    
+    <a href="{% url 'contact-us' %}" class="btn btn-secondary">Contact Our Team</a>
+
   </div>
 </section>
 
@@ -158,15 +194,15 @@
   
   .about-banner {
     position: relative;
-    margin-bottom: 40px;
+    margin-bottom: 60px;
     border-radius: 16px;
     overflow: hidden;
-
+    height: 600px;
   }
   
   .about-img {
     width: 100%;
-    height: 400px;
+    height: 100%;
     object-fit: cover;
   }
   
@@ -176,8 +212,37 @@
     left: 0;
     right: 0;
     background: linear-gradient(transparent, rgba(0,0,0,0.8));
-    padding: 40px;
+    padding: 60px;
     color: white;
+  }
+  
+  .banner-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  }
+  
+  .about-banner-text {
+    font-size: 1.3rem;
+    max-width: 600px;
+    margin-bottom: 30px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+  }
+  
+  .btn-primary {
+    background-color: #3498db;
+    border: none;
+    padding: 12px 30px;
+    font-size: 1.1rem;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-primary:hover {
+    background-color: #2980b9;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
   }
   
   .about-grid {
@@ -193,6 +258,11 @@
     border-radius: 12px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.05);
     text-align: center;
+    transition: transform 0.3s ease;
+  }
+  
+  .about-card:hover {
+    transform: translateY(-10px);
   }
   
   .about-card-icon {
@@ -201,21 +271,69 @@
     margin-bottom: 20px;
   }
   
-  .about-list {
-    margin-top: 20px;
+  /* Partners Section Styles */
+  .partners-section {
+    padding: 80px 0;
+    background-color: #f9f9f9;
   }
   
-  .about-item {
+  .section-header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+  
+  .section-subtitle {
+    color: #3498db;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 15px;
+  }
+  
+  .partners-carousel {
+    overflow: hidden;
+    position: relative;
+    padding: 20px 0;
+  }
+  
+  .partner-track {
+    display: flex;
+    gap: 40px;
+    animation: scroll 30s linear infinite;
+    width: calc(250px * 12);
+  }
+  
+  .partner-logo {
+    width: 200px;
+    height: 100px;
     display: flex;
     align-items: center;
-    margin-bottom: 10px;
+    justify-content: center;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.05);
   }
   
-  .about-item-icon {
-    color: var(--primary);
-    margin-right: 10px;
+  .partner-logo img {
+    max-width: 100%;
+    max-height: 60px;
+    filter: grayscale(100%);
+    opacity: 0.7;
+    transition: all 0.3s ease;
   }
   
+  .partner-logo:hover img {
+    filter: grayscale(0%);
+    opacity: 1;
+  }
+  
+  @keyframes scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(calc(-250px * 6)); }
+  }
+  
+  /* Existing team and cta styles remain the same */
   .team-section {
     padding: 60px 0;
     background-color: #f9f9f9;
@@ -257,4 +375,13 @@
     padding: 0 20px;
   }
 </style>
+
+<script>
+  // Simple JavaScript to duplicate partner logos for infinite scroll effect
+  document.addEventListener('DOMContentLoaded', function() {
+    const track = document.querySelector('.partner-track');
+    const logos = track.innerHTML;
+    track.innerHTML = logos + logos; // Duplicate logos for seamless looping
+  });
+</script>
 {% endblock %}
