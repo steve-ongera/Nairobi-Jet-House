@@ -343,8 +343,26 @@ def search_airports(request):
 def about_us(request):
     return render(request, 'about.html')
 
+from django.shortcuts import render, redirect
+from .models import ContactSubmission
+from django.contrib import messages
+
 def contact_us(request):
-    return render(request, 'contact-us.html') 
+    if request.method == 'POST':
+        try:
+            ContactSubmission.objects.create(
+                name=request.POST.get('name'),
+                email=request.POST.get('email'),
+                phone=request.POST.get('phone'),
+                subject=request.POST.get('subject'),
+                message=request.POST.get('message')
+            )
+            messages.success(request, 'Your message has been sent successfully!')
+            return redirect('contact_us')  # Redirect to clear the form
+        except Exception as e:
+            messages.error(request, f'Error submitting form: {str(e)}')
+    
+    return render(request, 'contact-us.html')
 
 def services(request):
     return render(request, 'service.html') 

@@ -346,6 +346,15 @@ class GroupInquiryAdmin(admin.ModelAdmin):
     list_filter = ('travel_date', 'submitted_at')
     ordering = ('-submitted_at',)
 
+from django.contrib import admin
+from .models import ContactSubmission
+
+@admin.register(ContactSubmission)
+class ContactSubmissionAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'subject', 'submitted_at')
+    list_filter = ('subject', 'submitted_at')
+    search_fields = ('name', 'email', 'message')
+    readonly_fields = ('submitted_at',)
 
 
 # Custom admin site configuration
