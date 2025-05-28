@@ -20,7 +20,9 @@
     <div class="hero-content">
       <h1 class="hero-title">Strategic Aircraft Leasing Solutions</h1>
       <p class="hero-subtitle">Flexible fleet solutions tailored to your operational requirements</p>
-      <a href="#leasing-services" class="btn btn-scroll">Explore Options <i class="bi bi-chevron-down"></i></a>
+    <a onclick="leasingModal.open()" class="btn btn-scroll" style="cursor: pointer; width: fit-content;">
+  Request a Lease Quote <i class="bi bi-chevron-right"></i>
+</a>
     </div>
   </div>
 </section>
@@ -178,6 +180,239 @@
     </div>
   </div>
 </section>
+
+
+<!-- Aircraft Leasing Modal -->
+<div id="leasing-modal" class="modal">
+    <div class="modal-content request-form" style="width: 90%; max-width: 1200px; height: 85vh; max-height: none; border-radius: 8px; position: relative; overflow-y: auto;">
+        <!-- Close Button -->
+        <button class="close-modal" style="position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 24px; cursor: pointer; color: #666; z-index: 10; padding: 5px; line-height: 1;">
+            ×
+        </button>
+        
+        <div class="form-header">
+            <h3>Aircraft Leasing Inquiry</h3>
+        </div>
+        
+        <form id="leasing-inquiry-form">
+            {% csrf_token %}
+            
+            <div class="form-section">
+                <h4>Service Type</h4>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input name="leasing_type" type="radio" value="private_jet" checked>
+                        <span>Private Jet Charter</span>
+                    </label>
+                    <label class="radio-option">
+                        <input name="leasing_type" type="radio" value="group_charter">
+                        <span>Group Air Charter</span>
+                    </label>
+                    <label class="radio-option">
+                        <input name="leasing_type" type="radio" value="aircraft_leasing">
+                        <span>Aircraft Leasing</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h4>Contact Information</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="leasing_name">Your Name *</label>
+                        <input id="leasing_name" name="name" type="text" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="leasing_company">Company</label>
+                        <input id="leasing_company" name="company" type="text">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="leasing_email">Email *</label>
+                        <input id="leasing_email" name="email" type="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="leasing_telephone">Telephone *</label>
+                        <input id="leasing_telephone" name="telephone" type="tel" required>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h4>Requirements</h4>
+                <div class="form-group">
+                    <label for="requirements">Your Requirements *</label>
+                    <textarea id="requirements" name="requirements" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="duration">Duration</label>
+                    <input id="duration" name="duration" type="text">
+                </div>
+            </div>
+            
+            <div class="form-actions" style="text-align: center;">
+                <button type="submit" class="btn-submit">Submit Inquiry</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Declare modal instances globally
+let cargoModal, leasingModal;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Modal functionality
+    function initModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return null;
+
+        // Get all elements that close this modal
+        const closeElements = modal.querySelectorAll('.close-modal');
+        
+        // Function to open modal
+        function openModal() {
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+        }
+
+        // Function to close modal
+        function closeModal() {
+            modal.style.display = 'none';
+            document.body.style.overflow = ''; // Re-enable scrolling
+        }
+
+        // Close when clicking outside modal content
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Add close handlers to all close buttons
+        closeElements.forEach(el => {
+            el.addEventListener('click', closeModal);
+        });
+
+        return {
+            open: openModal,
+            close: closeModal
+        };
+    }
+
+    // Initialize modals and assign to global variables
+    cargoModal = initModal('cargo-modal');
+    leasingModal = initModal('leasing-modal');
+
+    // Air Cargo Form Submission
+    const cargoForm = document.getElementById('cargo-request-form');
+    if (cargoForm) {
+        cargoForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {
+                request_type: formData.get('request_type'),
+                departure: formData.get('departure'),
+                destination: formData.get('destination'),
+                date: formData.get('date'),
+                departure_time: formData.get('departure_time'),
+                name: formData.get('name'),
+                company: formData.get('company'),
+                email: formData.get('email'),
+                telephone: formData.get('telephone'),
+                cargo_details: formData.get('cargo_details'),
+                special_requirements: formData.get('special_requirements')
+            };
+            
+            submitForm('/submit-cargo-request/', data, cargoModal);
+        });
+    }
+    
+    // Aircraft Leasing Form Submission
+    const leasingForm = document.getElementById('leasing-inquiry-form');
+    if (leasingForm) {
+        leasingForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {
+                leasing_type: formData.get('leasing_type'),
+                name: formData.get('name'),
+                company: formData.get('company'),
+                email: formData.get('email'),
+                telephone: formData.get('telephone'),
+                requirements: formData.get('requirements'),
+                duration: formData.get('duration')
+            };
+            
+            submitForm('/submit-leasing-inquiry/', data, leasingModal);
+        });
+    }
+    
+    // Generic form submission function
+    function submitForm(url, data, modalInstance) {
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken'),
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showToast(data.message, 'success');
+                if (modalInstance) modalInstance.close();
+                // Reset the form if needed
+                const formId = url.includes('cargo') ? 'cargo-request-form' : 'leasing-inquiry-form';
+                document.getElementById(formId)?.reset();
+            } else {
+                showToast(data.message, 'error');
+            }
+        })
+        .catch(error => {
+            showToast('Error: ' + error, 'error');
+        });
+    }
+
+    // Simple toast notification
+    function showToast(message, type) {
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }, 10);
+    }
+    
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
 
 <style>
   /* Breadcrumb Styles */
@@ -639,5 +874,213 @@
       text-align: center;
     }
   }
+
+  
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    max-width: 1200px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 30px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 1200px;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    position: relative;
+    animation: slideDown 0.3s ease-in-out;
+}
+
+/* Form Header */
+.form-header {
+    text-align: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.form-header h3 {
+    color: #2c3e50;
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Form Sections */
+.form-section {
+    margin-bottom: 25px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    border-left: 4px solid #3498db;
+}
+
+.form-section h4 {
+    color: #3498db;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+/* Form Layout */
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -10px;
+}
+
+.form-group {
+    flex: 1;
+    min-width: 200px;
+    margin: 0 10px 15px;
+}
+
+/* Input Styles */
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="date"],
+input[type="time"],
+textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border 0.3s;
+    box-sizing: border-box;
+}
+
+input:focus,
+textarea:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Radio Group Styles */
+.radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.radio-option:hover {
+    background-color: #f0f0f0;
+}
+
+.radio-option input {
+    margin-right: 8px;
+}
+
+/* Button Styles */
+.btn-submit {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-submit:hover {
+    background-color: #2980b9;
+}
+
+/* Required Field Indicator */
+label[required]::after {
+    content: " *";
+    color: #e74c3c;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+    }
+    
+    .form-row {
+        flex-direction: column;
+    }
+    
+    .form-group {
+        margin: 0 0 15px 0;
+    }
+    
+    .radio-group {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
+/* Close Button (if you add one) */
+.close {
+    color: #aaa;
+    position: absolute;
+    top: 15px;
+    right: 25px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: #333;
+}
+
+  
 </style>
 {% endblock %}
