@@ -311,6 +311,31 @@ class PassengerAdmin(admin.ModelAdmin):
     search_fields = ('name', 'passport_number', 'nationality')
     list_filter = ('nationality', 'booking')
 
+
+from django.contrib import admin
+from .models import AirCargoRequest, AircraftLeasingInquiry
+
+
+@admin.register(AirCargoRequest)
+class AirCargoRequestAdmin(admin.ModelAdmin):
+    list_display = (
+        'id', 'request_type', 'departure', 'destination', 'date',
+        'name', 'email', 'telephone', 'created_at'
+    )
+    list_filter = ('request_type', 'date', 'created_at')
+    search_fields = ('name', 'email', 'departure', 'destination', 'company')
+    readonly_fields = ('created_at',)
+
+
+@admin.register(AircraftLeasingInquiry)
+class AircraftLeasingInquiryAdmin(admin.ModelAdmin):
+    list_display = (
+        'id', 'leasing_type', 'name', 'email', 'telephone', 'created_at'
+    )
+    list_filter = ('leasing_type', 'created_at')
+    search_fields = ('name', 'email', 'company')
+    readonly_fields = ('created_at',)
+
 # Custom admin site configuration
 admin.site.site_header = "Private Jet Booking Administration"
 admin.site.site_title = "Private Jet Admin"

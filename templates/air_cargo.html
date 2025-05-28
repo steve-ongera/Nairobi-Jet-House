@@ -25,9 +25,11 @@
       <p class="hero-subtitle">Reliable freight transportation tailored to your supply chain requirements</p>
       <div class="hero-cta">
         <!-- Air Cargo Modal Trigger -->
-        <button onclick="cargoModal.open()" class="btn btn-outline">
-            Request Air Cargo
-        </button>
+        <button onclick="cargoModal.open()" style="background-color: green; color: white; border: none; padding: 10px 20px; border-radius: 5px; display: inline-flex; align-items: center;">
+          <i class="bi bi-file-earmark-text" style="margin-right: 8px;"></i> Get Quote
+      </button>
+
+
         <a href="tel:+254700000000" class="btn btn-outline">
           <i class="bi bi-telephone"></i> +254 700 000000
         </a>
@@ -251,172 +253,180 @@
     </div>
   </div>
 </section>
-
 <!-- Air Cargo Modal -->
 <div id="cargo-modal" class="modal">
-            <div class="modal-content request-form">
-                <div class="form-header">
-                    <h3>Air Cargo Request</h3>
-                </div>
-                
-                <form id="cargo-request-form">
-                    {% csrf_token %}
-                    
-                    <div class="form-section">
-                        <h4>Journey Type</h4>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input name="request_type" type="radio" value="one_way" checked>
-                                <span>One Way</span>
-                            </label>
-                            <label class="radio-option">
-                                <input name="request_type" type="radio" value="return">
-                                <span>Return</span>
-                            </label>
-                            <label class="radio-option">
-                                <input name="request_type" type="radio" value="multileg">
-                                <span>Multileg</span>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="form-section">
-                        <h4>Route Details</h4>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="departure">Departure *</label>
-                                <input id="departure" name="departure" type="text" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="destination">Destination *</label>
-                                <input id="destination" name="destination" type="text" required>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="date">Date *</label>
-                                <input id="date" name="date" type="date" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="departure_time">Departure Time</label>
-                                <input id="departure_time" name="departure_time" type="time">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-section">
-                        <h4>Contact Information</h4>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="name">Your Name *</label>
-                                <input id="name" name="name" type="text" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="company">Company</label>
-                                <input id="company" name="company" type="text">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="email">Email *</label>
-                                <input id="email" name="email" type="email" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="telephone">Telephone *</label>
-                                <input id="telephone" name="telephone" type="tel" required>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-section">
-                        <h4>Cargo Details</h4>
-                        <div class="form-group">
-                            <label for="cargo_details">Cargo Type/Commodity *</label>
-                            <textarea id="cargo_details" name="cargo_details" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="special_requirements">Special Requirements</label>
-                            <textarea id="special_requirements" name="special_requirements"></textarea>
-                        </div>
-                    </div>
-                    
-                    <div class="form-actions" style="text-align: center;">
-                        <button type="submit" class="btn-submit">Submit Request</button>
-                    </div>
-                </form>
-            </div>
+    <div class="modal-content request-form" style="width: 90%; max-width: 800px; height: 85vh; max-height: none; border-radius: 8px; position: relative; overflow-y: auto;">
+        <!-- Close Button -->
+        <button class="close-modal" style="position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 24px; cursor: pointer; color: #666; z-index: 10; padding: 5px; line-height: 1;">
+            ×
+        </button>
+        
+        <div class="form-header">
+            <h3>Air Cargo Request</h3>
         </div>
         
-        <!-- Aircraft Leasing Modal -->
-        <div id="leasing-modal" class="modal">
-            <div class="modal-content request-form">
-                <div class="form-header">
-                    <h3>Aircraft Leasing Inquiry</h3>
+        <form id="cargo-request-form">
+            {% csrf_token %}
+            
+            <div class="form-section">
+                <h4>Journey Type</h4>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input name="request_type" type="radio" value="one_way" checked>
+                        <span>One Way</span>
+                    </label>
+                    <label class="radio-option">
+                        <input name="request_type" type="radio" value="return">
+                        <span>Return</span>
+                    </label>
+                    <label class="radio-option">
+                        <input name="request_type" type="radio" value="multileg">
+                        <span>Multileg</span>
+                    </label>
                 </div>
-                
-                <form id="leasing-inquiry-form">
-                    {% csrf_token %}
-                    
-                    <div class="form-section">
-                        <h4>Service Type</h4>
-                        <div class="radio-group">
-                            <label class="radio-option">
-                                <input name="leasing_type" type="radio" value="private_jet" checked>
-                                <span>Private Jet Charter</span>
-                            </label>
-                            <label class="radio-option">
-                                <input name="leasing_type" type="radio" value="group_charter">
-                                <span>Group Air Charter</span>
-                            </label>
-                            <label class="radio-option">
-                                <input name="leasing_type" type="radio" value="aircraft_leasing">
-                                <span>Aircraft Leasing</span>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="form-section">
-                        <h4>Contact Information</h4>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="leasing_name">Your Name *</label>
-                                <input id="leasing_name" name="name" type="text" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="leasing_company">Company</label>
-                                <input id="leasing_company" name="company" type="text">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="leasing_email">Email *</label>
-                                <input id="leasing_email" name="email" type="email" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="leasing_telephone">Telephone *</label>
-                                <input id="leasing_telephone" name="telephone" type="tel" required>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="form-section">
-                        <h4>Requirements</h4>
-                        <div class="form-group">
-                            <label for="requirements">Your Requirements *</label>
-                            <textarea id="requirements" name="requirements" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="duration">Duration</label>
-                            <input id="duration" name="duration" type="text">
-                        </div>
-                    </div>
-                    
-                    <div class="form-actions" style="text-align: center;">
-                        <button type="submit" class="btn-submit">Submit Inquiry</button>
-                    </div>
-                </form>
             </div>
+            
+            <div class="form-section">
+                <h4>Route Details</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="departure">Departure *</label>
+                        <input id="departure" name="departure" type="text" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="destination">Destination *</label>
+                        <input id="destination" name="destination" type="text" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="date">Date *</label>
+                        <input id="date" name="date" type="date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="departure_time">Departure Time</label>
+                        <input id="departure_time" name="departure_time" type="time">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h4>Contact Information</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">Your Name *</label>
+                        <input id="name" name="name" type="text" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="company">Company</label>
+                        <input id="company" name="company" type="text">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input id="email" name="email" type="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="telephone">Telephone *</label>
+                        <input id="telephone" name="telephone" type="tel" required>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h4>Cargo Details</h4>
+                <div class="form-group">
+                    <label for="cargo_details">Cargo Type/Commodity *</label>
+                    <textarea id="cargo_details" name="cargo_details" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="special_requirements">Special Requirements</label>
+                    <textarea id="special_requirements" name="special_requirements"></textarea>
+                </div>
+            </div>
+            
+            <div class="form-actions" style="text-align: center;">
+                <button type="submit" class="btn-submit">Submit Request</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Aircraft Leasing Modal -->
+<div id="leasing-modal" class="modal">
+    <div class="modal-content request-form" style="width: 90%; max-width: 1200px; height: 85vh; max-height: none; border-radius: 8px; position: relative; overflow-y: auto;">
+        <!-- Close Button -->
+        <button class="close-modal" style="position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 24px; cursor: pointer; color: #666; z-index: 10; padding: 5px; line-height: 1;">
+            ×
+        </button>
+        
+        <div class="form-header">
+            <h3>Aircraft Leasing Inquiry</h3>
         </div>
+        
+        <form id="leasing-inquiry-form">
+            {% csrf_token %}
+            
+            <div class="form-section">
+                <h4>Service Type</h4>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input name="leasing_type" type="radio" value="private_jet" checked>
+                        <span>Private Jet Charter</span>
+                    </label>
+                    <label class="radio-option">
+                        <input name="leasing_type" type="radio" value="group_charter">
+                        <span>Group Air Charter</span>
+                    </label>
+                    <label class="radio-option">
+                        <input name="leasing_type" type="radio" value="aircraft_leasing">
+                        <span>Aircraft Leasing</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h4>Contact Information</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="leasing_name">Your Name *</label>
+                        <input id="leasing_name" name="name" type="text" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="leasing_company">Company</label>
+                        <input id="leasing_company" name="company" type="text">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="leasing_email">Email *</label>
+                        <input id="leasing_email" name="email" type="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="leasing_telephone">Telephone *</label>
+                        <input id="leasing_telephone" name="telephone" type="tel" required>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-section">
+                <h4>Requirements</h4>
+                <div class="form-group">
+                    <label for="requirements">Your Requirements *</label>
+                    <textarea id="requirements" name="requirements" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="duration">Duration</label>
+                    <input id="duration" name="duration" type="text">
+                </div>
+            </div>
+            
+            <div class="form-actions" style="text-align: center;">
+                <button type="submit" class="btn-submit">Submit Inquiry</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <script>
@@ -1101,6 +1111,7 @@ document.addEventListener('DOMContentLoaded', function() {
     display: none;
     position: fixed;
     z-index: 1000;
+    max-width: 1200px;
     left: 0;
     top: 0;
     width: 100%;
@@ -1116,7 +1127,7 @@ document.addEventListener('DOMContentLoaded', function() {
     padding: 30px;
     border: 1px solid #888;
     width: 90%;
-    max-width: 700px;
+    max-width: 1200px;
     border-radius: 8px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     position: relative;
