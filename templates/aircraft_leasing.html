@@ -444,17 +444,18 @@ document.addEventListener('DOMContentLoaded', function() {
     font-weight: 500;
   }
   
-  /* Hero Section */
-  .leasing-hero {
-    position: relative;
-    height: 70vh;
-    min-height: 500px;
-    background: url('{% static "assets/images/Website-Banner-12-1024x512.png" %}') no-repeat center center;
-    background-size: cover;
-    display: flex;
-    align-items: center;
-    color: #fff;
-  }
+/* Hero Section */
+.leasing-hero {
+  position: relative;
+  height: 70vh;
+  min-height: 500px;
+  background: url('{% static "assets/images/Website-Banner-12-1024x512.png" %}') no-repeat center center;
+  background-size: cover;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* Aligns content to the right */
+  color: #fff;
+}
   
   .hero-overlay {
     position: absolute;
