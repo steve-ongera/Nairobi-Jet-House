@@ -353,6 +353,9 @@ def aircraft_leasing(request):
 def air_cargo(request):
     return render(request, 'air_cargo.html') 
 
+def private_jet_charter(request):
+    return render(request, 'private_jet_charter.html') 
+
 
 from django.contrib.auth import logout
 from django.shortcuts import redirect
