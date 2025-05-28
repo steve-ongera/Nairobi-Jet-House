@@ -147,12 +147,12 @@
               <a href="{% url 'index'%}" class="navbar-link" data-nav-link>Home</a>
             </li>
 
-            <a href="{% url 'private_jet_charter'%}" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem;">
-              Private Jet
-            </a>
+            <a href="{% url 'private_jet_charter'%}" class="navbar-link" data-nav-link style> Private Jet</a>
+             
+         
 
             <li>
-              <a href="{% url 'services'%}" class="navbar-link" data-nav-link>Services</a>
+              <a href="{% url 'services'%}" class="navbar-link" data-nav-link>Group charter</a>
             </li>
 
             <li>
@@ -580,8 +580,12 @@
             </div>
           </li>
         </ul>
+       
+       
+        <a href="{% url 'services' %}">
+            <button class="btn btn-primary">View All services</button>
+        </a>
 
-        <button class="btn btn-primary">View All Packages</button>
       </div>
     </section>
 

@@ -356,6 +356,8 @@ def air_cargo(request):
 def private_jet_charter(request):
     return render(request, 'private_jet_charter.html') 
 
+def group_charter(request):
+    return render(request, 'group_charter.html') 
 
 from django.contrib.auth import logout
 from django.shortcuts import redirect
