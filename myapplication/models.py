@@ -303,3 +303,16 @@ class AircraftLeasingInquiry(models.Model):
     
     def __str__(self):
         return f"Leasing Inquiry #{self.id} - {self.get_leasing_type_display()}"
+    
+
+
+class GroupInquiry(models.Model):
+    group_name = models.CharField(max_length=100)
+    contact_email = models.EmailField()
+    passenger_count = models.PositiveIntegerField()
+    travel_date = models.DateField()
+
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.group_name} - {self.contact_email}"
