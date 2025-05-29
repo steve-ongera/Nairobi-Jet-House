@@ -204,25 +204,109 @@
         - #HERO
       -->
 
-      <section class="hero" id="home">
-        <div class="container">
+      <!-- Hero Section with timed video background -->
+<section class="hero" id="home">
+  <div class="container">
+    <h2 class="h1 hero-title">Travel across hidden lands</h2>
+    <p class="hero-text">
+      Discover the freedom of personalized travel. Nairobi Jet House connects you to Africa, Europe, and beyond with 
+      luxury, safety, and efficiency at the heart of every flight.
+    </p>
+    <div class="btn-group">
+      <a href="{% url 'about-us' %}" class="btn btn-primary">About us</a>
+      <button id="bookNowButton" class="btn btn-primary">Book Now</button>
+    </div>
+  </div>
+  
+  <!-- Video Background Element -->
+  <div class="video-background">
+    <video autoplay muted loop playsinline>
+      <source src="{% static 'assets/videos/jet-taking-off.mp4' %}" type="video/mp4">
+      <!-- Fallback image if video doesn't load -->
+      <img src="{% static 'assets/images/hero-banner.jpg' %}" alt="Private Jet">
+    </video>
+  </div>
+</section>
 
-          <h2 class="h1 hero-title">Travel across hidden lands</h2>
+<style>
+  .hero {
+    position: relative;
+    background-image: url("{% static 'assets/images/hero-banner.jpg' %}");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    background-color: hsla(0, 0%, 0%, 0.7);
+    background-blend-mode: overlay;
+    display: grid;
+    place-items: center;
+    min-height: 600px;
+    text-align: center;
+    padding-top: 125px;
+    overflow: hidden;
+    color: white;
+    transition: background-image 1.5s ease;
+  }
 
-          <p class="hero-text">
-             Discover the freedom of personalized travel. Nairobi Jet House connects you to Africa, Europe, and beyond with 
-             luxury, safety, and efficiency at the heart of every flight.
-          </p>
+  .hero .container {
+    position: relative;
+    z-index: 2;
+  }
 
-          <div class="btn-group">
-            <a href="{% url 'about-us' %}" class="btn btn-primary">About us</a>
+  .video-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 2s ease;
+  }
 
+  .video-background video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 
-            <button id="bookNowButton" class="btn btn-primary">Book Now</button>
-          </div>
+  /* Show video after delay */
+  body.video-active .hero .video-background {
+    opacity: 1;
+  }
 
-        </div>
-      </section>
+  /* Hero styles when video is active */
+  body.video-active .hero {
+    background-image: none;
+    background-color: hsla(0, 0%, 0%, 0.5);
+  }
+
+  @media (max-width: 768px) {
+    .hero {
+      min-height: 500px;
+      padding-top: 100px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const videoBackground = document.querySelector('.video-background');
+    
+    // Preload and start the video immediately (but hidden)
+    if (videoBackground) {
+      const video = videoBackground.querySelector('video');
+      if (video) {
+        video.load();
+        video.play().catch(e => console.log("Video autoplay prevented:", e));
+      }
+    }
+    
+    // Show video after 20 seconds
+    setTimeout(function() {
+      document.body.classList.add('video-active');
+    }, 3000); // 20000 milliseconds = 20 seconds
+  });
+</script>
 
 
 
