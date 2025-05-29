@@ -85,8 +85,18 @@
 
         <a href="{% url 'index'%}" class="logo" style="color: white; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 1.8rem; font-weight: 900; letter-spacing: 1.5px; text-decoration: none; display: inline-flex; align-items: center; gap: 10px;">
           <i class="bi bi-airplane-fill" style="font-size: 1.4em; transform: rotate(45deg); transition: transform 0.4s ease; color: white; margin-right: 2px;"></i>
-          <span style="font-weight: 900; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">NAIROBI JET </span>
+          <span style="font-weight: 900; text-shadow: 0 1px 2px rgba(0,0,0,0.2); white-space: nowrap; display: inline-block;">
+            <span class="logo-text" style="display: inline;">NAIROBI JET HOUSE</span>
+          </span>
         </a>
+
+        <style>
+          @media (max-width: 768px) {
+            .logo-text {
+              display: none !important;
+            }
+          }
+        </style>
         <div class="header-btn-group">
 
           <button class="search-btn" aria-label="Search">
@@ -1472,9 +1482,16 @@ input[type="radio"]:checked + .btn-option {
 
         <a href="{% url 'index'%}" class="logo" style="color: white; font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 1.8rem; font-weight: 900; letter-spacing: 1.5px; text-decoration: none; display: inline-flex; align-items: center; gap: 10px;">
           <i class="bi bi-airplane-fill" style="font-size: 1.4em; transform: rotate(45deg); transition: transform 0.4s ease; color: white; margin-right: 2px;"></i>
-          <span style="font-weight: 900; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">NAIJETS</span>
+          <span class="logo-text" style="font-weight: 900; text-shadow: 0 1px 2px rgba(0,0,0,0.2); white-space: nowrap;">Nairobi Jet House</span>
         </a>
 
+        <style>
+          @media (max-width: 768px) {
+            .logo-text {
+              display: none !important;
+            }
+          }
+        </style>
         <p class="footer-text">
           Nairobi Jet House is your trusted private aviation partner. We offer exceptional charter experiences
           with a focus on safety, luxury, and personalized service across Africa and Europe.
