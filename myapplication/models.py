@@ -340,3 +340,37 @@ class ContactSubmission(models.Model):
         verbose_name = "Contact Submission"
         verbose_name_plural = "Contact Submissions"
         ordering = ['-submitted_at']
+
+
+
+from django.db import models
+from django.utils import timezone
+
+class Inquiry(models.Model):
+    # Contact Information
+    full_name = models.CharField(max_length=100)
+    email = models.EmailField()
+    phone = models.CharField(max_length=20)
+    
+    # Flight Details
+    aircraft_type = models.ForeignKey(
+        'AircraftType', 
+        on_delete=models.SET_NULL, 
+        null=True,
+        related_name='inquiries'
+    )
+    departure = models.CharField(max_length=100)
+    destination = models.CharField(max_length=100)
+    passengers = models.PositiveIntegerField()
+    travel_date = models.DateField()
+    
+    # Metadata
+    submitted_at = models.DateTimeField(default=timezone.now)
+    is_processed = models.BooleanField(default=False)
+    
+    class Meta:
+        verbose_name_plural = "Inquiries"
+        ordering = ['-submitted_at']
+    
+    def __str__(self):
+        return f"Inquiry from {self.full_name} ({self.submitted_at.strftime('%Y-%m-%d')})"
