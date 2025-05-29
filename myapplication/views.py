@@ -1133,4 +1133,43 @@ def submit_leasing_inquiry(request):
     
 
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import authenticate, login
+
+
+@csrf_exempt
+def login_view(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        user = authenticate(username=email, password=password)
+        
+        if user is not None:
+            login(request, user)
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'message': 'Invalid credentials'}, status=400)
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+@csrf_exempt
+def signup_view(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        
+        if User.objects.filter(username=email).exists():
+            return JsonResponse({'success': False, 'message': 'Email already exists'}, status=400)
+            
+        user = User.objects.create_user(
+            username=email,
+            email=email,
+            password=password,
+            first_name=name.split()[0],
+            last_name=' '.join(name.split()[1:]) if ' ' in name else ''
+        )
+        
+        return JsonResponse({'success': True})
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
