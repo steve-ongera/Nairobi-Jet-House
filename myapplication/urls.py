@@ -25,5 +25,6 @@ urlpatterns = [
     path('api/check-email/', views.check_email_availability, name='check_email'),
     path('submit-cargo-request/', views.submit_cargo_request, name='submit_cargo_request'),
     path('submit-leasing-inquiry/', views.submit_leasing_inquiry, name='submit_leasing_inquiry'),
+    path('save-inquiry/', views.save_inquiry, name='save_inquiry'),
     
 ]

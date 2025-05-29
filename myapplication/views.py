@@ -308,6 +308,33 @@ def index(request):
     return render(request, 'index.html', context)
 
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Inquiry  # Assuming you have an Inquiry model
+
+@csrf_exempt  # Only if you're having CSRF issues, otherwise remove this
+def save_inquiry(request):
+    if request.method == 'POST':
+        try:
+            # Create and save the inquiry
+            inquiry = Inquiry(
+                full_name=request.POST.get('fullName'),
+                email=request.POST.get('email'),
+                phone=request.POST.get('phone'),
+                aircraft_type_id=request.POST.get('aircraftType'),
+                departure=request.POST.get('departure'),
+                destination=request.POST.get('destination'),
+                passengers=request.POST.get('passengers'),
+                travel_date=request.POST.get('date')
+            )
+            inquiry.save()
+            
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    return JsonResponse({'success': False, 'error': 'Invalid request method'})
+
+
 # Optional: Add this view for AJAX search functionality
 def search_airports(request):
     """

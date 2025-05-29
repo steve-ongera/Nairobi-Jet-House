@@ -356,6 +356,23 @@ class ContactSubmissionAdmin(admin.ModelAdmin):
     search_fields = ('name', 'email', 'message')
     readonly_fields = ('submitted_at',)
 
+from django.contrib import admin
+from .models import Inquiry
+
+@admin.register(Inquiry)
+class InquiryAdmin(admin.ModelAdmin):
+    list_display = (
+        'full_name', 'email', 'phone', 
+        'aircraft_type', 'departure', 
+        'destination', 'travel_date', 
+        'is_processed', 'submitted_at'
+    )
+    list_filter = ('is_processed', 'aircraft_type', 'travel_date', 'submitted_at')
+    search_fields = ('full_name', 'email', 'phone', 'departure', 'destination')
+    list_editable = ('is_processed',)
+    date_hierarchy = 'travel_date'
+    ordering = ('-submitted_at',)
+
 
 # Custom admin site configuration
 admin.site.site_header = "Private Jet Booking Administration"

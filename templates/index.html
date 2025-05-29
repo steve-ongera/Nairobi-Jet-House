@@ -319,37 +319,32 @@
       <section class="tour-search">
         <div class="container">
 
-          <form action="" class="tour-search-form">
+          <form action="" class="tour-search-form" id="flightInquiryForm">
+    <div class="input-wrapper">
+        <label for="departure" class="input-label">Departure*</label>
+        <input type="text" name="departure" id="departure" required placeholder="Enter Departure" class="input-field">
+    </div>
 
-            <div class="input-wrapper">
-              <label for="destination" class="input-label">Departure*</label>
+    <div class="input-wrapper">
+        <label for="destination" class="input-label">Destination*</label>
+        <input type="text" name="destination" id="destination" required placeholder="Destination" class="input-field">
+    </div>
 
-              <input type="text" name="departure" id="departure" required placeholder="Enter Departure"
-                class="input-field">
-            </div>
+    <div class="input-wrapper">
+        <label for="passengers" class="input-label">Passengers*</label>
+        <input type="number" name="passengers" id="passengers" required placeholder="No. of People" class="input-field">
+    </div>
 
-            <div class="input-wrapper">
-              <label for="destination" class="input-label">Destination*</label>
+    <div class="input-wrapper">
+        <label for="date" class="input-label">Date*</label>
+        <input type="date" name="date" id="date" required class="input-field">
+    </div>
 
-              <input type="text" name="destination" id="destination" required placeholder=" Destinantion" class="input-field">
-            </div>
+    <button type="submit" class="btn btn-secondary">Inquire now</button>
+</form>
 
-            <div class="input-wrapper">
-              <label for="checkin" class="input-label">Passengers*</label>
-
-             <input type="number" name="people" id="people" required placeholder="No.of People" class="input-field">
-            </div>
-
-            <div class="input-wrapper">
-              <label for="date" class="input-label">Date*</label>
-
-              <input type="date" name="date" id="date" required class="input-field">
-            </div>
-
-            <button type="submit" class="btn btn-secondary">Inquire now</button>
-
-          </form>
-
+      
+      
         </div>
       </section>
 
@@ -1307,6 +1302,298 @@ function getCookie(name) {
   return cookieValue;
 }
 
+</script>
+
+
+<!-- Add this modal HTML at the bottom of your body, before the scripts -->
+<div id="inquiryModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close-modal">&times;</span>
+    <h3>Complete Your Aircraft Inquiry</h3>
+    <form id="inquiryForm" class="inquiry-form">
+      <div class="input-wrapper">
+        <label for="fullName" class="input-label">Full Name*</label>
+        <input type="text" name="fullName" id="fullName" required placeholder="Your Full Name" class="input-field">
+      </div>
+      
+      <div class="input-wrapper">
+        <label for="email" class="input-label">Email*</label>
+        <input type="email" name="email" id="email" required placeholder="Your Email" class="input-field">
+      </div>
+      
+      <div class="input-wrapper">
+        <label for="phone" class="input-label">Phone Number*</label>
+        <input type="tel" name="phone" id="phone" required placeholder="Your Phone Number" class="input-field">
+      </div>
+      
+      <div class="input-wrapper">
+        <label for="aircraftType" class="input-label">Preferred Aircraft*</label>
+        <select name="aircraftType" id="aircraftType" required class="input-field">
+          <option value="">Select Aircraft</option>
+          {% for aircraft in aircraft_types %}
+          <option value="{{ aircraft.id }}">{{ aircraft.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      <!-- Hidden fields to store the initial form data -->
+      <input type="hidden" name="departure" id="modalDeparture">
+      <input type="hidden" name="destination" id="modalDestination">
+      <input type="hidden" name="passengers" id="modalPassengers">
+      <input type="hidden" name="date" id="modalDate">
+      
+      <button type="submit" class="btn btn-secondary">Submit Inquiry</button>
+    </form>
+    
+    <!-- Success message (initially hidden) -->
+    <div id="successMessage" style="display:none;">
+      <h3>Congratulations!</h3>
+      <p>Your inquiry has been successfully submitted. Our team will contact you within 5 minutes.</p>
+      <button class="btn btn-secondary close-success">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add this CSS in your head or CSS file -->
+<style>
+/* Modern Modal Styling */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1050;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.6);
+  backdrop-filter: blur(3px);
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 5% auto;
+  padding: 30px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  position: relative;
+  border: 1px solid #e1e1e1;
+}
+
+.modal-content h3 {
+  color: #2c3e50;
+  font-size: 24px;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  font-weight: 600;
+}
+
+.close-modal, .close-success {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 28px;
+  color: #aaa;
+  cursor: pointer;
+  transition: color 0.2s;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.close-modal:hover, .close-success:hover {
+  color: #333;
+}
+
+.inquiry-form .input-wrapper {
+  margin-bottom: 20px;
+}
+
+.inquiry-form .input-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #555;
+  font-size: 14px;
+}
+
+.inquiry-form .input-field {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 15px;
+  transition: border 0.3s;
+  box-sizing: border-box;
+}
+
+.inquiry-form .input-field:focus {
+  border-color: #3498db;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
+}
+
+.inquiry-form select.input-field {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 12px 24px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.3s;
+  border: none;
+}
+
+.btn-secondary {
+  background-color: #3498db;
+  color: white;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.btn-secondary:hover {
+  background-color: #2980b9;
+  transform: translateY(-1px);
+}
+
+#successMessage {
+  text-align: center;
+  padding: 20px;
+}
+
+#successMessage h3 {
+  color: #27ae60;
+  border-bottom: none;
+  margin-bottom: 15px;
+}
+
+#successMessage p {
+  color: #555;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .modal-content {
+    margin: 10% auto;
+    width: 95%;
+    padding: 20px;
+  }
+}
+</style>
+
+<!-- Add this JavaScript before your closing body tag -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+// Get the modal and form elements
+  const modal = document.getElementById('inquiryModal');
+  const inquiryForm = document.getElementById('inquiryForm');
+  const successMessage = document.getElementById('successMessage');
+  const closeModalElements = document.querySelectorAll('.close-modal, .close-success');
+  
+  // Handle the flight inquiry form submission
+  const flightInquiryForm = document.getElementById('flightInquiryForm');
+  if (flightInquiryForm) {
+    flightInquiryForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Store the form data in the modal's hidden fields
+      document.getElementById('modalDeparture').value = document.getElementById('departure').value;
+      document.getElementById('modalDestination').value = document.getElementById('destination').value;
+      document.getElementById('modalPassengers').value = document.getElementById('passengers').value;
+      document.getElementById('modalDate').value = document.getElementById('date').value;
+      
+      // Show the modal
+      modal.style.display = 'block';
+    });
+  }
+  // Handle the inquiry form submission
+  if (inquiryForm) {
+    inquiryForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Collect form data
+      const formData = new FormData(inquiryForm);
+      
+      // Send data to server
+      fetch('/save-inquiry/', {  // Update this URL to match your Django URL
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken'),  // Ensure CSRF token is included
+          'Accept': 'application/json',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Show success message
+          inquiryForm.style.display = 'none';
+          successMessage.style.display = 'block';
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+    });
+  }
+  
+  // Close modal handlers
+  closeModalElements.forEach(element => {
+    element.addEventListener('click', function() {
+      modal.style.display = 'none';
+      // Reset forms when closing
+      inquiryForm.style.display = 'block';
+      successMessage.style.display = 'none';
+      tourSearchForm.reset();
+    });
+  });
+  
+  // Close modal when clicking outside
+  window.addEventListener('click', function(event) {
+    if (event.target === modal) {
+      modal.style.display = 'none';
+      // Reset forms when closing
+      inquiryForm.style.display = 'block';
+      successMessage.style.display = 'none';
+      tourSearchForm.reset();
+    }
+  });
+  
+  // Function to get CSRF token
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+});
 </script>
 <!-- jQuery first if needed -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
