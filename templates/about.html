@@ -11,15 +11,13 @@
 <section class="about-section">
   <div class="container">
 
-    <div class="about-banner">
-      <img src="{% static 'assets/images/private-jet-classifications-VIP.jpg.webp'%}" alt="Our private jets" class="about-img">
-      
+    <div class="about-banner" style="background-image: url('{% static 'assets/images/private-jet-classifications-VIP.jpg.webp'%}');">
       <div class="about-banner-content">
         <h1 class="banner-title">Elevating Your Travel Experience</h1>
         <p class="about-banner-text">
           Since 2010, Nairobi Jet House has been redefining luxury air travel across Africa and beyond.
         </p>
-        <a href="#contact" class="btn btn-primary">Book Your Flight</a>
+        <a href="{% url 'contact-us'%}" class="btn btn-primary">Contact us</a>
       </div>
     </div>
 
@@ -59,6 +57,56 @@
 
       </div>
 
+      <!-- Mission, Vision, Objectives Section -->
+      <div class="mvp-section">
+        <div class="mvp-grid">
+          <div class="mvp-card">
+            <div class="mvp-icon">
+              <ion-icon name="compass-outline"></ion-icon>
+            </div>
+            <h3 class="mvp-title">Our Vision</h3>
+            <p class="mvp-text">
+              To revolutionize private aviation
+              by making high-end, on demand
+              chartered flights easily
+              accessible, offering unparalleled
+              comfort, flexibility, and
+              exceptional service.
+            </p>
+          </div>
+          
+          <div class="mvp-card">
+            <div class="mvp-icon">
+              <ion-icon name="rocket-outline"></ion-icon>
+            </div>
+            <h3 class="mvp-title">Our Mission</h3>
+            <p class="mvp-text">
+              Our mission is to provide
+              personalized, efficient, and reliable
+              private air travel solutions,
+              connecting our clients to the world
+              in the fastest, most comfortable way
+              possible while delivering exceptional
+              customer service every step of the
+              journey
+            </p>
+          </div>
+          
+          <div class="mvp-card">
+            <div class="mvp-icon">
+              <ion-icon name="flag-outline"></ion-icon>
+            </div>
+            <h3 class="mvp-title">Our Objectives</h3>
+            <ul class="mvp-list">
+              <li>Maintain 100% safety record</li>
+              <li>Expand to 15 African destinations</li>
+              <li>Delight every client with bespoke services</li>
+              <li>Invest in sustainable aviation technology</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <div class="about-detail">
         <h2 class="h2 section-title" style="font-size: 2.5rem; font-weight: 700; color: #1a4b8c; margin-bottom: 1.5rem; position: relative; display: inline-block;">
           Our Story
@@ -66,7 +114,13 @@
         </h2>
         
         <p class="about-text" style="font-size: 1.1rem; line-height: 1.8; color: #555; margin-bottom: 1.5rem; max-width: 1200px;">
-          Founded by aviation enthusiasts, Nairobi Jet House began with a single aircraft and a vision to make private air travel more accessible in East Africa. Today, we operate a growing fleet serving corporate clients, celebrities, and discerning travelers across the continent.
+          Nairobi Jethouse is a Kenyan based Aircraft Charter specialist broker
+          located in Nairobi Kenya chartering flights for the aviation industry. We
+          are a startup company striving to create establishmentin most major in
+          commercial and aviation hubs through strategic partnerships and
+          venture capital. The venture seeks to establish partnerships in various
+          capacities and provide clients with superbly competitive pricing while
+          ensuring they receive the best services at their convenience.
         </p>
         
         <p class="about-text" style="font-size: 1.1rem; line-height: 1.8; color: #555; margin-bottom: 2rem; max-width: 1200px;">
@@ -198,33 +252,29 @@
     border-radius: 16px;
     overflow: hidden;
     height: 600px;
-  }
-  
-  .about-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: flex-end;
   }
   
   .about-banner-content {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    width: 100%;
     background: linear-gradient(transparent, rgba(0,0,0,0.8));
     padding: 60px;
     color: white;
   }
   
   .banner-title {
-    font-size: 3.5rem;
+    font-size: clamp(2rem, 5vw, 3.5rem);
     font-weight: 700;
     margin-bottom: 20px;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
   }
   
   .about-banner-text {
-    font-size: 1.3rem;
+    font-size: clamp(1rem, 2vw, 1.3rem);
     max-width: 600px;
     margin-bottom: 30px;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
@@ -269,6 +319,70 @@
     font-size: 48px;
     color: var(--primary);
     margin-bottom: 20px;
+  }
+  
+  /* MVP Section Styles */
+  .mvp-section {
+    margin: 80px 0;
+  }
+  
+  .mvp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+  }
+  
+  .mvp-card {
+    background: white;
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+  
+  .mvp-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+  }
+  
+  .mvp-icon {
+    font-size: 48px;
+    color: #3498db;
+    margin-bottom: 20px;
+  }
+  
+  .mvp-title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #1a4b8c;
+  }
+  
+  .mvp-text {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: #555;
+  }
+  
+  .mvp-list {
+    text-align: left;
+    list-style: none;
+    padding-left: 0;
+  }
+  
+  .mvp-list li {
+    position: relative;
+    padding-left: 25px;
+    margin-bottom: 10px;
+    font-size: 1.05rem;
+    color: #555;
+  }
+  
+  .mvp-list li:before {
+    content: "✓";
+    color: #3498db;
+    position: absolute;
+    left: 0;
   }
   
   /* Partners Section Styles */
@@ -373,6 +487,20 @@
   
   .team-text {
     padding: 0 20px;
+  }
+
+  @media (max-width: 768px) {
+    .about-banner {
+      height: 400px;
+    }
+    
+    .about-banner-content {
+      padding: 30px;
+    }
+    
+    .mvp-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
 
