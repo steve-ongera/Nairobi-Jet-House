@@ -374,7 +374,17 @@ def air_cargo(request):
     return render(request, 'air_cargo.html') 
 
 def private_jet_charter(request):
-    return render(request, 'private_jet_charter.html') 
+    # Get all airports for the dropdown, ordered by name for better UX
+    airports = Airport.objects.all().order_by('name')
+    
+    # Optional: Get aircraft types if you want to show them in the form later
+    aircraft_types = AircraftType.objects.all().order_by('name')
+    
+    context = {
+        'airports': airports,
+        'aircraft_types': aircraft_types,
+    }
+    return render(request, 'private_jet_charter.html', context) 
 
 from django.views.decorators.csrf import csrf_protect
 from django.shortcuts import render, redirect
