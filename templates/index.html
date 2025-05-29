@@ -1342,7 +1342,7 @@ function getCookie(name) {
       <input type="hidden" name="passengers" id="modalPassengers">
       <input type="hidden" name="date" id="modalDate">
       
-      <button type="submit" class="btn btn-secondary">Submit Inquiry</button>
+      <button type="submit" class="btn btn-primary">Submit Inquiry</button>
     </form>
     
     <!-- Success message (initially hidden) -->
@@ -1356,49 +1356,47 @@ function getCookie(name) {
 
 <!-- Add this CSS in your head or CSS file -->
 <style>
-/* Modern Modal Styling */
+/* Modal Styles Matching Your Design System */
 .modal {
   display: none;
   position: fixed;
-  z-index: 1050;
+  z-index: 1000;
   left: 0;
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.6);
-  backdrop-filter: blur(3px);
-  animation: fadeIn 0.3s ease;
+  background-color: rgba(0, 0, 0, 0.5);
+  overflow: auto;
 }
 
 .modal-content {
   background-color: #fff;
   margin: 5% auto;
-  padding: 30px;
-  border-radius: 12px;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   width: 90%;
-  max-width: 600px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  position: relative;
-  border: 1px solid #e1e1e1;
+  max-width: 700px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-content h3 {
-  color: #2c3e50;
-  font-size: 24px;
-  margin-bottom: 25px;
-  padding-bottom: 15px;
+  padding: 10px 0;
   border-bottom: 1px solid #eee;
-  font-weight: 600;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  color: #333;
 }
 
 .close-modal, .close-success {
   position: absolute;
   top: 20px;
   right: 20px;
-  font-size: 28px;
+  font-size: 1.5rem;
   color: #aaa;
   cursor: pointer;
-  transition: color 0.2s;
   background: none;
   border: none;
   padding: 0;
@@ -1408,35 +1406,39 @@ function getCookie(name) {
   color: #333;
 }
 
-.inquiry-form .input-wrapper {
-  margin-bottom: 20px;
+.inquiry-form {
+  padding: 0;
+  overflow-y: auto;
+  flex-grow: 1;
 }
 
-.inquiry-form .input-label {
+.input-wrapper {
+  margin-bottom: 15px;
+}
+
+.input-label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
   font-weight: 500;
   color: #555;
-  font-size: 14px;
 }
 
-.inquiry-form .input-field {
+.input-field {
   width: 100%;
-  padding: 12px 15px;
+  padding: 10px 12px;
   border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 15px;
-  transition: border 0.3s;
+  border-radius: 4px;
+  font-size: 14px;
   box-sizing: border-box;
 }
 
-.inquiry-form .input-field:focus {
-  border-color: #3498db;
+.input-field:focus {
+  border-color: #007bff;
   outline: none;
-  box-shadow: 0 0 0 3px rgba(52,152,219,0.1);
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
-.inquiry-form select.input-field {
+#aircraftType {
   appearance: none;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
@@ -1444,37 +1446,14 @@ function getCookie(name) {
   background-size: 16px;
 }
 
-.btn {
-  display: inline-block;
-  padding: 12px 24px;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 16px;
-  cursor: pointer;
-  text-align: center;
-  transition: all 0.3s;
-  border: none;
-}
-
-.btn-secondary {
-  background-color: #3498db;
-  color: white;
-  width: 100%;
-  margin-top: 10px;
-}
-
-.btn-secondary:hover {
-  background-color: #2980b9;
-  transform: translateY(-1px);
-}
 
 #successMessage {
   text-align: center;
-  padding: 20px;
+  padding: 20px 0;
 }
 
 #successMessage h3 {
-  color: #27ae60;
+  color: #28a745;
   border-bottom: none;
   margin-bottom: 15px;
 }
@@ -1482,12 +1461,11 @@ function getCookie(name) {
 #successMessage p {
   color: #555;
   margin-bottom: 20px;
-  line-height: 1.6;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+#successMessage .btn {
+  width: auto;
+  padding: 8px 20px;
 }
 
 /* Responsive adjustments */
@@ -1495,11 +1473,14 @@ function getCookie(name) {
   .modal-content {
     margin: 10% auto;
     width: 95%;
-    padding: 20px;
+    padding: 15px;
+  }
+  
+  .modal-content h3 {
+    font-size: 1.3rem;
   }
 }
 </style>
-
 <!-- Add this JavaScript before your closing body tag -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
