@@ -5,6 +5,14 @@
 {% block description %}Customized aircraft leasing services including dry lease, wet lease, ACMI, and sale-leaseback options for African aviation operators.{% endblock %}
 
 {% block content %}
+<div class="message-container" id="system-messages">
+    {% for message in messages %}
+    <div class="alert-message alert-{{ message.tags }}">
+        {{ message }}
+        <span class="close-message">&times;</span>
+    </div>
+    {% endfor %}
+</div>
 <nav aria-label="breadcrumb" class="breadcrumb-wrapper">
   <div class="container">
     <ol class="breadcrumb">

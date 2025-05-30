@@ -5,6 +5,14 @@
 {% block description %}Premium group air charter services for sports teams, corporate retreats, weddings, and large parties. Experience luxury group travel with our spacious aircraft.{% endblock %}
 
 {% block content %}
+<div class="message-container" id="system-messages">
+    {% for message in messages %}
+    <div class="alert-message alert-{{ message.tags }}">
+        {{ message }}
+        <span class="close-message">&times;</span>
+    </div>
+    {% endfor %}
+  </div>
 <nav aria-label="breadcrumb" class="breadcrumb-nav">
   <div class="container">
     <ol class="breadcrumb">

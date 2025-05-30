@@ -5,6 +5,14 @@
 {% block description %}Comprehensive air cargo services including charter freight, scheduled cargo, perishable transport, and logistics solutions across Africa and beyond.{% endblock %}
 
 {% block content %}
+<div class="message-container" id="system-messages">
+    {% for message in messages %}
+    <div class="alert-message alert-{{ message.tags }}">
+        {{ message }}
+        <span class="close-message">&times;</span>
+    </div>
+    {% endfor %}
+</div>
 
   
 <link rel="stylesheet" href="{% static 'assets/css/aircargo.css' %}">
