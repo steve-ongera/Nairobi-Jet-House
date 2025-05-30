@@ -1174,7 +1174,10 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login
-
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
 
 @csrf_exempt
 def login_view(request):
@@ -1187,6 +1190,7 @@ def login_view(request):
             
             # Validate required fields
             if not email or not password:
+                messages.error(request, 'Email and password are required')
                 return JsonResponse({
                     'success': False, 
                     'message': 'Email and password are required'
@@ -1197,24 +1201,29 @@ def login_view(request):
             
             if user is not None:
                 login(request, user)
+                messages.success(request, f'Welcome back, {user.first_name or user.username}! You have successfully logged in.')
                 return JsonResponse({'success': True})
             else:
+                messages.error(request, 'Invalid email or password. Please try again.')
                 return JsonResponse({
                     'success': False, 
                     'message': 'Invalid credentials'
                 }, status=400)
                 
         except json.JSONDecodeError:
+            messages.error(request, 'Invalid data format received')
             return JsonResponse({
                 'success': False, 
                 'message': 'Invalid JSON data'
             }, status=400)
         except Exception as e:
+            messages.error(request, 'An unexpected error occurred. Please try again.')
             return JsonResponse({
                 'success': False, 
                 'message': 'Server error occurred'
             }, status=500)
     
+    messages.error(request, 'Invalid request method')
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
 
