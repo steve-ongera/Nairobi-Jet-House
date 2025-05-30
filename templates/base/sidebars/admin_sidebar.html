@@ -8,110 +8,171 @@
 
     <ul class="sidebar-nav" id="sidebar-nav">
 
-        <!-- Flight Operations Dashboard -->
+        <!-- Dashboard -->
         <li class="nav-item">
             <a class="nav-link" href="#" style="border-left: 3px solid #1a76d1;">
                 <i class="bi bi-speedometer2" style="color: #1a76d1;"></i>
-                <span>Flight Operations Dashboard</span>
+                <span>Flight  Dashboard</span>
             </a>
         </li>
 
-        <!-- Client Management -->
+        <!-- User Management -->
         <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#client-nav" data-bs-toggle="collapse" href="#">
+            <a class="nav-link collapsed" data-bs-target="#users-nav" data-bs-toggle="collapse" href="#">
                 <i class="bi bi-people" style="color: #1a76d1;"></i>
-                <span>Client Management</span>
+                <span>User Management</span>
                 <i class="bi bi-chevron-down ms-auto"></i>
             </a>
-            <ul id="client-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+            <ul id="users-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
                 <li>
                     <a href="#">
-                        <i class="bi bi-person-plus"></i> New Client Registration
+                        <i class="bi bi-person"></i> Clients
                     </a>
                 </li>
                 <li>
                     <a href="#">
-                        <i class="bi bi-card-checklist"></i> Client Profiles
+                        <i class="bi bi-airplane"></i> Aircraft Owners
                     </a>
                 </li>
                 <li>
                     <a href="#">
-                        <i class="bi bi-passport"></i> VIP Members
+                        <i class="bi bi-person-badge"></i> Booking Agents
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="bi bi-shield-lock"></i> Administrators
                     </a>
                 </li>
             </ul>
         </li>
 
-        <!-- Flight Scheduling -->
+        <!-- Aircraft Management -->
         <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#flight-nav" data-bs-toggle="collapse" href="#">
-                <i class="bi bi-calendar-check" style="color: #1a76d1;"></i>
-                <span>Flight Scheduling</span>
-                <i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="flight-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-                <li>
-                    <a href="#">
-                        <i class="bi bi-plus-circle"></i> New Charter Booking
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        <i class="bi bi-list-ul"></i> Today's Flights
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        <i class="bi bi-globe"></i> Flight Routes
-                    </a>
-                </li>
-            </ul>
-        </li>
-
-        <!-- Billing & Payments -->
-        <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#billing-nav" data-bs-toggle="collapse" href="#">
-                <i class="bi bi-cash-stack" style="color: #1a76d1;"></i>
-                <span>Billing & Payments</span>
-                <i class="bi bi-chevron-down ms-auto"></i>
-            </a>
-            <ul id="billing-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-                <li>
-                    <a href="#">
-                        <i class="bi bi-credit-card"></i> Process Payment
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        <i class="bi bi-file-earmark-text"></i> Invoices
-                    </a>
-                </li>
-                <li>
-                    <a href="#">
-                        <i class="bi bi-graph-up"></i> Revenue Reports
-                    </a>
-                </li>
-            </ul>
-        </li>
-
-        <!-- Fleet Management -->
-        <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#fleet-nav" data-bs-toggle="collapse" href="#">
+            <a class="nav-link collapsed" data-bs-target="#aircraft-nav" data-bs-toggle="collapse" href="#">
                 <i class="bi bi-airplane" style="color: #1a76d1;"></i>
-                <span>Fleet Management</span>
+                <span>Aircraft Management</span>
                 <i class="bi bi-chevron-down ms-auto"></i>
             </a>
-            <ul id="fleet-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-                <li><a href="#"><i class="bi bi-airplane-engines"></i> Aircraft Inventory</a></li>
-                <li><a href="#"><i class="bi bi-tools"></i> Maintenance</a></li>
-                <li><a href="#"><i class="bi bi-fuel-pump"></i> Fuel Management</a></li>
-                <li><a href="#"><i class="bi bi-exclamation-triangle"></i> Service Alerts</a></li>
-                <li><a href="#"><i class="bi bi-tags"></i> Aircraft Categories</a></li>
+            <ul id="aircraft-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+                <li>
+                    <a href="#">
+                        <i class="bi bi-airplane-engines"></i> All Aircraft
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="bi bi-tags"></i> Aircraft Types
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="bi bi-calendar-check"></i> Availability
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="bi bi-geo-alt"></i> Live Tracking
+                    </a>
+                </li>
             </ul>
         </li>
 
-        <!-- Company Administration -->
-        <li class="nav-heading" style="color: #1a76d1;">Company Administration</li>
+        <!-- Bookings & Flights -->
+        <li class="nav-item">
+            <a class="nav-link collapsed" data-bs-target="#bookings-nav" data-bs-toggle="collapse" href="#">
+                <i class="bi bi-calendar-check" style="color: #1a76d1;"></i>
+                <span>Bookings & Flights</span>
+                <i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="bookings-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+                <li>
+                    <a href="#">
+                        <i class="bi bi-journal-text"></i> All Bookings
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="bi bi-signpost-split"></i> Flight Legs
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="bi bi-plus-circle"></i> New Booking
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="bi bi-pin-map"></i> Airports
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <!-- Financial Management -->
+        <li class="nav-item">
+            <a class="nav-link collapsed" data-bs-target="#finance-nav" data-bs-toggle="collapse" href="#">
+                <i class="bi bi-cash-stack" style="color: #1a76d1;"></i>
+                <span>Financial Management</span>
+                <i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="finance-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+                <li>
+                    <a href="#">
+                        <i class="bi bi-currency-dollar"></i> Pricing Rules
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="bi bi-wallet2"></i> Owner Payouts
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="bi bi-percent"></i> Agent Commissions
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="bi bi-graph-up"></i> Financial Reports
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <!-- Requests & Inquiries -->
+        <li class="nav-item">
+            <a class="nav-link collapsed" data-bs-target="#requests-nav" data-bs-toggle="collapse" href="#">
+                <i class="bi bi-envelope" style="color: #1a76d1;"></i>
+                <span>Requests & Inquiries</span>
+                <i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="requests-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+                <li>
+                    <a href="#">
+                        <i class="bi bi-question-circle"></i> Flight Inquiries
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="bi bi-box-seam"></i> Cargo Requests
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="bi bi-file-earmark-text"></i> Leasing Inquiries
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="bi bi-chat-left-text"></i> Contact Submissions
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        <!-- System Administration -->
+        <li class="nav-heading" style="color: #1a76d1;">System Administration</li>
 
         <li class="nav-item">
             <a class="nav-link collapsed" href="#">
@@ -123,7 +184,7 @@
         <li class="nav-item">
             <a class="nav-link collapsed" href="#">
                 <i class="bi bi-gear" style="color: #1a76d1;"></i>
-                <span>User Manual</span>
+                <span>System Settings</span>
             </a>
         </li>
 
@@ -138,7 +199,7 @@
         </li>
 
         <li class="nav-item">
-            <a class="nav-link collapsed" href="#">
+            <a class="nav-link collapsed" href="{% url 'logout' %}">
                 <i class="bi bi-box-arrow-right"></i>
                 <span>Logout</span>
             </a>
