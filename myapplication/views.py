@@ -1217,24 +1217,64 @@ def login_view(request):
     
     return JsonResponse({'error': 'Invalid request method'}, status=405)
 
+
+import json
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import get_user_model
+
+# Get your custom User model
+User = get_user_model()
+
 @csrf_exempt
 def signup_view(request):
     if request.method == 'POST':
-        name = request.POST.get('name')
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        
-        if User.objects.filter(username=email).exists():
-            return JsonResponse({'success': False, 'message': 'Email already exists'}, status=400)
+        try:
+            # Parse JSON data from request body
+            data = json.loads(request.body)
+            name = data.get('name')
+            email = data.get('email')
+            password = data.get('password')
             
-        user = User.objects.create_user(
-            username=email,
-            email=email,
-            password=password,
-            first_name=name.split()[0],
-            last_name=' '.join(name.split()[1:]) if ' ' in name else ''
-        )
-        
-        return JsonResponse({'success': True})
-    return JsonResponse({'error': 'Invalid request'}, status=400)
-
+            # Validate required fields
+            if not name or not email or not password:
+                return JsonResponse({
+                    'success': False, 
+                    'message': 'Name, email, and password are required'
+                }, status=400)
+            
+            # Check if user already exists (check both username and email)
+            if User.objects.filter(username=email).exists() or User.objects.filter(email=email).exists():
+                return JsonResponse({
+                    'success': False, 
+                    'message': 'Email already exists'
+                }, status=400)
+            
+            # Split name safely
+            name_parts = name.strip().split()
+            first_name = name_parts[0] if name_parts else ''
+            last_name = ' '.join(name_parts[1:]) if len(name_parts) > 1 else ''
+            
+            # Create user with your custom User model
+            user = User.objects.create_user(
+                username=email,  # Use email as username
+                email=email,
+                password=password,
+                first_name=first_name,
+                last_name=last_name
+            )
+            
+            return JsonResponse({'success': True})
+            
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'success': False, 
+                'message': 'Invalid JSON data'
+            }, status=400)
+        except Exception as e:
+            return JsonResponse({
+                'success': False, 
+                'message': f'Server error: {str(e)}'
+            }, status=500)
+    
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
