@@ -1294,3 +1294,108 @@ def signup_view(request):
     
     messages.error(request, 'Invalid request method')
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+
+
+from django.shortcuts import render
+from django.utils import timezone
+from django.db.models import Count, Sum, Q
+from datetime import timedelta
+from .models import (
+    User, Aircraft, Booking, FlightLeg, 
+    Availability, AircraftTracking, OwnerPayout,
+    Inquiry, AirCargoRequest, AircraftLeasingInquiry
+)
+import json
+
+def admin_dashboard(request):
+    if not request.user.is_authenticated or request.user.user_type != 'admin':
+        return redirect('login')
+    
+    # Date calculations
+    today = timezone.now().date()
+    thirty_days_ago = today - timedelta(days=30)
+    
+    # User statistics
+    total_clients = User.objects.filter(user_type='client').count()
+    total_owners = User.objects.filter(user_type='owner').count()
+    total_agents = User.objects.filter(user_type='agent').count()
+    
+    # Aircraft statistics
+    total_aircraft = Aircraft.objects.count()
+    active_aircraft = Aircraft.objects.filter(is_active=True).count()
+    
+    # Booking statistics
+    total_bookings = Booking.objects.count()
+    today_bookings = Booking.objects.filter(
+        flight_legs__departure_datetime__date=today
+    ).distinct().count()
+    monthly_revenue = Booking.objects.filter(
+        created_at__gte=thirty_days_ago
+    ).aggregate(total=Sum('total_price'))['total'] or 0
+    
+    # Booking status breakdown
+    booking_status = Booking.objects.values('status').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # Recent bookings
+    recent_bookings = Booking.objects.select_related(
+        'client', 'aircraft', 'aircraft__aircraft_type'
+    ).prefetch_related('flight_legs').order_by('-created_at')[:10]
+    
+    # Aircraft type distribution
+    aircraft_types = AircraftType.objects.annotate(
+        count=Count('aircraft')
+    ).order_by('-count')[:5]
+    
+    # Revenue trends (last 7 days)
+    revenue_data = []
+    date_labels = []
+    for i in range(6, -1, -1):
+        date = today - timedelta(days=i)
+        date_labels.append(date.strftime('%b %d'))
+        daily_revenue = Booking.objects.filter(
+            flight_legs__departure_datetime__date=date
+        ).aggregate(total=Sum('total_price'))['total'] or 0
+        revenue_data.append(float(daily_revenue))
+    
+    # Inquiry statistics
+    recent_inquiries = Inquiry.objects.select_related(
+        'aircraft_type'
+    ).order_by('-submitted_at')[:5]
+    
+    # Aircraft locations
+    active_flights = AircraftTracking.objects.select_related(
+        'aircraft', 'aircraft__aircraft_type'
+    ).order_by('-timestamp')[:5]
+    
+    # Payment method breakdown
+    payment_methods = {
+        'Credit Card': 65,
+        'Bank Transfer': 20,
+        'Mobile Money': 10,
+        'Cash': 5
+    }
+    
+    context = {
+        'total_clients': total_clients,
+        'total_owners': total_owners,
+        'total_agents': total_agents,
+        'total_aircraft': total_aircraft,
+        'active_aircraft': active_aircraft,
+        'total_bookings': total_bookings,
+        'today_bookings': today_bookings,
+        'monthly_revenue': monthly_revenue,
+        'booking_status': booking_status,
+        'recent_bookings': recent_bookings,
+        'aircraft_types': aircraft_types,
+        'revenue_labels': json.dumps(date_labels),
+        'revenue_data': json.dumps(revenue_data),
+        'payment_methods': payment_methods,
+        'recent_inquiries': recent_inquiries,
+        'active_flights': active_flights,
+    }
+    
+    return render(request, 'dashboard/admin_dashboard.html', context)

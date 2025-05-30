@@ -1,70 +1,74 @@
 {% load static %}
-<!-- ======= Clinic Reception Sidebar ======= -->
+<!-- ======= SkyLux Executive Jets Sidebar ======= -->
 <aside id="sidebar" class="sidebar">
     <div class="sidebar-brand text-center py-3 bg-white">
-        <img src="{% static 'assets/img/mediclinic-logo.png' %}" alt="Clinic Logo" style="height: 40px;">
-        <h6 class="mt-2 text-uppercase" style="color: #1a76d1; font-weight: 600;">CLINIC RECEPTION PORTAL</h6>
+        <img src="{% static 'assets/img/skylux-logo.png' %}" alt="SkyLux Logo" style="height: 40px;">
+        <h6 class="mt-2 text-uppercase" style="color: #1a76d1; font-weight: 600;">SKYLUX EXECUTIVE JETS</h6>
     </div>
 
     <ul class="sidebar-nav" id="sidebar-nav">
 
-        <!-- Reception Dashboard -->
+        <!-- Flight Operations Dashboard -->
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'receptionist_dashboard'%}" style="border-left: 3px solid #1a76d1;">
+            <a class="nav-link" href="#" style="border-left: 3px solid #1a76d1;">
                 <i class="bi bi-speedometer2" style="color: #1a76d1;"></i>
-                <span>Reception Dashboard</span>
+                <span>Flight Operations Dashboard</span>
             </a>
         </li>
 
-        <!-- Patient Management -->
+        <!-- Client Management -->
         <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#patient-nav" data-bs-toggle="collapse" href="#">
+            <a class="nav-link collapsed" data-bs-target="#client-nav" data-bs-toggle="collapse" href="#">
                 <i class="bi bi-people" style="color: #1a76d1;"></i>
-                <span>Patient Management</span>
+                <span>Client Management</span>
                 <i class="bi bi-chevron-down ms-auto"></i>
             </a>
-            <ul id="patient-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+            <ul id="client-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
                 <li>
-                    <a href="{% url 'patients-create'%}">
-                        <i class="bi bi-person-plus"></i> New Patient Registration
+                    <a href="#">
+                        <i class="bi bi-person-plus"></i> New Client Registration
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'patients-list'%}">
-                        <i class="bi bi-card-checklist"></i> Patient Records
+                    <a href="#">
+                        <i class="bi bi-card-checklist"></i> Client Profiles
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'all_medical_records'%}">
-                        <i class="bi bi-file-medical"></i> Medical History
+                    <a href="#">
+                        <i class="bi bi-passport"></i> VIP Members
                     </a>
                 </li>
             </ul>
         </li>
 
-        <!-- Appointment Scheduling -->
+        <!-- Flight Scheduling -->
         <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#appointment-nav" data-bs-toggle="collapse" href="#">
+            <a class="nav-link collapsed" data-bs-target="#flight-nav" data-bs-toggle="collapse" href="#">
                 <i class="bi bi-calendar-check" style="color: #1a76d1;"></i>
-                <span>Appointments</span>
+                <span>Flight Scheduling</span>
                 <i class="bi bi-chevron-down ms-auto"></i>
             </a>
-            <ul id="appointment-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+            <ul id="flight-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
                 <li>
-                    <a href="{% url 'new_consultation'%}">
-                        <i class="bi bi-plus-circle"></i> Schedule Appointment
+                    <a href="#">
+                        <i class="bi bi-plus-circle"></i> New Charter Booking
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'doctor_calendar_view'%}">
-                        <i class="bi bi-list-ul"></i> Today's Appointments
+                    <a href="#">
+                        <i class="bi bi-list-ul"></i> Today's Flights
                     </a>
                 </li>
-                
+                <li>
+                    <a href="#">
+                        <i class="bi bi-globe"></i> Flight Routes
+                    </a>
+                </li>
             </ul>
         </li>
 
-        <!-- Billing -->
+        <!-- Billing & Payments -->
         <li class="nav-item">
             <a class="nav-link collapsed" data-bs-target="#billing-nav" data-bs-toggle="collapse" href="#">
                 <i class="bi bi-cash-stack" style="color: #1a76d1;"></i>
@@ -72,55 +76,52 @@
                 <i class="bi bi-chevron-down ms-auto"></i>
             </a>
             <ul id="billing-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-             
                 <li>
-                    <a href="{% url 'create_sale_from_consultation'%}">
+                    <a href="#">
                         <i class="bi bi-credit-card"></i> Process Payment
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'medicine_sales_list'%}">
-                        <i class="bi bi-file-earmark-text"></i> Payment  Records
+                    <a href="#">
+                        <i class="bi bi-file-earmark-text"></i> Invoices
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'otc_sale_list'%}">
-                        <i class="bi bi-file-earmark-text"></i> OTC sales
+                    <a href="#">
+                        <i class="bi bi-graph-up"></i> Revenue Reports
                     </a>
                 </li>
             </ul>
         </li>
 
-        <!-- Pharmacy -->
+        <!-- Fleet Management -->
         <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#pharmacy-nav" data-bs-toggle="collapse" href="#">
-                <i class="bi bi-capsule" style="color: #1a76d1;"></i>
-                <span>Pharmacy</span>
+            <a class="nav-link collapsed" data-bs-target="#fleet-nav" data-bs-toggle="collapse" href="#">
+                <i class="bi bi-airplane" style="color: #1a76d1;"></i>
+                <span>Fleet Management</span>
                 <i class="bi bi-chevron-down ms-auto"></i>
             </a>
-            <ul id="pharmacy-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-                <li><a href="{% url 'medicine-list'%}"><i class="bi bi-capsule" style="color: #1a76d1;"></i> Medicine Inventory</a></li>
-                <li><a href="{% url 'medicine_sales_list'%}"><i class="bi bi-cash-stack" style="color: #1a76d1;"></i> Pharmacy Sales</a></li>
-                 <li><a href="{% url 'otc_sale_list'%}"><i class="bi bi-cash-stack" style="color: #1a76d1;"></i> Pharmacy Sales(OTC)</a></li>
-                <li><a href="{% url 'medicine_stock_list'%}"><i class="bi bi-exclamation-triangle" style="color: #1a76d1;"></i> Low Stock Alerts</a></li>
-                <li><a href="{% url 'medicine_category_list'%}"><i class="bi bi-tags" style="color: #1a76d1;"></i> Medicine Categories</a></li>
+            <ul id="fleet-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+                <li><a href="#"><i class="bi bi-airplane-engines"></i> Aircraft Inventory</a></li>
+                <li><a href="#"><i class="bi bi-tools"></i> Maintenance</a></li>
+                <li><a href="#"><i class="bi bi-fuel-pump"></i> Fuel Management</a></li>
+                <li><a href="#"><i class="bi bi-exclamation-triangle"></i> Service Alerts</a></li>
+                <li><a href="#"><i class="bi bi-tags"></i> Aircraft Categories</a></li>
             </ul>
         </li>
 
-        <!-- Clinic Administration -->
-        <li class="nav-heading" style="color: #1a76d1;">Clinic Administration</li>
+        <!-- Company Administration -->
+        <li class="nav-heading" style="color: #1a76d1;">Company Administration</li>
 
         <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'clinical_reports'%}">
-                <i class="bi bi-file-earmark-medical" style="color: #1a76d1;"></i>
-                <span>Reports</span>
+            <a class="nav-link collapsed" href="#">
+                <i class="bi bi-file-earmark-bar-graph" style="color: #1a76d1;"></i>
+                <span>Operational Reports</span>
             </a>
         </li>
 
-        
-
         <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'user_manual'%}">
+            <a class="nav-link collapsed" href="#">
                 <i class="bi bi-gear" style="color: #1a76d1;"></i>
                 <span>User Manual</span>
             </a>
@@ -129,17 +130,15 @@
         <!-- Quick Actions -->
         <li class="nav-heading">Quick Actions</li>
 
-        
-
         <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'chat_home'%}">
-                <i class="bi bi-bell"></i>
-                <span>Call Next Patient</span>
+            <a class="nav-link collapsed" href="#">
+                <i class="bi bi-megaphone"></i>
+                <span>Flight Announcement</span>
             </a>
         </li>
 
         <li class="nav-item">
-            <a class="nav-link collapsed" href="{% url 'logout'%}">
+            <a class="nav-link collapsed" href="#">
                 <i class="bi bi-box-arrow-right"></i>
                 <span>Logout</span>
             </a>
@@ -150,14 +149,14 @@
     <!-- Emergency Actions -->
     <div class="sidebar-footer p-3">
         <button class="btn btn-sm btn-danger w-100 mb-2">
-            <i class="bi bi-exclamation-triangle"></i> Emergency Alert
+            <i class="bi bi-exclamation-triangle"></i> Emergency Protocol
         </button>
         <div class="btn-group w-100">
             <button class="btn btn-sm btn-outline-primary">
-                <i class="bi bi-person-lines-fill"></i> Call Doctor
+                <i class="bi bi-telephone"></i> Contact Pilot
             </button>
             <button class="btn btn-sm btn-outline-primary">
-                <i class="bi bi-ambulance"></i> Emergency
+                <i class="bi bi-shield-exclamation"></i> Mayday
             </button>
         </div>
     </div>

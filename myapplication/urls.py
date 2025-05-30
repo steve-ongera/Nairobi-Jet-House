@@ -26,5 +26,9 @@ urlpatterns = [
     path('submit-cargo-request/', views.submit_cargo_request, name='submit_cargo_request'),
     path('submit-leasing-inquiry/', views.submit_leasing_inquiry, name='submit_leasing_inquiry'),
     path('save-inquiry/', views.save_inquiry, name='save_inquiry'),
+
+    #admin application development product 2
+    path('admin-dashboard/' , views.admin_dashboard , name='admin_dashboard'),
+
     
 ]
