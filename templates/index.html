@@ -962,6 +962,7 @@
   </div>
 </div>
 
+
 <!-- Signup Modal -->
 <div id="signupModal" class="auth-modal" style="display: none;">
   <div class="modal-content">
@@ -1537,16 +1538,20 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  // Close modal handlers
-  closeModalElements.forEach(element => {
-    element.addEventListener('click', function() {
-      modal.style.display = 'none';
-      // Reset forms when closing
-      inquiryForm.style.display = 'block';
-      successMessage.style.display = 'none';
+ // Close modal handlers
+closeModalElements.forEach(element => {
+  element.addEventListener('click', function() {
+    modal.style.display = 'none';
+    // Reset forms when closing
+    inquiryForm.style.display = 'block';
+    successMessage.style.display = 'none';
+    
+    // Only reset if the form exists
+    if (tourSearchForm) {
       tourSearchForm.reset();
-    });
+    }
   });
+});
   
   // Close modal when clicking outside
   window.addEventListener('click', function(event) {
@@ -1575,6 +1580,329 @@ document.addEventListener('DOMContentLoaded', function() {
     return cookieValue;
   }
 });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+  // ======================
+  //  Auth Modal Management
+  // ======================
+  const authModals = {
+    login: document.getElementById('loginModal'),
+    signup: document.getElementById('signupModal')
+  };
+
+  const authForms = {
+    login: document.getElementById('loginForm'),
+    signup: document.getElementById('signupForm')
+  };
+
+  // ======================
+  //  Modal Event Listeners
+  // ======================
+  function initAuthModals() {
+    // Open modal triggers
+    document.getElementById('loginBtn')?.addEventListener('click', () => openAuthModal('login'));
+    document.getElementById('signupBtn')?.addEventListener('click', () => openAuthModal('signup'));
+
+    // Close modal handlers
+    document.querySelectorAll('.close-modal').forEach(btn => {
+      btn.addEventListener('click', function() {
+        closeAuthModal(this.closest('.auth-modal').id);
+      });
+    });
+
+    // Switch between login/signup
+    document.getElementById('showSignup')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      switchAuthModal('login', 'signup');
+    });
+
+    document.getElementById('showLogin')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      switchAuthModal('signup', 'login');
+    });
+
+    // Close when clicking outside
+    window.addEventListener('click', (e) => {
+      if (e.target.classList.contains('auth-modal')) {
+        closeAuthModal(e.target.id);
+      }
+    });
+  }
+
+  // ======================
+  //  Modal Core Functions
+  // ======================
+  function openAuthModal(modalType) {
+    const modal = authModals[modalType];
+    if (!modal) {
+      console.error(`Modal ${modalType} not found`);
+      return;
+    }
+
+    // Close any open auth modals first
+    Object.values(authModals).forEach(m => {
+      if (m) m.style.display = 'none';
+    });
+
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    modal.querySelector('input:not([type="hidden"])')?.focus();
+  }
+
+  function closeAuthModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) {
+      console.error(`Modal ${modalId} not found`);
+      return;
+    }
+
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+    resetAuthForm(modalId);
+  }
+
+  function switchAuthModal(fromType, toType) {
+    closeAuthModal(`${fromType}Modal`);
+    openAuthModal(toType);
+  }
+
+  function resetAuthForm(modalId) {
+    if (modalId === 'loginModal') {
+      authForms.login?.reset();
+    } else if (modalId === 'signupModal') {
+      authForms.signup?.reset();
+    }
+  }
+
+  // ======================
+  //  Form Validation
+  // ======================
+  function initFormValidation() {
+    authForms.login?.addEventListener('submit', function(e) {
+      if (!validateLoginForm()) e.preventDefault();
+    });
+
+    authForms.signup?.addEventListener('submit', function(e) {
+      if (!validateSignupForm()) e.preventDefault();
+    });
+  }
+
+  function validateLoginForm() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+    let isValid = true;
+
+    // Clear previous errors
+    clearValidationErrors('loginForm');
+
+    // Email validation
+    if (!email) {
+      showValidationError('loginEmail', 'Email is required');
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      showValidationError('loginEmail', 'Please enter a valid email');
+      isValid = false;
+    }
+
+    // Password validation
+    if (!password) {
+      showValidationError('loginPassword', 'Password is required');
+      isValid = false;
+    } else if (password.length < 6) {
+      showValidationError('loginPassword', 'Password must be at least 6 characters');
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  function validateSignupForm() {
+    const name = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value.trim();
+    let isValid = true;
+
+    // Clear previous errors
+    clearValidationErrors('signupForm');
+
+    // Name validation
+    if (!name) {
+      showValidationError('signupName', 'Full name is required');
+      isValid = false;
+    }
+
+    // Email validation
+    if (!email) {
+      showValidationError('signupEmail', 'Email is required');
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      showValidationError('signupEmail', 'Please enter a valid email');
+      isValid = false;
+    }
+
+    // Password validation
+    if (!password) {
+      showValidationError('signupPassword', 'Password is required');
+      isValid = false;
+    } else if (password.length < 8) {
+      showValidationError('signupPassword', 'Password must be at least 8 characters');
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
+  function showValidationError(fieldId, message) {
+    const field = document.getElementById(fieldId);
+    if (!field) return;
+
+    const formGroup = field.closest('.form-group');
+    if (!formGroup) return;
+
+    let errorElement = formGroup.querySelector('.error-message');
+    if (!errorElement) {
+      errorElement = document.createElement('div');
+      errorElement.className = 'error-message';
+      formGroup.appendChild(errorElement);
+    }
+
+    errorElement.textContent = message;
+    formGroup.classList.add('has-error');
+  }
+
+  function clearValidationErrors(formId) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+
+    form.querySelectorAll('.form-group').forEach(group => {
+      group.classList.remove('has-error');
+      const errorElement = group.querySelector('.error-message');
+      if (errorElement) errorElement.textContent = '';
+    });
+  }
+
+  // ======================
+  //  AJAX Form Submission
+  // ======================
+  function initFormSubmissions() {
+    authForms.login?.addEventListener('submit', handleLogin);
+    authForms.signup?.addEventListener('submit', handleSignup);
+  }
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    
+    if (!validateLoginForm()) return;
+
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+
+    try {
+      const response = await fetch('/api/auth/login/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({ email, password })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        window.location.reload(); // Or redirect to dashboard
+      } else {
+        showFormError('loginForm', data.message || 'Login failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      showFormError('loginForm', 'Network error. Please try again.');
+    }
+  }
+
+  async function handleSignup(e) {
+    e.preventDefault();
+    
+    if (!validateSignupForm()) return;
+
+    const name = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value.trim();
+
+    try {
+      const response = await fetch('/api/auth/register/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({ name, email, password })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        showFormSuccess('signupForm', 'Registration successful! Please login.');
+        setTimeout(() => {
+          switchAuthModal('signup', 'login');
+        }, 1500);
+      } else {
+        showFormError('signupForm', data.message || 'Registration failed. Please try again.');
+      }
+    } catch (error) {
+      console.error('Signup error:', error);
+      showFormError('signupForm', 'Network error. Please try again.');
+    }
+  }
+
+  function showFormError(formId, message) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+
+    let errorElement = form.querySelector('.form-error');
+    if (!errorElement) {
+      errorElement = document.createElement('div');
+      errorElement.className = 'form-error';
+      form.prepend(errorElement);
+    }
+
+    errorElement.textContent = message;
+    errorElement.style.display = 'block';
+  }
+
+  function showFormSuccess(formId, message) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+
+    let successElement = form.querySelector('.form-success');
+    if (!successElement) {
+      successElement = document.createElement('div');
+      successElement.className = 'form-success';
+      form.prepend(successElement);
+    }
+
+    successElement.textContent = message;
+    successElement.style.display = 'block';
+  }
+
+  // ======================
+  //  Helper Functions
+  // ======================
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  }
+
+  // ======================
+  //  Initialize
+  // ======================
+  initAuthModals();
+  initFormValidation();
+  initFormSubmissions();
+});
+
 </script>
 <!-- jQuery first if needed -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
