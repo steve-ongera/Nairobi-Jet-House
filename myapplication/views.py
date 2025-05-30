@@ -1399,3 +1399,28 @@ def admin_dashboard(request):
     }
     
     return render(request, 'dashboard/admin_dashboard.html', context)
+
+def admin_login_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            # Redirect based on user_type
+            if user.user_type == 'client':
+                return redirect('client_dashboard')
+            elif user.user_type == 'owner':
+                return redirect('owner_dashboard')
+            elif user.user_type == 'agent':
+                return redirect('agent_dashboard')
+            elif user.user_type == 'admin':
+                return redirect('admin_dashboard')
+            else:
+                messages.error(request, 'Unknown user type.')
+                return redirect('login')
+        else:
+            messages.error(request, 'Invalid username or password.')
+
+    return render(request, 'auth/login.html')

@@ -6,17 +6,17 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>Nairobi Jet House Management System | Login</title>
-  <meta content="Access the Nairobi Jet House management portal for premium hospitality services" name="description">
-  <meta content="Nairobi Jet House, Hotel Management, Hospitality System, Accommodation Portal, Kenya Hotels" name="keywords">
+  <title>Nairobi Jet House | Management System Login</title>
+  <meta content="Access the Nairobi Jet House private aviation management portal" name="description">
+  <meta content="Nairobi Jet House, Private Jet, Aviation Management, Aircraft Charter, Kenya Aviation" name="keywords">
 
   <!-- Favicons -->
-  <link href="{% static 'assets/img/nairobi-jet-house-logo.png'%}" rel="icon">
-  <link href="{% static 'assets/img/nairobi-jet-house-logo.png'%}" rel="apple-touch-icon">
+  <link href="{% static 'assets/img/airplane-logo.png'%}" rel="icon">
+  <link href="{% static 'assets/img/airplane-logo.png'%}" rel="apple-touch-icon">
 
   <!-- Google Fonts -->
   <link href="https://fonts.gstatic.com" rel="preconnect">
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <!-- Vendor CSS Files -->
   <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css'%}" rel="stylesheet">
@@ -26,9 +26,9 @@
 
   <style>
     :root {
-      --primary-color: #1A6FEF; /* Professional medical blue */
+      --primary-color: #1A76D1; /* Premium aviation blue */
       --secondary-color: #FFFFFF; /* White */
-      --accent-color: #0BB4FF; /* Light blue accent */
+      --accent-color: #0BB4FF; /* Sky blue accent */
       --dark-blue: #0A4DA6;
       --light-gray: #F8FAFC;
       --font-primary: 'Open Sans', sans-serif;
@@ -42,7 +42,7 @@
       min-height: 100vh;
       flex-direction: column;
       justify-content: center;
-      background-image: url("{% static 'assets/img/medical-pattern.png' %}");
+      background-image: url("{% static 'assets/img/aviation-pattern.png' %}");
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
@@ -54,42 +54,45 @@
     
     .company-header {
       text-align: center;
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
     }
     
     .company-name {
       font-family: var(--font-secondary);
-      font-weight: 600;
-      font-size: 1.8rem;
+      font-weight: 700;
+      font-size: 2rem;
       color: var(--dark-blue);
       margin-bottom: 0.25rem;
       letter-spacing: 0.5px;
+      text-transform: uppercase;
     }
     
     .company-slogan {
       font-family: var(--font-primary);
       font-weight: 400;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       color: #5A7184;
       margin-bottom: 0.5rem;
+      letter-spacing: 0.5px;
     }
     
     .logo-container {
       display: flex;
       justify-content: center;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
     }
     
     .company-logo {
-      max-width: 150px;
+      max-width: 180px;
       height: auto;
     }
     
     .card {
       border: none;
-      border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(10, 77, 166, 0.1);
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(10, 77, 166, 0.15);
       background-color: white;
+      border-top: 4px solid var(--primary-color);
     }
     
     .login-form-container {
@@ -101,63 +104,70 @@
     .btn-primary {
       background-color: var(--primary-color);
       border-color: var(--primary-color);
-      font-weight: 500;
-      padding: 8px 24px;
-      border-radius: 6px;
+      font-weight: 600;
+      padding: 10px 24px;
+      border-radius: 8px;
       letter-spacing: 0.5px;
       transition: all 0.3s ease;
+      text-transform: uppercase;
+      font-size: 0.9rem;
     }
     
     .btn-primary:hover {
       background-color: var(--dark-blue);
       border-color: var(--dark-blue);
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(10, 77, 166, 0.2);
+      box-shadow: 0 6px 15px rgba(10, 77, 166, 0.25);
     }
     
     .card-title {
       color: var(--dark-blue);
-      font-weight: 600;
-      font-size: 1.3rem;
+      font-weight: 700;
+      font-size: 1.5rem;
       margin-bottom: 0.5rem;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
     
     .form-control {
-      border-radius: 6px;
+      border-radius: 8px;
       padding: 10px 15px 10px 40px;
       border: 1px solid #E2E8F0;
       transition: border-color 0.3s ease;
-      height: 45px;
+      height: 42px;
+      font-size: 0.95rem;
     }
     
     .form-control:focus {
       border-color: var(--accent-color);
-      box-shadow: 0 0 0 3px rgba(11, 180, 255, 0.1);
+      box-shadow: 0 0 0 3px rgba(11, 180, 255, 0.15);
     }
     
     .footer {
-      margin-top: 1.5rem;
+      margin-top: 2rem;
       text-align: center;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       color: #5A7184;
     }
     
     .developer-credit {
-      margin-top: 0.5rem;
-      font-size: 0.75rem;
+      margin-top: 0.75rem;
+      font-size: 0.8rem;
     }
     
     .developer-credit a {
       color: var(--primary-color);
-      font-weight: 500;
+      font-weight: 600;
       text-decoration: none;
     }
     
     .login-divider {
       display: flex;
       align-items: center;
-      margin: 1rem 0;
+      margin: 1.5rem 0;
       color: #A0AEC0;
+      font-size: 0.9rem;
     }
     
     .login-divider::before, .login-divider::after {
@@ -177,9 +187,9 @@
     .forgot-password {
       color: var(--primary-color);
       text-decoration: none;
-      font-weight: 500;
+      font-weight: 600;
       transition: color 0.3s ease;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
     }
     
     .forgot-password:hover {
@@ -192,6 +202,7 @@
       transition: color 0.3s ease;
       right: 15px !important;
       top: 12px !important;
+      font-size: 1.1rem;
     }
     
     #togglePassword:hover {
@@ -204,19 +215,28 @@
       top: 12px;
       color: #A0AEC0;
       z-index: 10;
+      font-size: 1.1rem;
     }
     
     .input-group {
       position: relative;
-      margin-bottom: 1rem;
+      margin-bottom: 1.25rem;
     }
     
     .form-check-label {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
     }
     
     .card-body {
-      padding: 1.5rem 2rem !important;
+      padding: 2rem 2.5rem !important;
+    }
+    
+    .login-subtitle {
+      color: #64748B;
+      font-size: 0.95rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      font-weight: 400;
     }
   </style>
 </head>
@@ -238,17 +258,17 @@
         <!-- Company Header -->
         <div class="company-header">
           <div class="logo-container">
-            <img src="{% static 'assets/img/mediclinic-logo.png' %}" alt="Mediclinic Logo" class="company-logo">
+            <img src="{% static 'assets/img/airplane-logo.png' %}" alt="Nairobi Jet House Logo" class="company-logo">
           </div>
-          <h1 class="company-name">Mediclinic System</h1>
-          <p class="company-slogan">Comprehensive Healthcare Management Solution</p>
+          <h1 class="company-name">Nairobi Jet House</h1>
+          <p class="company-slogan">Premium Private Aviation Services</p>
         </div>
 
         <!-- Login Card -->
         <div class="card login-form-container">
           <div class="card-body">
-            <h5 class="card-title text-center mb-2">Staff Login</h5>
-            <p class="text-center text-muted mb-3" style="font-size: 0.9rem;">Enter your credentials to access the system</p>
+            <h5 class="card-title">Management Portal</h5>
+            <p class="login-subtitle">Access your aviation management account</p>
 
             <form method="POST" novalidate>
               {% csrf_token %}
@@ -257,33 +277,35 @@
                 <input type="text" id="username" name="username" class="form-control" placeholder="Username" required>
               </div>
 
+            
+
               <div class="input-group">
                 <i class="bi bi-lock-fill input-icon"></i>
                 <input type="password" id="password" name="password" class="form-control" placeholder="Password" required>
                 <i id="togglePassword" class="bi bi-eye-slash position-absolute" style="cursor: pointer;"></i>
               </div>
 
-              <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="d-flex justify-content-between align-items-center mb-4">
                 <div class="form-check">
                   <input class="form-check-input" type="checkbox" id="rememberMe">
                   <label class="form-check-label" for="rememberMe">Remember me</label>
                 </div>
-                <a href="{% url 'forgot_password'%}" class="forgot-password">Forgot password?</a>
+                <a href="#" class="forgot-password">Forgot password?</a>
               </div>
               
-              <button class="btn btn-primary w-100 mb-2 py-2" type="submit">Login</button>
+              <button class="btn btn-primary w-100 mb-3 py-2" type="submit">Login</button>
               
               <div class="login-divider">or</div>
               
-              <p class="text-center mb-0" style="font-size: 0.85rem;">Need assistance? <a href="#" data-bs-toggle="modal" data-bs-target="#contactModal" class="forgot-password">Contact IT Support</a></p>
+              <p class="text-center mb-0" style="font-size: 0.9rem;">Need assistance? <a href="#" data-bs-toggle="modal" data-bs-target="#contactModal" class="forgot-password">Contact Support</a></p>
             </form>
           </div>
         </div>
 
         <div class="footer">
-          <div>© {% now "Y" %} Mediclinic Management System. All rights reserved.</div>
+          <div>© {% now "Y" %} Nairobi Jet House. All rights reserved.</div>
           <div class="developer-credit">
-            Developed by <a href="#" target="_blank">kencom softwares Ltd</a>
+            Aviation Management System by <a href="#" target="_blank">Kencom Softwares Ltd</a>
           </div>
         </div>
       </div>
@@ -293,79 +315,79 @@
   <!-- Contact Support Modal -->
 <div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
     <div class="modal-dialog" style="max-width: 550px;">
-        <div class="modal-content" style="border-radius: 10px; border: none; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
-            <div class="modal-header" style="border-bottom: 1px solid #e9ecef; padding: 1.2rem 1.5rem;">
-                <h5 class="modal-title" style="font-weight: 600; color: #0A4DA6;">Technical Support Contact</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="font-size: 0.8rem;"></button>
+        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 5px 25px rgba(0,0,0,0.15);">
+            <div class="modal-header" style="border-bottom: 1px solid #e9ecef; padding: 1.5rem;">
+                <h5 class="modal-title" style="font-weight: 700; color: #0A4DA6; letter-spacing: 0.5px;">AVIATION SUPPORT</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" style="padding: 1.5rem;">
-                <div style="display: flex; align-items: center; margin-bottom: 1.2rem;">
-                    <img src="{% static 'assets/img/KenCom.png'%}" alt="Kencom Logo" style="width: 50px; height: auto; margin-right: 15px;">
+            <div class="modal-body" style="padding: 1.5rem 2rem;">
+                <div style="display: flex; align-items: center; margin-bottom: 1.5rem;">
+                    <img src="{% static 'assets/img/airplane-logo.png'%}" alt="Nairobi Jet House Logo" style="width: 60px; height: auto; margin-right: 20px;">
                     <div>
-                        <h4 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0; color: #333;">Kencom Softwares Ltd</h4>
-                        <p style="font-size: 0.85rem; color: #6c757d; margin-bottom: 0;">Software Development Company</p>
+                        <h4 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0; color: #1A76D1; letter-spacing: 0.5px;">NAIROBI JET HOUSE</h4>
+                        <p style="font-size: 0.9rem; color: #6c757d; margin-bottom: 0;">Premium Private Aviation</p>
                     </div>
                 </div>
                 
-                <p style="font-size: 0.9rem; color: #495057; margin-bottom: 1.5rem; line-height: 1.5;">
-                    Thank you for using our Mediclinic Management System. Our team is available to assist you with any technical issues.
+                <p style="font-size: 0.95rem; color: #495057; margin-bottom: 1.5rem; line-height: 1.6;">
+                    Our technical team is available to assist you with any system access issues or operational queries.
                 </p>
                 
-                <div style="background-color: #f8f9fa; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
-                    <div style="display: flex; align-items: center; margin-bottom: 0.8rem;">
-                        <div style="width: 32px; height: 32px; background-color: rgba(26, 109, 239, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0;">
-                            <i class="bi bi-person" style="color: #1A6FEF; font-size: 0.9rem;"></i>
+                <div style="background-color: #f8fafc; border-radius: 10px; padding: 1.25rem; margin-bottom: 1.5rem; border: 1px solid #e2e8f0;">
+                    <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                        <div style="width: 40px; height: 40px; background-color: rgba(26, 118, 209, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; flex-shrink: 0;">
+                            <i class="bi bi-headset" style="color: #1A76D1; font-size: 1rem;"></i>
                         </div>
                         <div>
-                            <p style="font-size: 0.75rem; color: #6c757d; margin-bottom: 0.1rem;">Developer Contact</p>
-                            <p style="font-size: 0.9rem; font-weight: 500; margin-bottom: 0; color: #343a40;">Steve Ongera (Lead Developer)</p>
+                            <p style="font-size: 0.8rem; color: #6c757d; margin-bottom: 0.1rem; letter-spacing: 0.5px;">SUPPORT CONTACT</p>
+                            <p style="font-size: 1rem; font-weight: 600; margin-bottom: 0; color: #343a40;">Aviation Support Team</p>
                         </div>
                     </div>
                     
-                    <div style="display: flex; align-items: center; margin-bottom: 0.8rem;">
-                        <div style="width: 32px; height: 32px; background-color: rgba(26, 109, 239, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0;">
-                            <i class="bi bi-envelope" style="color: #1A6FEF; font-size: 0.9rem;"></i>
+                    <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                        <div style="width: 40px; height: 40px; background-color: rgba(26, 118, 209, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; flex-shrink: 0;">
+                            <i class="bi bi-envelope" style="color: #1A76D1; font-size: 1rem;"></i>
                         </div>
                         <div>
-                            <p style="font-size: 0.75rem; color: #6c757d; margin-bottom: 0.1rem;">Email</p>
-                            <p style="font-size: 0.9rem; font-weight: 500; margin-bottom: 0; color: #343a40;">steveongera001@gmail.com</p>
+                            <p style="font-size: 0.8rem; color: #6c757d; margin-bottom: 0.1rem; letter-spacing: 0.5px;">EMAIL</p>
+                            <p style="font-size: 1rem; font-weight: 600; margin-bottom: 0; color: #343a40;">support@nairobi.jet</p>
                         </div>
                     </div>
                     
-                    <div style="display: flex; align-items: center; margin-bottom: 0.8rem;">
-                        <div style="width: 32px; height: 32px; background-color: rgba(26, 109, 239, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0;">
-                            <i class="bi bi-telephone" style="color: #1A6FEF; font-size: 0.9rem;"></i>
+                    <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                        <div style="width: 40px; height: 40px; background-color: rgba(26, 118, 209, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; flex-shrink: 0;">
+                            <i class="bi bi-telephone" style="color: #1A76D1; font-size: 1rem;"></i>
                         </div>
                         <div>
-                            <p style="font-size: 0.75rem; color: #6c757d; margin-bottom: 0.1rem;">Phone</p>
-                            <p style="font-size: 0.9rem; font-weight: 500; margin-bottom: 0; color: #343a40;">+254 757 790 687</p>
+                            <p style="font-size: 0.8rem; color: #6c757d; margin-bottom: 0.1rem; letter-spacing: 0.5px;">PHONE</p>
+                            <p style="font-size: 1rem; font-weight: 600; margin-bottom: 0; color: #343a40;">+254 700 123 456</p>
                         </div>
                     </div>
                     
                     <div style="display: flex; align-items: center;">
-                        <div style="width: 32px; height: 32px; background-color: rgba(26, 109, 239, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0;">
-                            <i class="bi bi-clock" style="color: #1A6FEF; font-size: 0.9rem;"></i>
+                        <div style="width: 40px; height: 40px; background-color: rgba(26, 118, 209, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; flex-shrink: 0;">
+                            <i class="bi bi-clock" style="color: #1A76D1; font-size: 1rem;"></i>
                         </div>
                         <div>
-                            <p style="font-size: 0.75rem; color: #6c757d; margin-bottom: 0.1rem;">Support Hours</p>
-                            <p style="font-size: 0.9rem; font-weight: 500; margin-bottom: 0; color: #343a40;">Mon-Fri: 9AM - 5PM EAT</p>
+                            <p style="font-size: 0.8rem; color: #6c757d; margin-bottom: 0.1rem; letter-spacing: 0.5px;">SUPPORT HOURS</p>
+                            <p style="font-size: 1rem; font-weight: 600; margin-bottom: 0; color: #343a40;">24/7 Aviation Support</p>
                         </div>
                     </div>
                 </div>
                 
-                <div style="background-color: #e7f1ff; padding: 0.8rem; border-radius: 6px; margin-bottom: 1.5rem;">
+                <div style="background-color: #e7f1ff; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
                     <div style="display: flex; align-items: flex-start;">
-                        <i class="bi bi-info-circle" style="color: #1A6FEF; font-size: 1rem; margin-right: 10px; margin-top: 2px;"></i>
-                        <p style="font-size: 0.8rem; color: #1A6FEF; margin-bottom: 0; line-height: 1.4;">
-                            For urgent issues outside business hours, please email with "URGENT" in the subject line.
+                        <i class="bi bi-info-circle" style="color: #1A76D1; font-size: 1.1rem; margin-right: 12px; margin-top: 2px;"></i>
+                        <p style="font-size: 0.85rem; color: #1A76D1; margin-bottom: 0; line-height: 1.5;">
+                            For urgent flight operations issues, please call the 24/7 operations line for immediate assistance.
                         </p>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer" style="border-top: 1px solid #e9ecef; padding: 1rem 1.5rem;">
-                <button type="button" class="btn btn-sm" data-bs-dismiss="modal" style="background-color: #f8f9fa; color: #495057; border: 1px solid #dee2e6; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem;">Close</button>
-                <a href="mailto:steveongera001@gmail.com" class="btn btn-sm" style="background-color: #1A6FEF; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem;">
-                    <i class="bi bi-envelope me-1"></i> Email Support
+            <div class="modal-footer" style="border-top: 1px solid #e9ecef; padding: 1.25rem 2rem;">
+                <button type="button" class="btn btn-sm" data-bs-dismiss="modal" style="background-color: #f8f9fa; color: #495057; border: 1px solid #dee2e6; padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.9rem; font-weight: 500;">Close</button>
+                <a href="tel:+254700123456" class="btn btn-sm" style="background-color: #1A76D1; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.9rem; font-weight: 500;">
+                    <i class="bi bi-telephone me-1"></i> Call Support
                 </a>
             </div>
         </div>
