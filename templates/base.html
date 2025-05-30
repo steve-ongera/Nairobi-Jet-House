@@ -284,7 +284,7 @@
   </footer>
 <style>
 
-  /* Header Base Styles */
+/* Header Base Styles */
 .header {
   position: absolute;
   top: 0;
@@ -312,6 +312,20 @@
   transform: translateY(-100%);
   opacity: 0;
   visibility: hidden;
+}
+
+.header.active .social-link {
+  color: #1a4b8c !important;  /* Blue color on white background */
+  background-color: rgba(26, 75, 140, 0.1) !important;
+}
+
+.header.active .social-link:hover {
+  color: #ffffff !important;
+  background-color: #1a4b8c !important;
+}
+
+.header.active .social-link ion-icon {
+  color: inherit !important;  /* Ensures icons inherit the parent color */
 }
 
 /* Header Bottom Styles */
