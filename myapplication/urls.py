@@ -30,6 +30,7 @@ urlpatterns = [
     #admin application development product 2
     path('admin-dashboard/' , views.admin_dashboard , name='admin_dashboard'),
     path('admin-login-dasboard/' , views.admin_login_view , name='admin-login'),
+    path('admin/logout/', views.admin_logout_view, name='admin_logout'),
 
     
 ]

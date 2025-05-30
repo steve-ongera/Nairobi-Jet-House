@@ -1400,6 +1400,12 @@ def admin_dashboard(request):
     
     return render(request, 'dashboard/admin_dashboard.html', context)
 
+
+@login_required
+def admin_logout_view(request):
+    logout(request)
+    return redirect('admin-login')  # Make sure this name matches your admin login URL name
+
 def admin_login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
