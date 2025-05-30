@@ -1231,6 +1231,7 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import get_user_model
+from django.contrib import messages
 
 # Get your custom User model
 User = get_user_model()
@@ -1247,6 +1248,7 @@ def signup_view(request):
             
             # Validate required fields
             if not name or not email or not password:
+                messages.error(request, 'Name, email, and password are required')
                 return JsonResponse({
                     'success': False, 
                     'message': 'Name, email, and password are required'
@@ -1254,6 +1256,7 @@ def signup_view(request):
             
             # Check if user already exists (check both username and email)
             if User.objects.filter(username=email).exists() or User.objects.filter(email=email).exists():
+                messages.error(request, 'An account with this email already exists. Please use a different email or try logging in.')
                 return JsonResponse({
                     'success': False, 
                     'message': 'Email already exists'
@@ -1273,17 +1276,21 @@ def signup_view(request):
                 last_name=last_name
             )
             
+            messages.success(request, f'Welcome {first_name}! Your account has been created successfully. You can now log in.')
             return JsonResponse({'success': True})
             
         except json.JSONDecodeError:
+            messages.error(request, 'Invalid data format received')
             return JsonResponse({
                 'success': False, 
                 'message': 'Invalid JSON data'
             }, status=400)
         except Exception as e:
+            messages.error(request, 'An unexpected error occurred during registration. Please try again.')
             return JsonResponse({
                 'success': False, 
                 'message': f'Server error: {str(e)}'
             }, status=500)
     
+    messages.error(request, 'Invalid request method')
     return JsonResponse({'error': 'Invalid request method'}, status=405)
