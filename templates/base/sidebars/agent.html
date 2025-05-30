@@ -1,0 +1,149 @@
+{% load static %}
+<!-- ======= Coca-Cola Staff Sidebar ======= -->
+<aside id="sidebar" class="sidebar" style="border-right: 2px solid #f40009;">
+    <div class="sidebar-brand text-center py-3">
+        <img src="{% static 'images/coca-cola-logo-small.png' %}" alt="Coca-Cola" style="height: 35px;">
+        <h6 class="mt-2" style="color: #f40009; font-size: 0.8rem;">STAFF PORTAL</h6>
+    </div>
+
+    <ul class="sidebar-nav" id="sidebar-nav">
+
+        <!-- Staff Dashboard -->
+        <li class="nav-item">
+            <a class="nav-link" href="#">
+                <i class="bi bi-house-door" style="color: #f40009;"></i>
+                <span>My Workspace</span>
+            </a>
+        </li>
+
+        <!-- Daily Tasks -->
+        <li class="nav-item">
+            <a class="nav-link collapsed" data-bs-target="#tasks-nav" data-bs-toggle="collapse" href="#">
+                <i class="bi bi-list-check" style="color: #f40009;"></i>
+                <span>My Tasks</span>
+                <i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="tasks-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+                <li><a href="#"><i class="bi bi-check-circle"></i> Today's Assignments</a></li>
+                <li><a href="#"><i class="bi bi-arrow-repeat"></i> Recurring Tasks</a></li>
+                <li><a href="#"><i class="bi bi-flag"></i> Priority Items</a></li>
+                <li><a href="#"><i class="bi bi-check2-all"></i> Task Completion</a></li>
+            </ul>
+        </li>
+
+        <!-- Time & Attendance -->
+        <li class="nav-item">
+            <a class="nav-link collapsed" data-bs-target="#time-nav" data-bs-toggle="collapse" href="#">
+                <i class="bi bi-clock-history" style="color: #f40009;"></i>
+                <span>Time Tracking</span>
+                <i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="time-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+                <li><a href="#"><i class="bi bi-qr-code"></i> Clock In/Out</a></li>
+                <li><a href="#"><i class="bi bi-calendar2-week"></i> Schedule</a></li>
+                <li><a href="#"><i class="bi bi-hourglass-top"></i> Break Logs</a></li>
+                <li><a href="#"><i class="bi bi-file-earmark-text"></i> Timesheets</a></li>
+            </ul>
+        </li>
+
+        <!-- Production -->
+        <li class="nav-item">
+            <a class="nav-link collapsed" data-bs-target="#production-nav" data-bs-toggle="collapse" href="#">
+                <i class="bi bi-cup-straw" style="color: #f40009;"></i>
+                <span>Production</span>
+                <i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="production-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+                <li><a href="#"><i class="bi bi-clipboard-check"></i> Quality Checks</a></li>
+                <li><a href="#"><i class="bi bi-box-seam"></i> Material Requests</a></li>
+                <li><a href="#"><i class="bi bi-exclamation-triangle"></i> Report Issue</a></li>
+                <li><a href="#"><i class="bi bi-lightbulb"></i> Improvement Ideas</a></li>
+            </ul>
+        </li>
+
+        <!-- Resources -->
+        <li class="nav-item">
+            <a class="nav-link collapsed" data-bs-target="#resources-nav" data-bs-toggle="collapse" href="#">
+                <i class="bi bi-journal-bookmark" style="color: #f40009;"></i>
+                <span>Resources</span>
+                <i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="resources-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+                <li><a href="#"><i class="bi bi-file-earmark-pdf"></i> SOP Manuals</a></li>
+                <li><a href="#"><i class="bi bi-film"></i> Training Videos</a></li>
+                <li><a href="#"><i class="bi bi-shield-check"></i> Safety Guides</a></li>
+                <li><a href="#"><i class="bi bi-telephone"></i> Emergency Contacts</a></li>
+            </ul>
+        </li>
+
+        <!-- Coca-Cola Connect -->
+        <li class="nav-heading" style="color: #f40009;">Coca-Cola Connect</li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#">
+                <i class="bi bi-chat-left-text" style="color: #f40009;"></i>
+                <span>Staff Announcements</span>
+                <span class="badge bg-danger float-end">2</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#">
+                <i class="bi bi-trophy" style="color: #f40009;"></i>
+                <span>Recognition Wall</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#">
+                <i class="bi bi-people" style="color: #f40009;"></i>
+                <span>Team Directory</span>
+            </a>
+        </li>
+
+        <!-- Personal -->
+        <li class="nav-heading">My Account</li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#">
+                <i class="bi bi-person-circle"></i>
+                <span>Profile</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#">
+                <i class="bi bi-file-earmark-text"></i>
+                <span>Pay & Benefits</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#">
+                <i class="bi bi-question-circle"></i>
+                <span>Help Center</span>
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="#">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Logout</span>
+            </a>
+        </li>
+
+    </ul>
+
+    <!-- Quick Actions -->
+    <div class="sidebar-footer p-2 text-center">
+        <div class="btn-group w-100">
+            <button class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-exclamation-circle"></i> Report
+            </button>
+            <button class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-question-circle"></i> Help
+            </button>
+        </div>
+        <small class="text-muted d-block mt-2">v2.4.1</small>
+    </div>
+</aside>

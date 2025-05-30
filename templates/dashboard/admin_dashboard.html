@@ -1,0 +1,577 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+<link href="#" rel="stylesheet">
+
+{% block title %}Clinical Management System{% endblock %}
+
+{% block content %}
+<div class="message-container" id="system-messages">
+    {% for message in messages %}
+    <div class="alert-message alert-{{ message.tags }}">
+        {{ message }}
+        <span class="close-message">&times;</span>
+    </div>
+    {% endfor %}
+  </div>
+
+<div class="pagetitle">
+    <h1>Dashboard</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item active">Dashboard</li>
+        <li class="breadcrumb-item"> {{ request.user.username }}</li>
+      </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section dashboard">
+    <div class="row">
+      <!-- Left side columns -->
+      <div class="col-lg-8">
+        <div class="row">
+          <!-- Patients Card -->
+          <div class="col-xxl-4 col-md-6">
+            <div class="card info-card sales-card" style="border-left: 5px solid #3498db;">
+              <div class="card-body">
+                <h5 class="card-title">Total Patients</h5>
+                <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center" style="background-color: #3498db;">
+                    <i class="bi bi-people text-white"></i>
+                  </div>
+                  <div class="ps-3">
+                    <h6>{{ total_patients }}</h6>
+                    <span class="text-success small pt-1 fw-bold"></span> 
+                    <span class="text-muted small pt-2 ps-1"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!-- End Patients Card -->
+
+          <!-- Doctors Card -->
+          <div class="col-xxl-4 col-md-6">
+            <div class="card info-card revenue-card" style="border-left: 5px solid #2980b9;">
+              <div class="card-body">
+                <h5 class="card-title">Doctors</h5>
+                <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center" style="background-color: #2980b9;">
+                    <i class="bi bi-person-badge text-white"></i>
+                  </div>
+                  <div class="ps-3">
+                    <h6>{{ total_doctors }}</h6>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!-- End Doctors Card -->
+
+          <!-- Appointments Card -->
+          <div class="col-xxl-4 col-md-6">
+            <div class="card info-card customers-card" style="border-left: 5px solid #1abc9c;">
+              <div class="card-body">
+                <h5 class="card-title">Today's Appointments</h5>
+                <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center" style="background-color: #1abc9c;">
+                    <i class="bi bi-calendar-check text-white"></i>
+                  </div>
+                  <div class="ps-3">
+                    <h6>{{ todays_appointments.count  }}</h6>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!-- End Appointments Card -->
+
+          <!-- Revenue Card -->
+          <div class="col-xxl-6 col-md-6">
+            <div class="card info-card revenue-card" style="border-left: 5px solid #3498db;">
+              <div class="card-body">
+                <h5 class="card-title">Monthly Revenue</h5>
+                <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center" style="background-color: #3498db;">
+                    <i class="bi bi-cash-stack text-white"></i>
+                  </div>
+                  <div class="ps-3">
+                    <h6>KES{{ total_revenue|floatformat:2 }}</h6>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!-- End Revenue Card -->
+
+          <!-- Medicine Stock Card -->
+          <div class="col-xxl-6 col-md-6">
+            <div class="card info-card sales-card" style="border-left: 5px solid #9b59b6;">
+              <div class="card-body">
+                <h5 class="card-title">Medicine Stock</h5>
+                <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center" style="background-color: #9b59b6;">
+                    <i class="bi bi-capsule text-white"></i>
+                  </div>
+                  <div class="ps-3">
+                    <h6>{{ total_medicines }} Items</h6>
+                    <span class="text-danger small">{{ low_stock|length }} low stock</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!-- End Medicine Stock Card -->
+
+          <!-- Common Diseases Chart -->
+          <div class="col-12">
+            <div class="card">
+                <div class="filter">
+                    <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                        <li class="dropdown-header text-start">
+                            <h6>Filter</h6>
+                        </li>
+                        <li><a class="dropdown-item filter-disease active" href="#" data-filter="all">All Diseases</a></li>
+                        <li><a class="dropdown-item filter-disease" href="#" data-filter="current">Current Month</a></li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Common Diseases</h5>
+                    <div class="chart-container" style="position: relative; height:300px; width:100%">
+                        <canvas id="diseaseChart"></canvas>
+                    </div>
+                </div>
+            </div>
+          </div>
+
+          <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                // Disease Chart
+                const diseaseLabels = JSON.parse('{{ disease_labels|escapejs }}');
+                const diseaseCounts = JSON.parse('{{ disease_counts|escapejs }}');
+                
+                const diseaseCtx = document.getElementById('diseaseChart').getContext('2d');
+                const diseaseChart = new Chart(diseaseCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: diseaseLabels,
+                        datasets: [{
+                            label: 'Cases',
+                            data: diseaseCounts,
+                            backgroundColor: [
+                                '#3498db',
+                                '#2980b9',
+                                '#1abc9c',
+                                '#9b59b6',
+                                '#34495e'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return `${context.label}: ${context.raw} cases`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Number of Cases'
+                                }
+                            }
+                        }
+                    }
+                });
+            
+                // Filter functionality
+                document.querySelectorAll('.filter-disease').forEach(item => {
+                    item.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        
+                        document.querySelectorAll('.filter-disease').forEach(el => {
+                            el.classList.remove('active');
+                        });
+                        this.classList.add('active');
+                        
+                        // In a real implementation, you would fetch filtered data
+                        console.log(`Filtering diseases by: ${this.getAttribute('data-filter')}`);
+                    });
+                });
+            });
+            </script>
+        <!-- End Disease Chart -->
+
+          <!-- Recent Appointments -->
+          <div class="col-12">
+            <div class="card recent-sales overflow-auto">
+              <div class="filter">
+                <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                  <li class="dropdown-header text-start">
+                    <h6>Filter</h6>
+                  </li>
+                  <li><a class="dropdown-item" href="#">Today</a></li>
+                  <li><a class="dropdown-item" href="#">This Week</a></li>
+                  <li><a class="dropdown-item" href="#">This Month</a></li>
+                </ul>
+              </div>
+              <div class="card-body">
+                <h5 class="card-title">Recent Appointments <span>| Today</span></h5>
+                <table class="table table-borderless">
+                  <thead>
+                    <tr>
+                      <th scope="col">Patient</th>
+                      <th scope="col">Doctor</th>
+                      <th scope="col">Time</th>
+                      <th scope="col">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for appointment in recent_appointments %}
+                    <tr>
+                      <td>{{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</td>
+                      <td>Dr. {{ appointment.doctor.last_name }}</td>
+                      <td>{{ appointment.scheduled_time|time }}</td>
+                      <td><span class="badge bg-{% if appointment.status == 'COMPLETED' %}success{% elif appointment.status == 'CANCELLED' %}danger{% else %}info{% endif %}">
+                        {{ appointment.get_status_display }}
+                      </span></td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div><!-- End Recent Appointments -->
+
+          <!-- Low Stock Medicines -->
+          <div class="col-12">
+            <div class="card top-selling overflow-auto">
+              <div class="filter">
+                <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                  <li class="dropdown-header text-start">
+                    <h6>Filter</h6>
+                  </li>
+                  <li><a class="dropdown-item" href="#">Critical</a></li>
+                  <li><a class="dropdown-item" href="#">All Low Stock</a></li>
+                </ul>
+              </div>
+              <div class="card-body pb-0">
+                <h5 class="card-title">Low Stock Medicines <span>| Need Reorder</span></h5>
+                <table class="table table-borderless">
+                  <thead>
+                    <tr>
+                      <th scope="col">Medicine</th>
+                      <th scope="col">Category</th>
+                      <th scope="col">In Stock</th>
+                      <th scope="col">Reorder Level</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for medicine in low_stock %}
+                    <tr>
+                      <td>{{ medicine.name }}</td>
+                      <td>{{ medicine.category.name|default:"-" }}</td>
+                      <td>{{ medicine.quantity_in_stock }}</td>
+                      <td>{{ medicine.reorder_level }}</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div><!-- End Low Stock Medicines -->
+        </div>
+      </div><!-- End Left side columns -->
+
+      <!-- Right side columns -->
+      <div class="col-lg-4">
+        <!-- Sales Trend Chart -->
+        <div class="card">
+          
+          <div class="card-body">
+              <h5 class="card-title">Sales Trend <span>| Last 7 Days</span></h5>
+              <div class="chart-container" style="position: relative; height:300px; width:100%">
+                  <canvas id="salesTrendChart"></canvas>
+              </div>
+          </div>
+        </div>
+      
+        <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Sales Trend Chart
+            const salesDates = JSON.parse('{{ sales_dates|escapejs }}');
+            const salesAmounts = JSON.parse('{{ sales_amounts|escapejs }}');
+            
+            const salesCtx = document.getElementById('salesTrendChart').getContext('2d');
+            const salesTrendChart = new Chart(salesCtx, {
+                type: 'line',
+                data: {
+                    labels: salesDates,
+                    datasets: [{
+                        label: 'Daily Sales (ksh)',
+                        data: salesAmounts,
+                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                        borderColor: '#3498db',
+                        borderWidth: 2,
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Sales Amount (ksh)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Sales: ksh${context.raw.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        
+            // Filter functionality
+            document.querySelectorAll('.filter-sales').forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    document.querySelectorAll('.filter-sales').forEach(el => {
+                        el.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    const period = this.getAttribute('data-period');
+                    document.querySelector('.card-title span').textContent = `| Last ${period} Days`;
+                    
+                    // In a real implementation, you would make an AJAX call here
+                    console.log(`Would fetch sales data for last ${period} days`);
+                });
+            });
+        });
+        </script>
+        <!-- End Sales Trend Chart -->
+
+        <!-- Payment Methods Chart -->
+        <div class="card">
+          <div class="card-body">
+              <h5 class="card-title">Payment Methods</h5>
+              <div class="chart-container" style="position: relative; height:300px; width:100%">
+                  <canvas id="paymentChart"></canvas>
+              </div>
+          </div>
+        </div>
+      
+        <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Payment Chart
+            const paymentLabels = JSON.parse('{{ payment_labels|escapejs }}');
+            const paymentTotals = JSON.parse('{{ payment_totals|escapejs }}');
+            
+            const paymentCtx = document.getElementById('paymentChart').getContext('2d');
+            const paymentChart = new Chart(paymentCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: paymentLabels,
+                    datasets: [{
+                        data: paymentTotals,
+                        backgroundColor: [
+                            '#3498db',
+                            '#2980b9',
+                            '#1abc9c',
+                            '#9b59b6'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ksh${context.raw.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+        </script>
+        <!-- End Payment Methods Chart -->
+
+        <!-- Best Selling Medicines -->
+        <div class="card">
+          
+          <div class="card-body pb-0">
+            <h5 class="card-title">Top 5 Best-Selling Medicines</h5>
+            <div class="news">
+              
+              <div class="post-item clearfix">
+                <div class="d-flex justify-content-between">
+                   
+                  <div class="card-body">
+                      <canvas id="topMedicinesChart" height="300"></canvas>
+                  </div>
+                </div>
+                <hr class="my-2">
+              </div>
+              
+            </div>
+          </div>
+        </div>
+        <!-- In your admin_dashboard.html template -->
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if medicine data exists
+            console.log("Medicine Labels:", {{ medicine_labels|safe }});
+            console.log("Medicine Counts:", {{ medicine_counts|safe }});
+            
+            // Your chart initialization code should be here
+            const ctx = document.getElementById('topMedicinesChart').getContext('2d');
+            const topMedicinesChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: JSON.parse('{{ medicine_labels|escapejs }}'),
+                    datasets: [{
+                        label: 'Units Sold',
+                        data: JSON.parse('{{ medicine_counts|escapejs }}'),
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Top 5 Best-Selling Medicines'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Units Sold'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+        </script>
+        <!-- End Best Selling Medicines -->
+
+        <!-- Recent Notifications -->
+        <div class="card">
+          <div class="card-body pb-0">
+            <h5 class="card-title">Recent Notifications</h5>
+            <div class="news">
+              <div class="post-item clearfix">
+                <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>
+                <h6><a href="#">Low Stock Alert</a></h6>
+                <p>5 medicines are below reorder level</p>
+              </div>
+              <div class="post-item clearfix">
+                <i class="bi bi-calendar-check-fill text-info me-2"></i>
+                <h6><a href="#">New Appointments</a></h6>
+                <p>3 new appointments scheduled for today</p>
+              </div>
+              <div class="post-item clearfix">
+                <i class="bi bi-cash-coin text-success me-2"></i>
+                <h6><a href="#">Daily Sales Report</a></h6>
+                <p>Total sales today: KES 24,500</p>
+              </div>
+            </div>
+          </div>
+        </div><!-- End Recent Notifications -->
+      </div><!-- End Right side columns -->
+    </div>
+</section>
+
+<style>
+  /* Blue Theme Colors */
+  .card-icon[style*="background-color: #3498db;"] {
+    background-color: #3498db !important;
+  }
+  
+  .card-icon[style*="background-color: #2980b9;"] {
+    background-color: #2980b9 !important;
+  }
+  
+  .card-icon[style*="background-color: #1abc9c;"] {
+    background-color: #1abc9c !important;
+  }
+  
+  .card-icon[style*="background-color: #9b59b6;"] {
+    background-color: #9b59b6 !important;
+  }
+
+  /* Hover effects for cards */
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(52, 152, 219, 0.1);
+    transition: all 0.3s ease;
+  }
+
+  /* Custom badge colors */
+  .badge.bg-primary {
+    background-color: #3498db !important;
+  }
+
+  .badge.bg-info {
+    background-color: #1abc9c !important;
+  }
+
+  /* Alert messages */
+  .alert-message {
+    border-left: 4px solid #3498db;
+  }
+
+  .alert-success {
+    border-left-color: #1abc9c;
+  }
+
+  .alert-danger {
+    border-left-color: #e74c3c;
+  }
+
+  .alert-warning {
+    border-left-color: #f39c12;
+  }
+</style>
+
+{% endblock %}

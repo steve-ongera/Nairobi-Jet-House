@@ -1,0 +1,324 @@
+{% load static %}
+<!-- ======= Sidebar ======= -->
+<aside id="sidebar" class="sidebar">
+
+    <ul class="sidebar-nav" id="sidebar-nav">
+
+      <li class="nav-item">
+        <a class="nav-link " href="#">
+          <i class="bi bi-grid"></i>
+          <span>Dashboard</span>
+        </a>
+      </li><!-- End Dashboard Nav -->
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#staff-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-people"></i><span>Staff</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="staff-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+          
+          <!-- Doctors Sub-List -->
+          <li>
+            <a class="nav-link collapsed" data-bs-target="#doctors-subnav" data-bs-toggle="collapse" href="#">
+              <i class="bi bi-person-badge"></i><span>Teachers</span><i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="doctors-subnav" class="nav-content collapse">
+              <li>
+                <a href="#">
+                  <i class="bi bi-circle"></i><span>Teachers List</span>
+                </a>
+              </li>
+              <li>
+                <a href="#">
+                  <i class="bi bi-circle"></i><span>Add Teachers</span>
+                </a>
+              </li>
+              
+            </ul>
+          </li>
+          
+          <!-- Interns Sub-List -->
+          <li>
+            <a class="nav-link collapsed" data-bs-target="#interns-subnav" data-bs-toggle="collapse" href="#">
+              <i class="bi bi-person-lines-fill"></i><span>Staff</span><i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="interns-subnav" class="nav-content collapse">
+              <li>
+                <a href="#">
+                  <i class="bi bi-circle"></i><span>Staff List</span>
+                </a>
+              </li>
+              <li>
+                <a href="#">
+                  <i class="bi bi-circle"></i><span>Add Staff</span>
+                </a>
+              </li>
+              
+            </ul>
+          </li>
+          <!--staffs -->
+
+          <li>
+            <a class="nav-link collapsed" data-bs-target="#staff-subnav" data-bs-toggle="collapse" href="#">
+              <i class="bi bi-person-x"></i><span>Non Staff</span><i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="staff-subnav" class="nav-content collapse">
+              <li>
+                <a href="#">
+                  <i class="bi bi-circle"></i><span>Non-Staff List</span>
+                </a>
+              </li>
+              <li>
+                <a href="#">
+                  <i class="bi bi-circle"></i><span>Add Non-staff</span>
+                </a>
+              </li>
+    
+            
+            </ul>
+          </li>
+          
+          <!-- Non-Staff Sub-List -->
+          <li>
+            <a class="nav-link collapsed" data-bs-target="#nonstaff-subnav" data-bs-toggle="collapse" href="#">
+              <i class="bi bi-person-x"></i><span>Intern</span><i class="bi bi-chevron-down ms-auto"></i>
+            </a>
+            <ul id="nonstaff-subnav" class="nav-content collapse">
+              <li>
+                <a href="#">
+                  <i class="bi bi-circle"></i><span>Interns</span>
+                </a>
+              </li>
+              <li>
+                <a href="#">
+                  <i class="bi bi-circle"></i><span>Add Intern</span>
+                </a>
+              </li>
+            </ul>
+          </li>
+          
+        </ul>
+      </li><!-- End Staff Nav -->
+      
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#forms-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-journal-text"></i><span>Student</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="forms-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="#">
+              <i class="bi bi-circle"></i><span>Student Records</span>
+            </a>
+          </li>
+
+          <li>
+            <a href="#">
+              <i class="bi bi-circle"></i><span>Search Student</span>
+            </a>
+          </li>
+
+
+          <li>
+            <a href="#">
+              <i class="bi bi-circle"></i><span>Add Student</span>
+            </a>
+          </li>
+
+
+        </ul>
+      </li><!-- End Forms Nav -->
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#tables-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-layout-text-window-reverse"></i><span>Academic Management</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="tables-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="#">
+              <i class="bi bi-circle"></i><span>Streams </span>
+            </a>
+          </li>
+
+          <li>
+            <a href="#">
+              <i class="bi bi-circle"></i><span>Timetable </span>
+            </a>
+          </li>
+
+          <li>
+            <a href="#">
+              <i class="bi bi-circle"></i><span>Resources</span>
+            </a>
+          </li>
+
+          <li>
+            <a href="#">
+              <i class="bi bi-circle"></i><span>Assignments</span>
+            </a>
+          </li>
+
+          
+
+        </ul>
+      </li><!-- End Tables Nav -->
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#charts-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-bar-chart"></i><span>Terms</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="charts-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="#">
+              <i class="bi bi-circle"></i><span>Terms List</span>
+            </a>
+          </li>
+          <li>
+            <a href="#">
+              <i class="bi bi-circle"></i><span>Add Term</span>
+            </a>
+          </li>
+
+         
+          
+        </ul>
+      </li><!-- End Charts Nav -->
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#icons-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-gem"></i><span>Exams Records
+          </span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="icons-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="#">
+              <i class="bi bi-circle"></i><span>Student Ranking</span>
+            </a>
+          </li>
+
+          
+
+          <li>
+            <a href="#">
+              <i class="bi bi-circle"></i><span>Form Ranking</span>
+            </a>
+          </li>
+
+          <li>
+            <a href="#">
+              <i class="bi bi-circle"></i><span>stream performance</span>
+            </a>
+          </li>
+
+          <li>
+            <a href="#">
+              <i class="bi bi-circle"></i><span>subject performance</span>
+            </a>
+          </li>
+
+          <li>
+            <a href="#">
+              <i class="bi bi-circle"></i><span>CAT Records</span>
+            </a>
+          </li>
+          
+          <li>
+            <a href="#">
+              <i class="bi bi-circle"></i><span>Add Marks</span>
+            </a>
+          </li>
+
+          <li>
+            <a href="#">
+              <i class="bi bi-circle"></i><span> Reports</span>
+            </a>
+          </li>
+         
+        </ul>
+      </li><!-- End Icons Nav -->
+
+      <li class="nav-heading">Pages</li>
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="#">
+          <i class="bi bi-person"></i>
+          <span>Profile</span>
+        </a>
+      </li><!-- End Profile Page Nav -->
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#tb-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-people"></i><span>Analysis Section</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="tb-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+
+          <!--Dashboard-->
+          <li class="nav-item">
+            <a class="nav-link collapsed" href="#">
+              <i class="bi bi-card-list"></i>
+              <span>Population Graphs </span>
+            </a>
+          </li><!-- End population -->
+
+          <li class="nav-item">
+            <a class="nav-link collapsed" href="#">
+              <i class="bi bi-card-list"></i>
+              <span>class-distribution</span>
+            </a>
+          </li>
+
+          
+
+          <li class="nav-item">
+            <a class="nav-link collapsed" href="#">
+              <i class="bi bi-card-list"></i>
+              <span>student results</span>
+            </a>
+          </li>
+          
+          
+     
+          
+          
+        </ul>
+      </li><!-- End Staff Nav --><!-- End F.A.Q Page Nav -->
+
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="#">
+          <i class="bi bi-card-list"></i>
+          <span>Search Student</span>
+        </a>
+      </li><!-- End Register Page Nav -->
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="#">
+          <i class="bi bi-card-list"></i>
+          <span>Register</span>
+        </a>
+      </li><!-- End Register Page Nav -->
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="#">
+          <i class="bi bi-box-arrow-in-right"></i>
+          <span>Login</span>
+        </a>
+      </li><!-- End Login Page Nav -->
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="#">
+          <i class="bi bi-dash-circle"></i>
+          <span> System Settings</span>
+        </a>
+      </li><!-- End Error 404 Page Nav -->
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="#">
+          <i class="bi bi-file-earmark"></i>
+          <span>Help & Support</span>
+        </a>
+      </li><!-- End Blank Page Nav -->
+
+    </ul>
+
+  </aside><!-- End Sidebar-->

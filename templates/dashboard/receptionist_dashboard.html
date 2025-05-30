@@ -1,0 +1,355 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+<link href="#" rel="stylesheet">
+
+{% block title %}Clinic Reception Portal{% endblock %}
+
+{% block content %}
+<div class="message-container" id="system-messages">
+  {% for message in messages %}
+  <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="pagetitle">
+    <h1>Reception Dashboard</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item active">Dashboard</li>
+        <li class="breadcrumb-item">{{ request.user.get_full_name }}</li>
+      </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section dashboard">
+    <div class="row">
+      <!-- Left side columns -->
+      <div class="col-lg-8">
+        <div class="row">
+          <!-- Receptionist Profile Card -->
+          <div class="col-xxl-4 col-md-6">
+            <div class="card info-card" style="border-left: 5px solid #1a76d1;">
+              <div class="card-body">
+                <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center" style="background-color: #1a76d1;">
+                    <i class="bi bi-person-badge text-white"></i>
+                  </div>
+                  <div class="ps-3">
+                    <h5 class="card-title mb-0">{{ request.user.get_full_name }}</h5>
+                    <span class="small text-muted">Receptionist</span>
+                    <div class="employee-status mt-1">
+                      <span class="badge bg-success">
+                        Active
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!-- End Profile Card -->
+
+          <!-- Today's Appointments Card -->
+          <div class="col-xxl-4 col-md-6">
+            <div class="card info-card" style="border-left: 5px solid #4CAF50;">
+              <div class="card-body">
+                <h5 class="card-title">Today's Appointments</h5>
+                <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center" style="background-color: #4CAF50;">
+                    <i class="bi bi-calendar-check text-white"></i>
+                  </div>
+                  <div class="ps-3">
+                    <h6>{{ todays_appointments.count }}</h6>
+                    <span class="text-muted small">Appointments</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!-- End Appointments Card -->
+
+          <!-- New Patients Card -->
+          <div class="col-xxl-4 col-md-6">
+            <div class="card info-card" style="border-left: 5px solid #2196F3;">
+              <div class="card-body">
+                <h5 class="card-title">New Patients</h5>
+                <div class="d-flex align-items-center">
+                  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center" style="background-color: #2196F3;">
+                    <i class="bi bi-person-plus text-white"></i>
+                  </div>
+                  <div class="ps-3">
+                    <h6>{{ new_patients_this_week }}</h6>
+                    <span class="text-muted small">This week</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!-- End Patients Card -->
+
+          <!-- Quick Actions -->
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Quick Actions</h5>
+                <div class="row text-center">
+                  <div class="col-md-3 col-6 mb-3">
+                    <a href="{% url 'patients-create'%}" class="btn btn-primary btn-sm w-100 py-2">
+                      <i class="bi bi-person-plus"></i><br>
+                      New Patient
+                    </a>
+                  </div>
+                  <div class="col-md-3 col-6 mb-3">
+                    <a href="{% url 'new_consultation'%}" class="btn btn-outline-primary btn-sm w-100 py-2">
+                      <i class="bi bi-calendar-plus"></i><br>
+                      New Appointment
+                    </a>
+                  </div>
+                  <div class="col-md-3 col-6 mb-3">
+                    <a href="{% url 'create_sale_from_consultation'%}" class="btn btn-outline-primary btn-sm w-100 py-2">
+                      <i class="bi bi-cash-stack"></i><br>
+                      Process Payment
+                    </a>
+                  </div>
+                  <div class="col-md-3 col-6 mb-3">
+                    <a href="{% url 'otc_sale_list'%}" class="btn btn-outline-primary btn-sm w-100 py-2">
+                      <i class="bi bi-prescription"></i><br>
+                      OTC Sales
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div><!-- End Quick Actions -->
+
+          <!-- Today's Appointments -->
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Today's Appointments</h5>
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>Time</th>
+                        <th>Patient</th>
+                        <th>Doctor</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for appointment in todays_appointments|slice:":5" %}
+                      <tr>
+                        <td>{{ appointment.scheduled_time|time:"H:i" }}</td>
+                        <td>{{ appointment.patient.first_name}}</td>
+                        <td>Dr. {{ appointment.doctor.last_name }}</td>
+                        <td>
+                          <span class="badge bg-{% if appointment.status == 'COMPLETED' %}success{% elif appointment.status == 'CANCELLED' %}danger{% elif appointment.status == 'IN_PROGRESS' %}info{% else %}warning{% endif %}">
+                            {{ appointment.get_status_display }}
+                          </span>
+                        </td>
+                        <td>
+                          <a href="#" class="btn btn-sm btn-outline-primary">View</a>
+                        </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div><!-- End Today's Appointments -->
+
+          <!-- Recent Patient Registrations -->
+          <div class="col-12">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Recent Patient Registrations</h5>
+                <div class="row">
+                  {% for patient in recent_patients %}
+                  <div class="col-md-4 mb-3">
+                    <div class="card border-primary">
+                      <div class="card-body">
+                        <h6 class="card-title">{{ patient.full_name }}</h6>
+                        <p class="card-text small">
+                          <i class="bi bi-gender-{{ patient.gender|lower }}"></i> {{ patient.get_gender_display }}<br>
+                          <i class="bi bi-calendar"></i> {{ patient.date_of_birth|date:"M d, Y" }} ({{ patient.age }} yrs)<br>
+                          <i class="bi bi-telephone"></i> {{ patient.phone_number }}
+                        </p>
+                        <a href="#" class="btn btn-sm btn-outline-primary">View Record</a>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div><!-- End Recent Patients -->
+        </div>
+      </div><!-- End Left side columns -->
+
+      <!-- Right side columns -->
+      <div class="col-lg-4">
+        <!-- Clinic Announcements -->
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Clinic Announcements</h5>
+            <div class="news">
+              {% for announcement in announcements %}
+              <div class="post-item {% if announcement.is_new %}bg-light{% endif %} p-2 mb-2 rounded">
+                <h6>{{ announcement.title }}</h6>
+                <p class="small">{{ announcement.content|truncatechars:100 }}</p>
+                <div class="d-flex justify-content-between">
+                  <span class="small text-muted">{{ announcement.created_at|timesince }} ago</span>
+                  <a href="#" class="small">Read More</a>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div><!-- End Announcements -->
+
+        <!-- Doctor Availability -->
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Doctor Availability</h5>
+            <div class="doctor-availability">
+              {% for doctor in available_doctors %}
+              <div class="doctor-item mb-3 p-2 border rounded">
+                <div class="d-flex align-items-center">
+                  <div class="me-3">
+                    {% if doctor.profile_picture %}
+                    <img src="{{ doctor.profile_picture.url }}" alt="{{ doctor.full_name }}" class="rounded-circle" width="40" height="40">
+                    {% else %}
+                    <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
+                      <i class="bi bi-person text-primary"></i>
+                    </div>
+                    {% endif %}
+                  </div>
+                  <div>
+                    <strong>Dr. {{ doctor.last_name }}</strong>
+                    <div class="small">
+                      <span class="badge bg-success">Available</span>
+                      <span class="text-muted ms-2">{{ doctor.working_hours }}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div><!-- End Doctor Availability -->
+
+        <!-- Prescription Alerts -->
+        <div class="card border-warning">
+          <div class="card-header bg-warning text-white">
+            <h5 class="card-title mb-0"><i class="bi bi-capsule"></i> Prescription Alerts</h5>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-warning">
+              <h6>Prescriptions to Fill: <strong>{{ pending_prescriptions.count }}</strong></h6>
+            </div>
+            <ul class="list-group list-group-flush">
+              {% for prescription in pending_prescriptions|slice:":3" %}
+              <li class="list-group-item small">
+                <i class="bi bi-prescription text-primary"></i>
+                {{ prescription.medicine.name }} for {{ prescription.consultation.appointment.patient.full_name }}
+              </li>
+              {% endfor %}
+              {% if pending_prescriptions.count > 3 %}
+              <li class="list-group-item text-center">
+                <a href="#" class="small">+ {{ pending_prescriptions.count|add:"-3" }} more</a>
+              </li>
+              {% endif %}
+            </ul>
+          </div>
+        </div><!-- End Prescription Alerts -->
+
+        <!-- Clinic Values -->
+        <div class="card">
+          <div class="card-body text-center" style="background-color: #1a76d1; color: white;">
+            <h5 class="card-title">Our Values</h5>
+            <div class="values-carousel">
+              <div class="value-item">
+                <i class="bi bi-heart-pulse display-6"></i>
+                <p class="mb-0">Compassion</p>
+              </div>
+              <div class="value-item">
+                <i class="bi bi-shield-check display-6"></i>
+                <p class="mb-0">Safety</p>
+              </div>
+              <div class="value-item">
+                <i class="bi bi-people-fill display-6"></i>
+                <p class="mb-0">Teamwork</p>
+              </div>
+            </div>
+          </div>
+        </div><!-- End Values Card -->
+      </div><!-- End Right side columns -->
+    </div>
+</section>
+
+<style>
+  /* Clinic Theme Enhancements */
+  .card-icon {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .doctor-item {
+    transition: all 0.3s ease;
+  }
+  
+  .doctor-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(26, 118, 209, 0.1);
+  }
+  
+  .values-carousel {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+  }
+  
+  .value-item {
+    padding: 10px;
+  }
+  
+  .value-item i {
+    color: white;
+    margin-bottom: 10px;
+  }
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Close alert messages
+  document.querySelectorAll('.btn-close').forEach(button => {
+    button.addEventListener('click', function() {
+      this.closest('.alert').style.display = 'none';
+    });
+  });
+  
+  // Simple carousel for values
+  const valueItems = document.querySelectorAll('.value-item');
+  let currentItem = 0;
+  
+  function rotateValues() {
+    valueItems.forEach(item => item.style.display = 'none');
+    valueItems[currentItem].style.display = 'block';
+    currentItem = (currentItem + 1) % valueItems.length;
+  }
+  
+  // Show first value immediately
+  valueItems.forEach((item, index) => {
+    if(index !== 0) item.style.display = 'none';
+  });
+  
+  // Rotate every 3 seconds
+  setInterval(rotateValues, 3000);
+});
+</script>
+{% endblock %}

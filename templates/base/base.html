@@ -1,0 +1,105 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+  <title>{% block title %}Nairobi Jet House {% endblock %}</title>
+  <meta name="description" content="Welcome to Nairobi Jet House - Premium accommodation and hospitality services in Nairobi.">
+  <meta name="keywords" content="Nairobi Jet House, Accommodation, Hospitality, Luxury Stay, Nairobi Hotels, Premium Suites, Kenya Tourism">
+  <meta name="author" content="Nairobi Jet House">
+
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:title" content="Nairobi Jet House - Luxury Accommodation in Nairobi">
+  <meta property="og:description" content="Experience premium hospitality and luxury stays at Nairobi Jet House.">
+  <meta property="og:image" content="{% static 'assets/img/nairobi-jet-house-logo.png' %}">
+  <meta property="og:url" content="https://www.nairobi-jet-house.com/">
+  <meta property="og:type" content="website">
+
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Nairobi Jet House">
+  <meta name="twitter:description" content="Discover Nairobi Jet House's premium accommodation and hospitality services.">
+  <meta name="twitter:image" content="{% static 'assets/img/nairobi-jet-house-logo.png' %}">
+
+
+  <!-- Favicons -->
+  <link href="{% static 'assets/img/mediclinic-logo.png'%}" rel="icon">
+  <link href="{% static 'assets/img/mediclinic-logo.png'%}" rel="apple-touch-icon">
+
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700|Nunito:300,400,600,700|Poppins:300,400,500,600,700" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{% static 'assets/vendor/bootstrap/css/bootstrap.min.css'%}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/bootstrap-icons/bootstrap-icons.css'%}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/boxicons/css/boxicons.min.css'%}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/quill/quill.snow.css'%}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/quill/quill.bubble.css'%}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/remixicon/remixicon.css'%}" rel="stylesheet">
+  <link href="{% static 'assets/vendor/simple-datatables/style.css'%}" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- PDF.js and Charts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+
+  <!-- Template Main CSS & JS -->
+  <link href="{% static 'assets/css/admin_css/style.css'%}" rel="stylesheet">
+  <link href="{% static 'assets/css/extra.css'%}" rel="stylesheet">
+  <link href="{% static 'assets/css/messages.css'%}" rel="stylesheet">
+  <script src="{% static 'assets/js/messages.js'%}"></script>
+
+  <script src="https://unpkg.com/htmx.org@1.9.0"></script>
+</head>
+
+  <body>
+    {% include "base/navbar.html" %}
+
+    {% if request.user.user_type == 'admin' %}
+        {% include "base/sidebars/admin_sidebar.html" %}
+    {% elif request.user.user_type == 'agent' %}
+        {% include "base/sidebars/agent.html" %}
+    {% else %}
+        {% include "base/sidebars/owner.html" %}
+    {% endif %}
+
+
+
+    <main id="main" class="main">
+
+        
+
+        {% block content %}
+                <!-- Page content will go here -->
+        {% endblock %}
+        
+
+    </main><!-- End #main -->  
+
+    <div class="modal fade" id="quickViewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" id="quickViewContent">
+                <!-- HTMX will load content here -->
+            </div>
+        </div>
+    </div>
+    
+    {% include 'base/footer.html'%}
+
+
+    
+
+ </body>
+
+</html>    
