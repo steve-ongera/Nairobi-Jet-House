@@ -2073,3 +2073,145 @@ def aircraft_type_api(request, pk):
         return aircraft_type_api_delete(request, pk)
     else:
         return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.core.paginator import Paginator
+from django.views.decorators.http import require_http_methods
+from django.utils import timezone
+from .models import Availability, Aircraft, Airport
+from datetime import datetime
+
+def availability_list(request):
+    # Get all availabilities with related aircraft and airport info
+    availabilities = Availability.objects.select_related(
+        'aircraft',
+        'aircraft__aircraft_type'
+    ).order_by('start_datetime')
+    
+    # Filter by date range if provided
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    
+    if start_date and end_date:
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+            availabilities = availabilities.filter(
+                start_datetime__date__gte=start_date,
+                end_datetime__date__lte=end_date
+            )
+        except ValueError:
+            pass
+    
+    # Pagination
+    paginator = Paginator(availabilities, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'current_time': timezone.now(),
+    }
+    return render(request, 'availability/availability_list.html', context)
+
+def availability_detail(request, availability_id):
+    try:
+        availability = Availability.objects.select_related(
+            'aircraft',
+            'aircraft__aircraft_type'
+        ).get(id=availability_id)
+        
+        data = {
+            'success': True,
+            'availability': {
+                'id': availability.id,
+                'aircraft': {
+                    'model_name': availability.aircraft.model_name,
+                    'registration_number': availability.aircraft.registration_number,
+                    'aircraft_type': availability.aircraft.aircraft_type.name,
+                    'current_location': availability.aircraft.current_location,
+                    'hourly_rate': str(availability.aircraft.hourly_rate),
+                },
+                'start_datetime': availability.start_datetime.strftime("%Y-%m-%d %H:%M"),
+                'end_datetime': availability.end_datetime.strftime("%Y-%m-%d %H:%M"),
+                'is_available': availability.is_available,
+                'status': 'Available' if availability.is_available else 'Booked',
+                'notes': availability.notes,
+                'duration': (availability.end_datetime - availability.start_datetime).total_seconds() / 3600,
+            }
+        }
+    except Availability.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Availability not found'
+        }
+    return JsonResponse(data)
+
+@require_http_methods(["POST"])
+def update_availability(request, availability_id):
+    try:
+        availability = Availability.objects.get(id=availability_id)
+        
+        # Parse datetime strings from form
+        start_datetime = datetime.strptime(
+            request.POST.get('start_datetime'), 
+            '%Y-%m-%dT%H:%M'
+        )
+        end_datetime = datetime.strptime(
+            request.POST.get('end_datetime'), 
+            '%Y-%m-%dT%H:%M'
+        )
+        
+        availability.start_datetime = start_datetime
+        availability.end_datetime = end_datetime
+        availability.is_available = request.POST.get('is_available') == 'true'
+        availability.notes = request.POST.get('notes', '')
+        availability.save()
+        
+        data = {
+            'success': True,
+            'message': 'Availability updated successfully',
+            'availability': {
+                'id': availability.id,
+                'start_datetime': availability.start_datetime.strftime("%Y-%m-%d %H:%M"),
+                'end_datetime': availability.end_datetime.strftime("%Y-%m-%d %H:%M"),
+                'is_available': availability.is_available,
+            }
+        }
+    except Availability.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Availability not found'
+        }
+    except Exception as e:
+        data = {
+            'success': False,
+            'error': str(e)
+        }
+    return JsonResponse(data)
+
+@require_http_methods(["POST"])
+def delete_availability(request, availability_id):
+    try:
+        availability = Availability.objects.get(id=availability_id)
+        aircraft_id = availability.aircraft.id
+        availability.delete()
+        
+        data = {
+            'success': True,
+            'message': 'Availability slot deleted successfully',
+            'aircraft_id': aircraft_id
+        }
+    except Availability.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Availability not found'
+        }
+    except Exception as e:
+        data = {
+            'success': False,
+            'error': str(e)
+        }
+    return JsonResponse(data)

@@ -1,0 +1,856 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Aircraft Availability Management{% endblock %}
+
+{% block extra_css %}
+<style>
+    .availability-card {
+        transition: all 0.3s ease;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        overflow: hidden;
+        background: white;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .availability-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    }
+    
+    .aircraft-header {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        padding: 20px;
+        position: relative;
+    }
+    
+    .aircraft-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #28a745, #20c997, #17a2b8);
+    }
+    
+    .aircraft-title {
+        font-size: 1.3em;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .aircraft-subtitle {
+        opacity: 0.9;
+        font-size: 0.9em;
+    }
+    
+    .aircraft-details {
+        padding: 20px;
+    }
+    
+    .status-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 0.8em;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .status-available {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .status-in-use {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .status-maintenance {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+    
+    .location-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .location-item {
+        text-align: center;
+        flex: 1;
+    }
+    
+    .location-label {
+        font-size: 0.8em;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 5px;
+    }
+    
+    .location-value {
+        font-weight: bold;
+        color: #495057;
+        font-size: 1.1em;
+    }
+    
+    .availability-timeline {
+        margin-top: 20px;
+    }
+    
+    .timeline-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .timeline-item:last-child {
+        border-bottom: none;
+    }
+    
+    .timeline-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 15px;
+        flex-shrink: 0;
+    }
+    
+    .timeline-dot.available {
+        background: #28a745;
+    }
+    
+    .timeline-dot.unavailable {
+        background: #dc3545;
+    }
+    
+    .timeline-content {
+        flex: 1;
+    }
+    
+    .timeline-time {
+        font-weight: bold;
+        color: #495057;
+        margin-bottom: 2px;
+    }
+    
+    .timeline-notes {
+        font-size: 0.9em;
+        color: #6c757d;
+    }
+    
+    .aircraft-specs {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .spec-item {
+        text-align: center;
+    }
+    
+    .spec-value {
+        font-weight: bold;
+        color: #007bff;
+        font-size: 1.1em;
+        margin-bottom: 3px;
+    }
+    
+    .spec-label {
+        font-size: 0.8em;
+        color: #6c757d;
+        text-transform: uppercase;
+    }
+    
+    .filters-container {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        padding: 25px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        border: 1px solid #dee2e6;
+    }
+    
+    .filter-group {
+        margin-bottom: 20px;
+    }
+    
+    .filter-group:last-child {
+        margin-bottom: 0;
+    }
+    
+    .filter-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    .date-range-inputs {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .modal-header {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+    }
+    
+    .modal-header .btn-close {
+        filter: invert(1);
+    }
+    
+    .form-floating {
+        margin-bottom: 1rem;
+    }
+    
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #007bff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 10px;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .no-data {
+        text-align: center;
+        padding: 80px 20px;
+        color: #6c757d;
+    }
+    
+    .no-data i {
+        font-size: 5em;
+        margin-bottom: 25px;
+        opacity: 0.3;
+    }
+    
+    .alert {
+        border-radius: 8px;
+        margin-bottom: 20px;
+        border: none;
+    }
+    
+    .btn {
+        border-radius: 6px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    
+    .btn:hover {
+        transform: translateY(-1px);
+    }
+    
+    .stats-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        text-align: center;
+        border-left: 4px solid #007bff;
+    }
+    
+    .stat-value {
+        font-size: 2em;
+        font-weight: bold;
+        color: #007bff;
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.9em;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1">Aircraft Availability Management</h1>
+                    <p class="text-muted">Monitor aircraft availability, locations, and usage status</p>
+                </div>
+                <button class="btn btn-primary" onclick="showAddAvailabilityForm()">
+                    <i class="fas fa-calendar-plus me-2"></i>Add Availability Period
+                </button>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="stats-cards" id="statsCards">
+                <!-- Stats will be loaded here -->
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-container">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="filter-group">
+                            <label class="filter-label">Search Aircraft</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" class="form-control" id="searchInput" placeholder="Search by registration, model...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="filter-group">
+                            <label class="filter-label">Status</label>
+                            <select class="form-select" id="statusFilter">
+                                <option value="">All Status</option>
+                                <option value="available">Available</option>
+                                <option value="in-use">In Use</option>
+                                <option value="maintenance">Maintenance</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="filter-group">
+                            <label class="filter-label">Location</label>
+                            <select class="form-select" id="locationFilter">
+                                <option value="">All Locations</option>
+                                <!-- Will be populated via AJAX -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="filter-group">
+                            <label class="filter-label">Date Range</label>
+                            <div class="date-range-inputs">
+                                <input type="date" class="form-control" id="startDate">
+                                <span>to</span>
+                                <input type="date" class="form-control" id="endDate">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="filter-group">
+                            <label class="filter-label">Sort By</label>
+                            <select class="form-select" id="sortBy">
+                                <option value="registration_number">Registration</option>
+                                <option value="model_name">Model</option>
+                                <option value="current_location">Location</option>
+                                <option value="hourly_rate">Rate</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerts -->
+            <div id="alertContainer">
+                {% if error_message %}
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Error loading availability data: {{ error_message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="text-center py-5" style="display: none;">
+                <div class="loading-spinner"></div>
+                <span>Loading aircraft availability...</span>
+            </div>
+
+            <!-- Aircraft Availability Grid -->
+            <div id="availabilityGrid" class="row">
+                {% if not availability_data %}
+                <div class="col-12">
+                    <div class="no-data">
+                        <i class="fas fa-calendar-times"></i>
+                        <h4>No availability data found</h4>
+                        <p>Get started by adding availability periods for your aircraft.</p>
+                        <button class="btn btn-primary mt-3" onclick="showAddAvailabilityForm()">
+                            <i class="fas fa-calendar-plus me-2"></i>Add First Availability Period
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+                <!-- Availability cards will be loaded here via JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Availability Detail Modal -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plane me-2"></i>
+                    <span id="detailTitle">Aircraft Availability Details</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="detailContent">
+                <!-- Details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-warning" id="editAvailabilityBtn">
+                    <i class="fas fa-edit me-2"></i>Edit Availability
+                </button>
+                <button type="button" class="btn btn-danger" id="deleteAvailabilityBtn">
+                    <i class="fas fa-trash me-2"></i>Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Availability Modal -->
+<div class="modal fade" id="availabilityFormModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-calendar-plus me-2"></i>
+                    <span id="formTitle">Add Availability Period</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="availabilityForm">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="aircraft" name="aircraft" required>
+                                    <option value="">Select Aircraft</option>
+                                    <!-- Will be populated via AJAX -->
+                                </select>
+                                <label for="aircraft">Aircraft *</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select class="form-select" id="is_available" name="is_available">
+                                    <option value="true">Available</option>
+                                    <option value="false">Not Available</option>
+                                </select>
+                                <label for="is_available">Status *</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="datetime-local" class="form-control" id="start_datetime" name="start_datetime" required>
+                                <label for="start_datetime">Start Date & Time *</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="datetime-local" class="form-control" id="end_datetime" name="end_datetime" required>
+                                <label for="end_datetime">End Date & Time *</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-floating">
+                        <textarea class="form-control" id="notes" name="notes" style="height: 100px;"></textarea>
+                        <label for="notes">Notes</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <span id="submitText">Save Availability</span>
+                        <div class="loading-spinner" id="submitSpinner" style="display: none;"></div>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Confirm Delete
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this availability period?</p>
+                <p><strong id="deleteItemName"></strong></p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash me-2"></i>Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let availabilityData = [];
+let aircraftList = [];
+let locationsList = [];
+let currentEditId = null;
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if we have initial data from the server
+    {% if availability_data_json %}
+        availabilityData = {{ availability_data_json|safe }};
+        updateStatistics();
+        filterAndDisplay();
+        showLoading(false);
+    {% else %}
+        loadAvailabilityData();
+    {% endif %}
+    
+    setupEventListeners();
+    loadAircraftList();
+    loadLocationsList();
+    
+    // Set today's date as default
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('startDate').value = today;
+});
+
+function setupEventListeners() {
+    // Filter event listeners
+    document.getElementById('searchInput').addEventListener('input', filterAndDisplay);
+    document.getElementById('statusFilter').addEventListener('change', filterAndDisplay);
+    document.getElementById('locationFilter').addEventListener('change', filterAndDisplay);
+    document.getElementById('startDate').addEventListener('change', filterAndDisplay);
+    document.getElementById('endDate').addEventListener('change', filterAndDisplay);
+    document.getElementById('sortBy').addEventListener('change', filterAndDisplay);
+    
+    // Form submission
+    document.getElementById('availabilityForm').addEventListener('submit', handleFormSubmit);
+    
+    // Delete confirmation
+    document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
+}
+
+// Load availability data
+function loadAvailabilityData() {
+    showLoading(true);
+    
+    const params = new URLSearchParams({
+        search: document.getElementById('searchInput').value,
+        status: document.getElementById('statusFilter').value,
+        location: document.getElementById('locationFilter').value,
+        start_date: document.getElementById('startDate').value,
+        end_date: document.getElementById('endDate').value,
+        sort_by: document.getElementById('sortBy').value
+    });
+    
+    fetch(`/api/aircraft-availability/?${params}`)
+        .then(response => response.json())
+        .then(data => {
+            availabilityData = data;
+            updateStatistics();
+            filterAndDisplay();
+            showLoading(false);
+        })
+        .catch(error => {
+            console.error('Error loading availability data:', error);
+            showAlert('Error loading availability data. Please try again.', 'danger');
+            showLoading(false);
+        });
+}
+
+// Update statistics
+function updateStatistics() {
+    const stats = calculateStatistics(availabilityData);
+    
+    document.getElementById('statsCards').innerHTML = `
+        <div class="stat-card">
+            <div class="stat-value">${stats.totalAircraft}</div>
+            <div class="stat-label">Total Aircraft</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">${stats.availableNow}</div>
+            <div class="stat-label">Available Now</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">${stats.inUse}</div>
+            <div class="stat-label">In Use</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">${stats.uniqueLocations}</div>
+            <div class="stat-label">Locations</div>
+        </div>
+    `;
+}
+
+// Calculate statistics
+function calculateStatistics(data) {
+    const now = new Date();
+    const aircraftIds = new Set();
+    const locations = new Set();
+    let availableNow = 0;
+    let inUse = 0;
+    
+    data.forEach(item => {
+        aircraftIds.add(item.aircraft.id);
+        locations.add(item.aircraft.current_location);
+        
+        // Check current availability
+        const startTime = new Date(item.start_datetime);
+        const endTime = new Date(item.end_datetime);
+        
+        if (now >= startTime && now <= endTime) {
+            if (item.is_available) {
+                availableNow++;
+            } else {
+                inUse++;
+            }
+        }
+    });
+    
+    return {
+        totalAircraft: aircraftIds.size,
+        availableNow,
+        inUse,
+        uniqueLocations: locations.size
+    };
+}
+
+// Filter and display availability data
+function filterAndDisplay() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const statusFilter = document.getElementById('statusFilter').value;
+    const locationFilter = document.getElementById('locationFilter').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const sortBy = document.getElementById('sortBy').value;
+    
+    let filtered = availabilityData.filter(item => {
+        const matchesSearch = item.aircraft.registration_number.toLowerCase().includes(searchTerm) ||
+                            item.aircraft.model_name.toLowerCase().includes(searchTerm) ||
+                            item.notes.toLowerCase().includes(searchTerm);
+        
+        let matchesStatus = true;
+        if (statusFilter) {
+            const now = new Date();
+            const startTime = new Date(item.start_datetime);
+            const endTime = new Date(item.end_datetime);
+            
+            if (statusFilter === 'available') {
+                matchesStatus = item.is_available && now >= startTime && now <= endTime;
+            } else if (statusFilter === 'in-use') {
+                matchesStatus = !item.is_available && now >= startTime && now <= endTime;
+            } else if (statusFilter === 'maintenance') {
+                matchesStatus = !item.is_available && item.notes.toLowerCase().includes('maintenance');
+            }
+        }
+        
+        const matchesLocation = !locationFilter || item.aircraft.current_location === locationFilter;
+        
+        let matchesDateRange = true;
+        if (startDate) {
+            matchesDateRange = new Date(item.end_datetime) >= new Date(startDate);
+        }
+        if (endDate && matchesDateRange) {
+            matchesDateRange = new Date(item.start_datetime) <= new Date(endDate + 'T23:59:59');
+        }
+        
+        return matchesSearch && matchesStatus && matchesLocation && matchesDateRange;
+    });
+    
+    // Sort results
+    filtered.sort((a, b) => {
+        const aValue = sortBy.includes('.') ? 
+            sortBy.split('.').reduce((obj, key) => obj[key], a) : 
+            a.aircraft[sortBy] || a[sortBy];
+        const bValue = sortBy.includes('.') ? 
+            sortBy.split('.').reduce((obj, key) => obj[key], b) : 
+            b.aircraft[sortBy] || b[sortBy];
+        
+        if (typeof aValue === 'string') {
+            return aValue.localeCompare(bValue);
+        }
+        return bValue - aValue;
+    });
+    
+    displayAvailabilityData(filtered);
+}
+
+// Display availability data
+function displayAvailabilityData(data) {
+    const grid = document.getElementById('availabilityGrid');
+    
+    if (data.length === 0) {
+        grid.innerHTML = `
+            <div class="col-12">
+                <div class="no-data">
+                    <i class="fas fa-calendar-times"></i>
+                    <h4>No availability data found</h4>
+                    <p>Try adjusting your search criteria or add new availability periods.</p>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    // Group by aircraft
+    const groupedData = groupByAircraft(data);
+    
+    grid.innerHTML = Object.values(groupedData).map(aircraftGroup => {
+        const aircraft = aircraftGroup.aircraft;
+        const availabilities = aircraftGroup.availabilities;
+        const currentStatus = getCurrentStatus(availabilities);
+        
+        return `
+            <div class="col-lg-6 col-xl-4">
+                <div class="availability-card" onclick="viewDetails(${aircraft.id})">
+                    <div class="aircraft-header">
+                        <div class="aircraft-title">${aircraft.model_name}</div>
+                        <div class="aircraft-subtitle">${aircraft.registration_number}</div>
+                        <div class="status-badge ${currentStatus.class}">${currentStatus.text}</div>
+                    </div>
+                    
+                    <div class="aircraft-details">
+                        <div class="location-info">
+                            <div class="location-item">
+                                <div class="location-label">Base Airport</div>
+                                <div class="location-value">${aircraft.base_airport}</div>
+                            </div>
+                            <div class="location-item">
+                                <div class="location-label">Current Location</div>
+                                <div class="location-value">${aircraft.current_location}</div>
+                            </div>
+                            <div class="location-item">
+                                <div class="location-label">Hourly Rate</div>
+                                <div class="location-value">$${aircraft.hourly_rate}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="aircraft-specs">
+                            <div class="spec-item">
+                                <div class="spec-value">${aircraft.aircraft_type.passenger_capacity}</div>
+                                <div class="spec-label">Passengers</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-value">${aircraft.aircraft_type.range_nautical_miles}</div>
+                                <div class="spec-label">Range (NM)</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-value">${aircraft.minimum_hours}h</div>
+                                <div class="spec-label">Min Hours</div>
+                            </div>
+                        </div>
+                        
+                        <div class="availability-timeline">
+                            ${availabilities.slice(0, 3).map(avail => `
+                                <div class="timeline-item">
+                                    <div class="timeline-dot ${avail.is_available ? 'available' : 'unavailable'}"></div>
+                                    <div class="timeline-content">
+                                        <div class="timeline-time">
+                                            ${formatDateTime(avail.start_datetime)} - ${formatDateTime(avail.end_datetime)}
+                                        </div>
+                                        <div class="timeline-notes">
+                                            ${avail.is_available ? 'Available' : 'Not Available'}
+                                            ${avail.notes ? ' - ' + avail.notes : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                            ${availabilities.length > 3 ? `
+                                <div class="text-center mt-2">
+                                    <small class="text-muted">+${availabilities.length - 3} more periods</small>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Group availability data by aircraft
+function groupByAircraft(data) {
+    const grouped = {};
+    
+    data.forEach(item => {
+        const aircraftId = item.aircraft.id;
+        if (!grouped[aircraftId]) {
+            grouped[aircraftId] = {
+                aircraft: item.aircraft,
+                availabilities: []
+            };
+        }
+        grouped[aircraftId].availabilities.push(item);
+    });
+    
+    // Sort availabilities by date
+    Object.values(grouped).forEach(group => {
+        group.availabilities.sort((a, b) => new Date(a.start_datetime) - new Date(b.start_datetime));
+    });
+    
+    return grouped;
+}
+
+// Get current status of aircraft
+function getCurrentStatus(availabilities) {
+    const now = new Date();
+    
+    for (let avail of availabilities) {
+        const startTime = new Date(avail.start_datetime);
+        const endTime = new Date(avail.end_datetime);
+        
+        if (now >= startTime && now <= endTime) {
+            if (avail.is_available) {
+                return { text: 'Available', class: 'status-available' };
+            } else if (avail.notes.toLowerCase().includes('maintenance')) {
+                return { text: 'Maintenance', class: 'status-maintenance' };
+            } else {
+                return { text: 'In Use', class:

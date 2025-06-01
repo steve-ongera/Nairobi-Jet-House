@@ -61,6 +61,10 @@ urlpatterns = [
     path('api/aircraft-types/<int:pk>/update/', views.aircraft_type_api_update, name='aircraft_type_update'),
     path('api/aircraft-types/<int:pk>/delete/', views.aircraft_type_api_delete, name='aircraft_type_delete'),
 
+    path('availability/', views.availability_list, name='availability_list'),
+    path('availability/<int:availability_id>/detail/', views.availability_detail, name='availability_detail'),
+    path('availability/<int:availability_id>/update/', views.update_availability, name='update_availability'),
+    path('availability/<int:availability_id>/delete/', views.delete_availability, name='delete_availability'),
 
     
 ]

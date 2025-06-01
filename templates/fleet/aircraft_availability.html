@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aircraft Availability Management | Fleet Operations</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 15px 20px 15px 50px;
+            border: 2px solid #e0e6ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .filter-select {
+            padding: 15px 20px;
+            border: 2px solid #e0e6ed;
+            border-radius: 10px;
+            font-size: 16px;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 150px;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .aircraft-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .aircraft-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .aircraft-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .aircraft-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            margin-right: 15px;
+        }
+
+        .aircraft-info h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .aircraft-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-available {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-in-use {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-maintenance {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .availability-details {
+            margin: 15px 0;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .detail-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        .close {
+            color: white;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close:hover {
+            transform: scale(1.1);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e6ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-plane"></i> Aircraft Availability Management</h1>
+            <p>Monitor and manage your fleet's availability status in real-time</p>
+        </div>
+
+        <div class="controls">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search by aircraft model, registration, or location...">
+            </div>
+            <select id="statusFilter" class="filter-select">
+                <option value="">All Status</option>
+                <option value="available">Available</option>
+                <option value="in-use">In Use</option>
+                <option value="maintenance">Maintenance</option>
+            </select>
+            <select id="locationFilter" class="filter-select">
+                <option value="">All Locations</option>
+                <option value="KJFK">JFK - New York</option>
+                <option value="KLAX">LAX - Los Angeles</option>
+                <option value="KORD">ORD - Chicago</option>
+                <option value="KIAH">IAH - Houston</option>
+            </select>
+            <button class="btn btn-primary" onclick="addAvailability()">
+                <i class="fas fa-plus"></i> Add Availability
+            </button>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <div class="grid" id="aircraftGrid">
+            <!-- Aircraft cards will be loaded here -->
+        </div>
+
+        <div id="loadingIndicator" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Loading aircraft availability data...</p>
+        </div>
+    </div>
+
+    <!-- Edit Availability Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-edit"></i> Update Availability</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editForm">
+                    <input type="hidden" id="availabilityId">
+                    <div class="form-group">
+                        <label for="aircraftSelect">Aircraft</label>
+                        <select id="aircraftSelect" class="form-control" required>
+                            <option value="">Select Aircraft</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="startDateTime">Start Date & Time</label>
+                        <input type="datetime-local" id="startDateTime" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="endDateTime">End Date & Time</label>
+                        <input type="datetime-local" id="endDateTime" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="isAvailable">Status</label>
+                        <select id="isAvailable" class="form-control" required>
+                            <option value="true">Available</option>
+                            <option value="false">Not Available</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">Notes</label>
+                        <textarea id="notes" class="form-control" rows="3" placeholder="Additional notes about availability..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveAvailability()">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-trash"></i> Confirm Deletion</h2>
+                <span class="close" onclick="closeDeleteModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this availability record?</p>
+                <p><strong>This action cannot be undone.</strong></p>
+                <input type="hidden" id="deleteAvailabilityId">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample data structure matching Django models
+        let aircraftData = [
+            {
+                id: 1,
+                model_name: "Citation CJ3+",
+                registration_number: "N123AB",
+                aircraft_type: "Light Jet",
+                current_location: "KJFK",
+                base_airport: "KJFK",
+                hourly_rate: 3200.00,
+                owner: "Prestige Aviation LLC",
+                availabilities: [
+                    {
+                        id: 1,
+                        start_datetime: "2025-06-02T08:00:00",
+                        end_datetime: "2025-06-05T18:00:00",
+                        is_available: true,
+                        notes: "Available for charter"
+                    }
+                ]
+            },
+            {
+                id: 2,
+                model_name: "Gulfstream G650",
+                registration_number: "N456CD",
+                aircraft_type: "Heavy Jet",
+                current_location: "KLAX",
+                base_airport: "KLAX",
+                hourly_rate: 8500.00,
+                owner: "Elite Charter Services",
+                availabilities: [
+                    {
+                        id: 2,
+                        start_datetime: "2025-06-01T14:00:00",
+                        end_datetime: "2025-06-03T12:00:00",
+                        is_available: false,
+                        notes: "In use - Charter to Miami"
+                    }
+                ]
+            },
+            {
+                id: 3,
+                model_name: "King Air 350i",
+                registration_number: "N789EF",
+                aircraft_type: "Turboprop",
+                current_location: "KORD",
+                base_airport: "KORD",
+                hourly_rate: 2800.00,
+                owner: "Midwest Aviation Group",
+                availabilities: [
+                    {
+                        id: 3,
+                        start_datetime: "2025-06-01T09:00:00",
+                        end_datetime: "2025-06-04T17:00:00",
+                        is_available: false,
+                        notes: "Scheduled maintenance"
+                    }
+                ]
+            },
+            {
+                id: 4,
+                model_name: "Phenom 300E",
+                registration_number: "N101GH",
+                aircraft_type: "Light Jet",
+                current_location: "KIAH",
+                base_airport: "KIAH",
+                hourly_rate: 3800.00,
+                owner: "Texas Sky Holdings",
+                availabilities: [
+                    {
+                        id: 4,
+                        start_datetime: "2025-06-02T06:00:00",
+                        end_datetime: "2025-06-07T20:00:00",
+                        is_available: true,
+                        notes: "Ready for immediate dispatch"
+                    }
+                ]
+            }
+        ];
+
+        let airportData = {
+            'KJFK': 'JFK - New York',
+            'KLAX': 'LAX - Los Angeles',
+            'KORD': 'ORD - Chicago',
+            'KIAH': 'IAH - Houston'
+        };
+
+        function getAircraftStatus(aircraft) {
+            const now = new Date();
+            const currentAvailability = aircraft.availabilities.find(avail => {
+                const start = new Date(avail.start_datetime);
+                const end = new Date(avail.end_datetime);
+                return now >= start && now <= end;
+            });
+
+            if (!currentAvailability) return 'available';
+            
+            if (currentAvailability.is_available) {
+                return 'available';
+            } else if (currentAvailability.notes.toLowerCase().includes('maintenance')) {
+                return 'maintenance';
+            } else {
+                return 'in-use';
+            }
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'available': '<span class="status-badge status-available">Available</span>',
+                'in-use': '<span class="status-badge status-in-use">In Use</span>',
+                'maintenance': '<span class="status-badge status-maintenance">Maintenance</span>'
+            };
+            return badges[status] || badges['available'];
+        }
+
+        function getNextAvailability(aircraft) {
+            const now = new Date();
+            const futureAvailabilities = aircraft.availabilities.filter(avail => {
+                const end = new Date(avail.end_datetime);
+                return end > now;
+            });
+
+            if (futureAvailabilities.length === 0) return null;
+            
+            return futureAvailabilities.sort((a, b) => 
+                new Date(a.end_datetime) - new Date(b.end_datetime)
+            )[0];
+        }
+
+        function formatDateTime(dateTimeString) {
+            const date = new Date(dateTimeString);
+            return date.toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function renderAircraftCard(aircraft) {
+            const status = getAircraftStatus(aircraft);
+            const nextAvailability = getNextAvailability(aircraft);
+            const currentLocation = airportData[aircraft.current_location] || aircraft.current_location;
+            const baseAirport = airportData[aircraft.base_airport] || aircraft.base_airport;
+
+            return `
+                <div class="aircraft-card" data-aircraft-id="${aircraft.id}">
+                    ${getStatusBadge(status)}
+                    <div class="aircraft-header">
+                        <div class="aircraft-icon">
+                            <i class="fas fa-plane"></i>
+                        </div>
+                        <div class="aircraft-info">
+                            <h3>${aircraft.model_name}</h3>
+                            <p>${aircraft.registration_number} • ${aircraft.aircraft_type}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="availability-details">
+                        <div class="detail-row">
+                            <span class="detail-label">
+                                <i class="fas fa-map-marker-alt"></i> Current Location
+                            </span>
+                            <span class="detail-value">${currentLocation}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">
+                                <i class="fas fa-home"></i> Base Airport
+                            </span>
+                            <span class="detail-value">${baseAirport}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">
+                                <i class="fas fa-dollar-sign"></i> Hourly Rate
+                            </span>
+                            <span class="detail-value">$${aircraft.hourly_rate.toLocaleString()}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">
+                                <i class="fas fa-user"></i> Owner
+                            </span>
+                            <span class="detail-value">${aircraft.owner}</span>
+                        </div>
+                        ${nextAvailability ? `
+                        <div class="detail-row">
+                            <span class="detail-label">
+                                <i class="fas fa-calendar-alt"></i> ${status === 'available' ? 'Available Until' : 'Next Available'}
+                            </span>
+                            <span class="detail-value">${formatDateTime(nextAvailability.end_datetime)}</span>
+                        </div>
+                        ` : ''}
+                        ${nextAvailability && nextAvailability.notes ? `
+                        <div class="detail-row">
+                            <span class="detail-label">
+                                <i class="fas fa-sticky-note"></i> Notes
+                            </span>
+                            <span class="detail-value">${nextAvailability.notes}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="actions">
+                        <button class="btn btn-success btn-sm" onclick="editAvailability(${nextAvailability ? nextAvailability.id : 'null'}, ${aircraft.id})">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        ${nextAvailability ? `
+                        <button class="btn btn-danger btn-sm" onclick="deleteAvailability(${nextAvailability.id})">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                        ` : ''}
+                        <button class="btn btn-primary btn-sm" onclick="viewDetails(${aircraft.id})">
+                            <i class="fas fa-eye"></i> Details
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAircraftGrid() {
+            const grid = document.getElementById('aircraftGrid');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const locationFilter = document.getElementById('locationFilter').value;
+
+            let filteredAircraft = aircraftData.filter(aircraft => {
+                const matchesSearch = aircraft.model_name.toLowerCase().includes(searchTerm) ||
+                                    aircraft.registration_number.toLowerCase().includes(searchTerm) ||
+                                    aircraft.current_location.toLowerCase().includes(searchTerm);
+                
+                const matchesStatus = !statusFilter || getAircraftStatus(aircraft) === statusFilter;
+                const matchesLocation = !locationFilter || aircraft.current_location === locationFilter;
+
+                return matchesSearch && matchesStatus && matchesLocation;
+            });
+
+            if (filteredAircraft.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+                        <i class="fas fa-search" style="font-size: 3rem; color: #ccc; margin-bottom: 20px;"></i>
+                        <h3 style="color: #666;">No aircraft found</h3>
+                        <p style="color: #999;">Try adjusting your search criteria or filters.</p>
+                    </div>
+                `;
+            } else {
+                grid.innerHTML = filteredAircraft.map(renderAircraftCard).join('');
+            }
+        }
+
+        function showAlert(message, type = 'success') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            
+            alertContainer.innerHTML = `
+                <div class="alert ${alertClass}">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                    ${message}
+                </div>
+            `;
+            
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        function addAvailability() {
+            document.getElementById('availabilityId').value = '';
+            document.getElementById('editForm').reset();
+            populateAircraftSelect();
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        function editAvailability(availabilityId, aircraftId) {
+            const aircraft = aircraftData.find(a => a.id === aircraftId);
+            const availability = availabilityId ? 
+                aircraft.availabilities.find(a => a.id === availabilityId) : 
+                { aircraft_id: aircraftId, start_datetime: '', end_datetime: '', is_available: true, notes: '' };
+
+            document.getElementById('availabilityId').value = availabilityId || '';
+            document.getElementById('aircraftSelect').value = aircraftId;
+            document.getElementById('startDateTime').value = availability.start_datetime ? 
+                new Date(availability.start_datetime).toISOString().slice(0, 16) : '';
+            document.getElementById('endDateTime').value = availability.end_datetime ? 
+                new Date(availability.end_datetime).toISOString().slice(0, 16) : '';
+            document.getElementById('isAvailable').value = availability.is_available.toString();
+            document.getElementById('notes').value = availability.notes || '';
+
+            populateAircraftSelect();
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        function populateAircraftSelect() {
+            const select = document.getElementById('aircraftSelect');
+            select.innerHTML = '<option value="">Select Aircraft</option>';
+            
+            aircraftData.forEach(aircraft => {
+                select.innerHTML += `
+                    <option value="${aircraft.id}">${aircraft.model_name} (${aircraft.registration_number})</option>
+                `;
+            });
+        }
+
+        function saveAvailability() {
+            const formData = {
+                id: document.getElementById('availabilityId').value,
+                aircraft_id: document.getElementById('aircraftSelect').value,
+                start_datetime: document.getElementById('startDateTime').value,
+                end_datetime: document.getElementById('endDateTime').value,
+                is_available: document.getElementById('isAvailable').value === 'true',
+                notes: document.getElementById('notes').value
+            };
+
+            // Validate form
+            if (!formData.aircraft_id || !formData.start_datetime || !formData.end_datetime) {
+                showAlert('Please fill in all required fields.', 'error');
+                return;
+
+            };
+
+ </script>
+ {% endblock %}
