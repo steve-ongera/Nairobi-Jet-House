@@ -1478,3 +1478,97 @@ def client_detail(request, client_id):
             'error': 'Client not found'
         }
     return JsonResponse(data)
+
+
+
+def aircraft_owner_list(request):
+    # Get all aircraft owners
+    owners = User.objects.filter(user_type='owner').order_by('-date_joined')
+    
+    # Pagination
+    paginator = Paginator(owners, 10)  # Show 10 owners per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+    }
+    return render(request, 'owners/aircraftowners.html', context)
+
+def aircraft_owner_detail(request, owner_id):
+    try:
+        owner = User.objects.get(id=owner_id, user_type='owner')
+        data = {
+            'success': True,
+            'owner': {
+                'id': owner.id,
+                'full_name': owner.get_full_name(),
+                'email': owner.email,
+                'phone_number': owner.phone_number,
+                'company_name': owner.company_name,
+                'address': owner.address,
+                'tax_id': owner.tax_id,
+                'verified': owner.verified,
+                'date_joined': owner.date_joined.strftime("%Y-%m-%d"),
+                'last_login': owner.last_login.strftime("%Y-%m-%d %H:%M") if owner.last_login else 'Never',
+            }
+        }
+    except User.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Aircraft owner not found'
+        }
+    return JsonResponse(data)
+
+@require_http_methods(["POST"])
+def update_aircraft_owner(request, owner_id):
+    try:
+        owner = User.objects.get(id=owner_id, user_type='owner')
+        owner.company_name = request.POST.get('company_name', owner.company_name)
+        owner.phone_number = request.POST.get('phone_number', owner.phone_number)
+        owner.address = request.POST.get('address', owner.address)
+        owner.tax_id = request.POST.get('tax_id', owner.tax_id)
+        owner.verified = request.POST.get('verified') == 'true'
+        owner.save()
+        
+        data = {
+            'success': True,
+            'message': 'Owner updated successfully',
+            'owner': {
+                'id': owner.id,
+                'company_name': owner.company_name,
+                'verified': owner.verified,
+            }
+        }
+    except User.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Aircraft owner not found'
+        }
+    except Exception as e:
+        data = {
+            'success': False,
+            'error': str(e)
+        }
+    return JsonResponse(data)
+
+@require_http_methods(["POST"])
+def delete_aircraft_owner(request, owner_id):
+    try:
+        owner = User.objects.get(id=owner_id, user_type='owner')
+        owner.delete()
+        data = {
+            'success': True,
+            'message': 'Owner deleted successfully'
+        }
+    except User.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Aircraft owner not found'
+        }
+    except Exception as e:
+        data = {
+            'success': False,
+            'error': str(e)
+        }
+    return JsonResponse(data)

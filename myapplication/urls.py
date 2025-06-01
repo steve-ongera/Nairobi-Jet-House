@@ -33,6 +33,10 @@ urlpatterns = [
     path('adminpage/logout/', views.admin_logout_view, name='admin_logout'),
     path('clients/', views.client_list, name='client_list'),
     path('clients/<int:client_id>/detail/', views.client_detail, name='client_detail'),
+    path('owners/', views.aircraft_owner_list, name='aircraft_owner_list'),
+    path('owners/<int:owner_id>/detail/', views.aircraft_owner_detail, name='aircraft_owner_detail'),
+    path('owners/<int:owner_id>/update/', views.update_aircraft_owner, name='update_aircraft_owner'),
+    path('owners/<int:owner_id>/delete/', views.delete_aircraft_owner, name='delete_aircraft_owner'),
 
     
 ]
