@@ -91,5 +91,9 @@ urlpatterns = [
     path('group-inquiries/<int:inquiry_id>/detail/', views.group_inquiry_detail, name='group_inquiry_detail'),
     path('group-inquiries/<int:inquiry_id>/update/', views.update_group_inquiry, name='update_group_inquiry'),
     path('group-inquiries/<int:inquiry_id>/delete/', views.delete_group_inquiry, name='delete_group_inquiry'),
+
+    path('contact-submissions/', views.contact_submission_list, name='contact_submission_list'),
+    path('contact-submissions/<int:submission_id>/detail/', views.contact_submission_detail, name='contact_submission_detail'),
+    path('contact-submissions/<int:submission_id>/delete/', views.delete_contact_submission, name='delete_contact_submission'),
   
 ]

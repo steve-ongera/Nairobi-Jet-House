@@ -2813,3 +2813,77 @@ def delete_group_inquiry(request, inquiry_id):
             'error': str(e)
         }
     return JsonResponse(data)
+
+
+
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.core.paginator import Paginator
+from django.views.decorators.http import require_http_methods
+from django.utils import timezone
+from .models import ContactSubmission
+
+def contact_submission_list(request):
+    # Get all contact submissions ordered by submission date
+    submissions = ContactSubmission.objects.all().order_by('-submitted_at')
+    
+    # Filter by subject if provided
+    subject_filter = request.GET.get('subject')
+    if subject_filter in [choice[0] for choice in ContactSubmission._meta.get_field('subject').choices]:
+        submissions = submissions.filter(subject=subject_filter)
+    
+    # Pagination
+    paginator = Paginator(submissions, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'subject_choices': ContactSubmission._meta.get_field('subject').choices,
+    }
+    return render(request, 'contact/contact_submission_list.html', context)
+
+def contact_submission_detail(request, submission_id):
+    try:
+        submission = ContactSubmission.objects.get(id=submission_id)
+        data = {
+            'success': True,
+            'submission': {
+                'id': submission.id,
+                'name': submission.name,
+                'email': submission.email,
+                'phone': submission.phone or 'Not provided',
+                'subject': submission.subject,
+                'message': submission.message,
+                'submitted_at': submission.submitted_at.strftime("%Y-%m-%d %H:%M"),
+            }
+        }
+    except ContactSubmission.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Contact submission not found'
+        }
+    return JsonResponse(data)
+
+@require_http_methods(["POST"])
+def delete_contact_submission(request, submission_id):
+    try:
+        submission = ContactSubmission.objects.get(id=submission_id)
+        submission_info = f"{submission.name} - {submission.subject}"
+        submission.delete()
+        
+        data = {
+            'success': True,
+            'message': f'Contact submission "{submission_info}" deleted successfully'
+        }
+    except ContactSubmission.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Contact submission not found'
+        }
+    except Exception as e:
+        data = {
+            'success': False,
+            'error': str(e)
+        }
+    return JsonResponse(data)
