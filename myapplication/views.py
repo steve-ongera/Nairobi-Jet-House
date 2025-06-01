@@ -1404,6 +1404,7 @@ def admin_dashboard(request):
 @login_required
 def admin_logout_view(request):
     logout(request)
+    messages.success(request , 'logged out sucessfullyy !')
     return redirect('admin-login')  # Make sure this name matches your admin login URL name
 
 def admin_login_view(request):
@@ -1422,6 +1423,7 @@ def admin_login_view(request):
             elif user.user_type == 'agent':
                 return redirect('agent_dashboard')
             elif user.user_type == 'admin':
+                messages.success(request , 'welcome back admin !')
                 return redirect('admin_dashboard')
             else:
                 messages.error(request, 'Unknown user type.')
