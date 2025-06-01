@@ -229,25 +229,28 @@ $(document).ready(function() {
     loadDropdownData();
     
     function loadDropdownData() {
-        $.get('/aircraft/dropdown-data/', function(response) {
-            if (response.success) {
-                // Populate owners dropdown
-                let ownerSelect = $('#owner_id');
-                ownerSelect.empty().append('<option value="">Select Owner</option>');
-                response.owners.forEach(function(owner) {
-                    let name = owner.first_name && owner.last_name ? 
-                        `${owner.first_name} ${owner.last_name}` : owner.username;
-                    ownerSelect.append(`<option value="${owner.id}">${name}</option>`);
-                });
-                
-                // Populate aircraft types dropdown
-                let typeSelect = $('#aircraft_type_id');
-                typeSelect.empty().append('<option value="">Select Type</option>');
-                response.aircraft_types.forEach(function(type) {
-                    typeSelect.append(`<option value="${type.id}">${type.name}</option>`);
-                });
-            }
-        });
+        fetch('/aircraft/dropdown-data/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Populate owners dropdown
+                    let ownerSelect = $('#owner_id');
+                    ownerSelect.empty().append('<option value="">Select Owner</option>');
+                    data.owners.forEach(function(owner) {
+                        let name = owner.first_name && owner.last_name ? 
+                            `${owner.first_name} ${owner.last_name}` : owner.username;
+                        ownerSelect.append(`<option value="${owner.id}">${name}</option>`);
+                    });
+                    
+                    // Populate aircraft types dropdown
+                    let typeSelect = $('#aircraft_type_id');
+                    typeSelect.empty().append('<option value="">Select Type</option>');
+                    data.aircraft_types.forEach(function(type) {
+                        typeSelect.append(`<option value="${type.id}">${type.name}</option>`);
+                    });
+                }
+            })
+            .catch(error => console.error('Error loading dropdown data:', error));
     }
     
     // View aircraft details
@@ -268,58 +271,69 @@ $(document).ready(function() {
     $('.delete-aircraft').click(function() {
         let aircraftId = $(this).data('id');
         if (confirm('Are you sure you want to delete this aircraft?')) {
-            $.ajax({
-                url: `/aircraft/${aircraftId}/delete/`,
+            fetch(`/aircraft/${aircraftId}/delete/`, {
                 method: 'DELETE',
-                success: function(response) {
-                    if (response.success) {
-                        alert(response.message);
-                        location.reload();
-                    } else {
-                        alert('Error: ' + response.error);
-                    }
-                },
-                error: function() {
-                    alert('Error occurred while deleting aircraft');
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
                 }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error occurred while deleting aircraft');
             });
         }
     });
     
     function loadAircraftData(aircraftId, viewOnly) {
-        $.get(`/aircraft/${aircraftId}/detail/`, function(response) {
-            if (response.success) {
-                let data = response.data;
-                
-                // Populate form
-                $('#registration_number').val(data.registration_number);
-                $('#model_name').val(data.model_name);
-                $('#year_manufactured').val(data.year_manufactured);
-                $('#base_airport').val(data.base_airport);
-                $('#current_location').val(data.current_location);
-                $('#features').val(data.features);
-                $('#hourly_rate').val(data.hourly_rate);
-                $('#minimum_hours').val(data.minimum_hours);
-                $('#is_active').val(data.is_active.toString());
-                $('#owner_id').val(data.owner_id);
-                $('#aircraft_type_id').val(data.aircraft_type_id);
-                
-                // Set modal title and form state
-                if (viewOnly) {
-                    $('#modalTitle').text('View Aircraft Details');
-                    $('#aircraftForm input, #aircraftForm select, #aircraftForm textarea').prop('disabled', true);
-                    $('#saveAircraft').hide();
+        fetch(`/aircraft/${aircraftId}/detail/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    let aircraftData = data.data;
+                    
+                    // Populate form
+                    $('#registration_number').val(aircraftData.registration_number);
+                    $('#model_name').val(aircraftData.model_name);
+                    $('#year_manufactured').val(aircraftData.year_manufactured);
+                    $('#base_airport').val(aircraftData.base_airport);
+                    $('#current_location').val(aircraftData.current_location);
+                    $('#features').val(aircraftData.features);
+                    $('#hourly_rate').val(aircraftData.hourly_rate);
+                    $('#minimum_hours').val(aircraftData.minimum_hours);
+                    $('#is_active').val(aircraftData.is_active.toString());
+                    $('#owner_id').val(aircraftData.owner_id);
+                    $('#aircraft_type_id').val(aircraftData.aircraft_type_id);
+                    
+                    // Set modal title and form state
+                    if (viewOnly) {
+                        $('#modalTitle').text('View Aircraft Details');
+                        $('#aircraftForm input, #aircraftForm select, #aircraftForm textarea').prop('disabled', true);
+                        $('#saveAircraft').hide();
+                    } else {
+                        $('#modalTitle').text('Edit Aircraft');
+                        $('#aircraftForm input, #aircraftForm select, #aircraftForm textarea').prop('disabled', false);
+                        $('#saveAircraft').show();
+                    }
+                    
+                    $('#aircraftModal').modal('show');
                 } else {
-                    $('#modalTitle').text('Edit Aircraft');
-                    $('#aircraftForm input, #aircraftForm select, #aircraftForm textarea').prop('disabled', false);
-                    $('#saveAircraft').show();
+                    alert('Error: ' + data.error);
                 }
-                
-                $('#aircraftModal').modal('show');
-            } else {
-                alert('Error: ' + response.error);
-            }
-        });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error occurred while loading aircraft data');
+            });
     }
     
     // Save aircraft changes
@@ -338,25 +352,45 @@ $(document).ready(function() {
             aircraft_type_id: $('#aircraft_type_id').val()
         };
         
-        $.ajax({
-            url: `/aircraft/${currentAircraftId}/update/`,
+        fetch(`/aircraft/${currentAircraftId}/update/`, {
             method: 'POST',
-            data: JSON.stringify(formData),
-            contentType: 'application/json',
-            success: function(response) {
-                if (response.success) {
-                    alert(response.message);
-                    $('#aircraftModal').modal('hide');
-                    location.reload();
-                } else {
-                    alert('Error: ' + response.error);
-                }
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
             },
-            error: function() {
-                alert('Error occurred while updating aircraft');
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                $('#aircraftModal').modal('hide');
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
             }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error occurred while updating aircraft');
         });
     });
+    
+    // Helper function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
 });
 </script>
 {% endblock %}

@@ -38,5 +38,16 @@ urlpatterns = [
     path('owners/<int:owner_id>/update/', views.update_aircraft_owner, name='update_aircraft_owner'),
     path('owners/<int:owner_id>/delete/', views.delete_aircraft_owner, name='delete_aircraft_owner'),
 
+    # Main aircraft list view
+    path('aircraft/', views.aircraft_list, name='aircraft_list'),
+    
+    # AJAX endpoints
+    path('aircraft/<int:aircraft_id>/detail/', views.aircraft_detail_ajax, name='aircraft_detail_ajax'),
+    path('aircraft/<int:aircraft_id>/update/', views.aircraft_update_ajax, name='aircraft_update_ajax'),
+    path('aircraft/<int:aircraft_id>/delete/', views.aircraft_delete_ajax, name='aircraft_delete_ajax'),
+    
+    # Dropdown data endpoint
+    path('aircraft/dropdown-data/', views.get_dropdown_data, name='aircraft_dropdown_data'),
+
     
 ]
