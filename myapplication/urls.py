@@ -86,5 +86,10 @@ urlpatterns = [
     path('leasing-inquiries/<int:inquiry_id>/detail/', views.leasing_inquiry_detail, name='leasing_inquiry_detail'),
     path('leasing-inquiries/<int:inquiry_id>/update/', views.update_leasing_inquiry, name='update_leasing_inquiry'),
     path('leasing-inquiries/<int:inquiry_id>/delete/', views.delete_leasing_inquiry, name='delete_leasing_inquiry'),
+
+    path('group-inquiries/', views.group_inquiry_list, name='group_inquiry_list'),
+    path('group-inquiries/<int:inquiry_id>/detail/', views.group_inquiry_detail, name='group_inquiry_detail'),
+    path('group-inquiries/<int:inquiry_id>/update/', views.update_group_inquiry, name='update_group_inquiry'),
+    path('group-inquiries/<int:inquiry_id>/delete/', views.delete_group_inquiry, name='delete_group_inquiry'),
   
 ]
