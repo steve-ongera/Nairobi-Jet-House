@@ -3061,3 +3061,123 @@ def delete_admin(request, admin_id):
         return JsonResponse({'success': True, 'message': 'Admin deleted successfully'})
     except Exception as e:
         return JsonResponse({'success': False, 'message': str(e)}, status=400)
+    
+
+from django.shortcuts import render
+from django.db.models import Sum, Count, F, Value, CharField
+from django.db.models.functions import Concat
+from django.utils import timezone
+from datetime import timedelta
+from .models import Booking, FlightLeg, Aircraft, OwnerPayout
+from django.db.models.functions import TruncMonth
+
+
+def financial_dashboard(request):
+    # Calculate date range (last 12 months)
+    end_date = timezone.now()
+    start_date = end_date - timedelta(days=365)
+    
+    # Calculate previous period for growth comparison
+    previous_start_date = start_date - timedelta(days=365)
+    previous_end_date = start_date
+    
+    # 1. Financial Performance (Last 12 months)
+    monthly_revenue = (
+        Booking.objects
+        .filter(created_at__range=[start_date, end_date])
+        .annotate(month=TruncMonth('created_at'))
+        .values('month')
+        .annotate(
+            total_revenue=Sum('total_price'),
+            commission=Sum('agent_commission'),
+            owner_earnings=Sum('owner_earnings')
+        )
+        .order_by('month')
+    )
+    
+    # 2. Busiest Travel Months (Last 12 months)
+    monthly_travel = (
+        FlightLeg.objects
+        .filter(departure_datetime__range=[start_date, end_date])
+        .annotate(month=TruncMonth('departure_datetime'))
+        .values('month')
+        .annotate(total_flights=Count('id'))
+        .order_by('month')
+    )
+    
+    # 3. Top Performing Aircraft
+    top_aircraft = (
+        Aircraft.objects
+        .annotate(
+            total_bookings=Count('bookings'),
+            total_revenue=Sum('bookings__total_price')
+        )
+        .order_by('-total_revenue')[:5]
+    )
+    
+    # 4. Most Popular Flight Legs - FIXED with Concat
+    popular_legs = (
+        FlightLeg.objects
+        .values('departure_airport__icao_code', 'arrival_airport__icao_code')
+        .annotate(
+            total_flights=Count('id'),
+            route_name=Concat(
+                'departure_airport__icao_code',
+                Value(' → '),
+                'arrival_airport__icao_code',
+                output_field=CharField()
+            )
+        )
+        .order_by('-total_flights')[:10]
+    )
+    
+    # 5. Additional metrics for the dashboard
+    active_aircraft_count = Aircraft.objects.filter(is_active=True).count()
+    
+    # Previous period data for growth calculations
+    previous_revenue = (
+        Booking.objects
+        .filter(created_at__range=[previous_start_date, previous_end_date])
+        .aggregate(total=Sum('total_price'))['total'] or 0
+    )
+    
+    previous_flights = (
+        FlightLeg.objects
+        .filter(departure_datetime__range=[previous_start_date, previous_end_date])
+        .count()
+    )
+    
+    previous_routes = (
+        FlightLeg.objects
+        .filter(departure_datetime__range=[previous_start_date, previous_end_date])
+        .values('departure_airport__icao_code', 'arrival_airport__icao_code')
+        .distinct()
+        .count()
+    )
+    
+    # Instead of separate context variables, create one dashboard_data dict
+    dashboard_data = {
+        'monthly_revenue': list(monthly_revenue),
+        'monthly_travel': list(monthly_travel),
+        'top_aircraft': list(top_aircraft.values('registration_number', 'model_name', 'total_revenue')),
+        'popular_legs': list(popular_legs),
+        'active_aircraft_count': active_aircraft_count,
+        'previous_revenue_total': previous_revenue,
+        'previous_flights_total': previous_flights,
+        'previous_routes_count': previous_routes,
+    }
+    
+    context = {
+        'dashboard_data': dashboard_data,
+        # Keep individual variables if other parts of template need them
+        'monthly_revenue': list(monthly_revenue),
+        'monthly_travel': list(monthly_travel),
+        'top_aircraft': list(top_aircraft.values('registration_number', 'model_name', 'total_revenue')),
+        'popular_legs': list(popular_legs),
+        'active_aircraft_count': active_aircraft_count,
+        'previous_revenue_total': previous_revenue,
+        'previous_flights_total': previous_flights,
+        'previous_routes_count': previous_routes,
+    }
+    
+    return render(request, 'dashboard/financial_dashboard.html', context)

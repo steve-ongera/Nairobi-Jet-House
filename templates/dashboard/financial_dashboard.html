@@ -1,0 +1,515 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Financial Dashboard{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+    <h1>Financial & Operational Dashboard</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Home</a></li>
+            <li class="breadcrumb-item active">Dashboard</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="row">
+        <!-- Revenue Trend Chart -->
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Revenue Performance (Last 12 Months)</h5>
+                    <div class="chart-container">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Flight Volume Chart -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Flight Volume by Month</h5>
+                    <div class="chart-container">
+                        <canvas id="flightVolumeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Aircraft Chart -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Top Performing Aircraft</h5>
+                    <div class="chart-container">
+                        <canvas id="aircraftRevenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Popular Routes Chart -->
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Most Popular Flight Legs</h5>
+                    <div class="chart-container">
+                        <canvas id="popularRoutesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics Cards -->
+    <div class="row">
+        <div class="col-lg-3 col-md-6">
+            <div class="card info-card revenue-card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Revenue <span>| Last 12 Months</span></h5>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-currency-dollar"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h6 id="totalRevenue">$0</h6>
+                            <span class="text-success small pt-1 fw-bold" id="revenueGrowth">0%</span>
+                            <span class="text-muted small pt-2 ps-1">vs previous period</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card info-card flights-card">
+                <div class="card-body">
+                    <h5 class="card-title">Total Flights <span>| Last 12 Months</span></h5>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-airplane"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h6 id="totalFlights">0</h6>
+                            <span class="text-success small pt-1 fw-bold" id="flightsGrowth">0%</span>
+                            <span class="text-muted small pt-2 ps-1">vs previous period</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card info-card aircraft-card">
+                <div class="card-body">
+                    <h5 class="card-title">Active Aircraft <span>| Currently</span></h5>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-airplane-fill"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h6 id="activeAircraft">0</h6>
+                            <span class="text-success small pt-1 fw-bold">100%</span>
+                            <span class="text-muted small pt-2 ps-1">utilization</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6">
+            <div class="card info-card routes-card">
+                <div class="card-body">
+                    <h5 class="card-title">Unique Routes <span>| Last 12 Months</span></h5>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-signpost-split"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h6 id="uniqueRoutes">0</h6>
+                            <span class="text-success small pt-1 fw-bold" id="routesGrowth">0%</span>
+                            <span class="text-muted small pt-2 ps-1">vs previous period</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Include jQuery first -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+<!-- Hidden data for debugging -->
+<script id="django-data" type="application/json">
+{
+    "monthly_revenue": {{ monthly_revenue|default:"[]"|safe }},
+    "monthly_travel": {{ monthly_travel|default:"[]"|safe }},
+    "top_aircraft": {{ top_aircraft|default:"[]"|safe }},
+    "popular_legs": {{ popular_legs|default:"[]"|safe }},
+    "active_aircraft_count": {{ active_aircraft_count|default:0 }},
+    "previous_revenue_total": {{ previous_revenue_total|default:0 }},
+    "previous_flights_total": {{ previous_flights_total|default:0 }},
+    "previous_routes_count": {{ previous_routes_count|default:0 }}
+}
+</script>
+
+<script>
+$(document).ready(function() {
+    // Debug: Check if data is loading
+    console.log('Dashboard initializing...');
+    
+    try {
+        // Get data from JSON script tag
+        const djangoData = JSON.parse(document.getElementById('django-data').textContent);
+        console.log('Django data loaded:', djangoData);
+        
+        // Data from Django context
+        const monthlyRevenueData = djangoData.monthly_revenue || [];
+        const monthlyTravelData = djangoData.monthly_travel || [];
+        const topAircraftData = djangoData.top_aircraft || [];
+        const popularLegsData = djangoData.popular_legs || [];
+
+        console.log('Monthly revenue data:', monthlyRevenueData);
+        console.log('Monthly travel data:', monthlyTravelData);
+
+        // Check if we have data
+        if (monthlyRevenueData.length === 0) {
+            console.warn('No revenue data found');
+            $('#revenueChart').parent().html('<p class="text-center text-muted">No revenue data available</p>');
+        }
+
+        // Process data for charts
+        const revenueLabels = monthlyRevenueData.map(item => {
+            const date = new Date(item.month);
+            return date.toLocaleString('default', { month: 'short', year: 'numeric' });
+        });
+        const revenueTotals = monthlyRevenueData.map(item => parseFloat(item.total_revenue) || 0);
+        const commissionTotals = monthlyRevenueData.map(item => parseFloat(item.commission) || 0);
+        const ownerEarnings = monthlyRevenueData.map(item => parseFloat(item.owner_earnings) || 0);
+
+        const travelLabels = monthlyTravelData.map(item => {
+            const date = new Date(item.month);
+            return date.toLocaleString('default', { month: 'short', year: 'numeric' });
+        });
+        const flightCounts = monthlyTravelData.map(item => item.total_flights || 0);
+
+        const aircraftLabels = topAircraftData.map(item => `${item.registration_number} (${item.model_name})`);
+        const aircraftRevenue = topAircraftData.map(item => parseFloat(item.total_revenue) || 0);
+
+        const routeLabels = popularLegsData.map(item => item.route_name);
+        const routeCounts = popularLegsData.map(item => item.total_flights);
+
+        // Calculate key metrics
+        const totalRevenue = revenueTotals.reduce((a, b) => a + b, 0);
+        const totalFlights = flightCounts.reduce((a, b) => a + b, 0);
+        const uniqueRoutes = popularLegsData.length;
+        const activeAircraft = djangoData.active_aircraft_count;
+
+        // Calculate growth compared to previous period
+        const previousRevenue = djangoData.previous_revenue_total || 0;
+        const previousFlights = djangoData.previous_flights_total || 0;
+        const previousRoutes = djangoData.previous_routes_count || 0;
+
+        const revenueGrowth = previousRevenue ? ((totalRevenue - previousRevenue) / previousRevenue * 100).toFixed(1) : 0;
+        const flightsGrowth = previousFlights ? ((totalFlights - previousFlights) / previousFlights * 100).toFixed(1) : 0;
+        const routesGrowth = previousRoutes ? ((uniqueRoutes - previousRoutes) / previousRoutes * 100).toFixed(1) : 0;
+
+        // Update metric cards
+        $('#totalRevenue').text('$' + totalRevenue.toLocaleString('en-US', {maximumFractionDigits: 0}));
+        $('#totalFlights').text(totalFlights.toLocaleString());
+        $('#uniqueRoutes').text(uniqueRoutes);
+        $('#activeAircraft').text(activeAircraft);
+        
+        $('#revenueGrowth').text(revenueGrowth + '%');
+        $('#flightsGrowth').text(flightsGrowth + '%');
+        $('#routesGrowth').text(routesGrowth + '%');
+
+        // Set growth indicator colors
+        setGrowthIndicator('revenueGrowth', revenueGrowth);
+        setGrowthIndicator('flightsGrowth', flightsGrowth);
+        setGrowthIndicator('routesGrowth', routesGrowth);
+
+        function setGrowthIndicator(elementId, growth) {
+            const element = $('#' + elementId);
+            element.removeClass('text-success text-danger');
+            if (growth > 0) {
+                element.addClass('text-success');
+                element.text('+' + growth + '%');
+            } else if (growth < 0) {
+                element.addClass('text-danger');
+                element.text(growth + '%');
+            } else {
+                element.text('0%');
+            }
+        }
+
+        // Initialize charts only if canvas elements exist
+        const revenueCanvas = document.getElementById('revenueChart');
+        if (revenueCanvas && revenueLabels.length > 0) {
+            console.log('Creating revenue chart...');
+            const revenueCtx = revenueCanvas.getContext('2d');
+            const revenueChart = new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: revenueLabels,
+                    datasets: [
+                        {
+                            label: 'Total Revenue',
+                            data: revenueTotals,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Owner Earnings',
+                            data: ownerEarnings,
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Company Commission',
+                            data: commissionTotals,
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': $' + context.raw.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Flight Volume Chart
+        const flightVolumeCanvas = document.getElementById('flightVolumeChart');
+        if (flightVolumeCanvas && travelLabels.length > 0) {
+            console.log('Creating flight volume chart...');
+            const flightVolumeCtx = flightVolumeCanvas.getContext('2d');
+            const flightVolumeChart = new Chart(flightVolumeCtx, {
+                type: 'bar',
+                data: {
+                    labels: travelLabels,
+                    datasets: [{
+                        label: 'Number of Flights',
+                        data: flightCounts,
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.raw + ' flights';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Top Aircraft Chart
+        const aircraftRevenueCanvas = document.getElementById('aircraftRevenueChart');
+        if (aircraftRevenueCanvas && aircraftLabels.length > 0) {
+            console.log('Creating aircraft revenue chart...');
+            const aircraftRevenueCtx = aircraftRevenueCanvas.getContext('2d');
+            const aircraftRevenueChart = new Chart(aircraftRevenueCtx, {
+                type: 'bar',
+                data: {
+                    labels: aircraftLabels,
+                    datasets: [{
+                        label: 'Revenue Generated',
+                        data: aircraftRevenue,
+                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return '$' + context.raw.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Popular Routes Chart
+        const popularRoutesCanvas = document.getElementById('popularRoutesChart');
+        if (popularRoutesCanvas && routeLabels.length > 0) {
+            console.log('Creating popular routes chart...');
+            const popularRoutesCtx = popularRoutesCanvas.getContext('2d');
+            const popularRoutesChart = new Chart(popularRoutesCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: routeLabels,
+                    datasets: [{
+                        data: routeCounts,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 206, 86, 0.7)',
+                            'rgba(75, 192, 192, 0.7)',
+                            'rgba(153, 102, 255, 0.7)',
+                            'rgba(255, 159, 64, 0.7)',
+                            'rgba(199, 199, 199, 0.7)',
+                            'rgba(83, 102, 255, 0.7)',
+                            'rgba(40, 159, 64, 0.7)',
+                            'rgba(210, 99, 132, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 159, 64, 1)',
+                            'rgba(199, 199, 199, 1)',
+                            'rgba(83, 102, 255, 1)',
+                            'rgba(40, 159, 64, 1)',
+                            'rgba(210, 99, 132, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ' + context.raw + ' flights';
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        }
+
+        console.log('Dashboard initialization complete');
+
+    } catch (error) {
+        console.error('Error initializing dashboard:', error);
+        // Show error message to user
+        $('.chart-container').html('<div class="alert alert-danger">Error loading dashboard data. Please check the console for details.</div>');
+    }
+});
+</script>
+
+<style>
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+.card {
+    margin-bottom: 20px;
+}
+.info-card {
+    border-left: 4px solid #4e73df;
+}
+.info-card .card-icon {
+    font-size: 2rem;
+    color: #dddfeb;
+    background: #4e73df;
+}
+.revenue-card .card-icon {
+    background: #1cc88a !important;
+}
+.flights-card .card-icon {
+    background: #36b9cc !important;
+}
+.aircraft-card .card-icon {
+    background: #e74a3b !important;
+}
+.routes-card .card-icon {
+    background: #f6c23e !important;
+}
+</style>
+{% endblock %}

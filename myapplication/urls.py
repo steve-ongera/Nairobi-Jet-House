@@ -29,6 +29,7 @@ urlpatterns = [
 
     #admin application development product 2
     path('admin-dashboard/' , views.admin_dashboard , name='admin_dashboard'),
+    path('financial-dashboard/', views.financial_dashboard, name='financial_dashboard'),
     path('admin-login-dasboard/' , views.admin_login_view , name='admin-login'),
     path('adminpage/logout/', views.admin_logout_view, name='admin_logout'),
     path('clients/', views.client_list, name='client_list'),
