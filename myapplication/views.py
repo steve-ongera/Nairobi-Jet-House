@@ -1731,3 +1731,345 @@ def get_dropdown_data(request):
         })
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+    
+# views.py
+# views.py
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.conf import settings
+from django.core.files.storage import default_storage
+import json
+import os
+from .models import AircraftType
+
+
+def aircraft_types_view(request):
+    """Main view for aircraft types management page"""
+    try:
+        # Get search parameters
+        search = request.GET.get('search', '')
+        sort_by = request.GET.get('sort_by', 'name')
+        capacity_filter = request.GET.get('capacity_filter', '')
+        
+        # Base queryset
+        queryset = AircraftType.objects.all()
+        
+        # Apply search filter
+        if search:
+            queryset = queryset.filter(
+                Q(name__icontains=search) | Q(description__icontains=search)
+            )
+        
+        # Apply capacity filter
+        if capacity_filter:
+            if capacity_filter == 'small':
+                queryset = queryset.filter(passenger_capacity__lte=10)
+            elif capacity_filter == 'medium':
+                queryset = queryset.filter(passenger_capacity__gt=10, passenger_capacity__lte=50)
+            elif capacity_filter == 'large':
+                queryset = queryset.filter(passenger_capacity__gt=50)
+        
+        # Apply sorting
+        valid_sort_fields = ['name', 'passenger_capacity', 'range_nautical_miles', 'speed_knots']
+        if sort_by in valid_sort_fields:
+            if sort_by == 'name':
+                queryset = queryset.order_by('name')
+            else:
+                queryset = queryset.order_by(f'-{sort_by}')  # Descending for numeric fields
+        
+        # Convert to list of dictionaries for JavaScript
+        aircraft_data = []
+        for aircraft in queryset:
+            aircraft_data.append({
+                'id': aircraft.id,
+                'name': aircraft.name,
+                'description': aircraft.description,
+                'image': aircraft.image.url if aircraft.image else None,
+                'passenger_capacity': aircraft.passenger_capacity,
+                'range_nautical_miles': aircraft.range_nautical_miles,
+                'speed_knots': aircraft.speed_knots,
+            })
+        
+        context = {
+            'aircraft_types': queryset,  # For template rendering
+            'aircraft_data_json': json.dumps(aircraft_data),  # For JavaScript
+            'search': search,
+            'sort_by': sort_by,
+            'capacity_filter': capacity_filter,
+        }
+        
+        return render(request, 'aircraft_types/aircraft_types.html', context)
+    
+    except Exception as e:
+        # If there's an error, still render the template but with empty data
+        context = {
+            'aircraft_types': AircraftType.objects.none(),
+            'aircraft_data_json': json.dumps([]),
+            'error_message': str(e),
+        }
+        return render(request, 'aircraft_types/aircraft_types.html', context)
+
+
+@require_http_methods(["GET"])
+def aircraft_types_api_list(request):
+    """API endpoint to get all aircraft types"""
+    try:
+        # Get search parameters
+        search = request.GET.get('search', '')
+        sort_by = request.GET.get('sort_by', 'name')
+        capacity_filter = request.GET.get('capacity_filter', '')
+        
+        # Base queryset
+        queryset = AircraftType.objects.all()
+        
+        # Apply search filter
+        if search:
+            queryset = queryset.filter(
+                Q(name__icontains=search) | Q(description__icontains=search)
+            )
+        
+        # Apply capacity filter
+        if capacity_filter:
+            if capacity_filter == 'small':
+                queryset = queryset.filter(passenger_capacity__lte=10)
+            elif capacity_filter == 'medium':
+                queryset = queryset.filter(passenger_capacity__gt=10, passenger_capacity__lte=50)
+            elif capacity_filter == 'large':
+                queryset = queryset.filter(passenger_capacity__gt=50)
+        
+        # Apply sorting
+        valid_sort_fields = ['name', 'passenger_capacity', 'range_nautical_miles', 'speed_knots']
+        if sort_by in valid_sort_fields:
+            if sort_by == 'name':
+                queryset = queryset.order_by('name')
+            else:
+                queryset = queryset.order_by(f'-{sort_by}')  # Descending for numeric fields
+        
+        # Convert to list of dictionaries
+        aircraft_data = []
+        for aircraft in queryset:
+            aircraft_data.append({
+                'id': aircraft.id,
+                'name': aircraft.name,
+                'description': aircraft.description,
+                'image': aircraft.image.url if aircraft.image else None,
+                'passenger_capacity': aircraft.passenger_capacity,
+                'range_nautical_miles': aircraft.range_nautical_miles,
+                'speed_knots': aircraft.speed_knots,
+            })
+        
+        return JsonResponse(aircraft_data, safe=False)
+    
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@require_http_methods(["GET"])
+def aircraft_type_api_detail(request, pk):
+    """API endpoint to get a specific aircraft type"""
+    try:
+        aircraft = get_object_or_404(AircraftType, pk=pk)
+        
+        data = {
+            'id': aircraft.id,
+            'name': aircraft.name,
+            'description': aircraft.description,
+            'image': aircraft.image.url if aircraft.image else None,
+            'passenger_capacity': aircraft.passenger_capacity,
+            'range_nautical_miles': aircraft.range_nautical_miles,
+            'speed_knots': aircraft.speed_knots,
+        }
+        
+        return JsonResponse(data)
+    
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def aircraft_type_api_create(request):
+    """API endpoint to create a new aircraft type"""
+    try:
+        # Get data from POST request
+        name = request.POST.get('name')
+        description = request.POST.get('description', '')
+        passenger_capacity = request.POST.get('passenger_capacity')
+        range_nautical_miles = request.POST.get('range_nautical_miles')
+        speed_knots = request.POST.get('speed_knots')
+        image = request.FILES.get('image')
+        
+        # Validate required fields
+        if not name or not passenger_capacity or not range_nautical_miles or not speed_knots:
+            return JsonResponse({'error': 'Missing required fields'}, status=400)
+        
+        try:
+            passenger_capacity = int(passenger_capacity)
+            range_nautical_miles = int(range_nautical_miles)
+            speed_knots = int(speed_knots)
+        except ValueError:
+            return JsonResponse({'error': 'Invalid numeric values'}, status=400)
+        
+        # Validate positive values
+        if passenger_capacity <= 0 or range_nautical_miles <= 0 or speed_knots <= 0:
+            return JsonResponse({'error': 'Numeric values must be positive'}, status=400)
+        
+        # Create new aircraft type
+        aircraft = AircraftType.objects.create(
+            name=name,
+            description=description,
+            passenger_capacity=passenger_capacity,
+            range_nautical_miles=range_nautical_miles,
+            speed_knots=speed_knots,
+            image=image
+        )
+        
+        return JsonResponse({
+            'id': aircraft.id,
+            'name': aircraft.name,
+            'description': aircraft.description,
+            'image': aircraft.image.url if aircraft.image else None,
+            'passenger_capacity': aircraft.passenger_capacity,
+            'range_nautical_miles': aircraft.range_nautical_miles,
+            'speed_knots': aircraft.speed_knots,
+            'message': 'Aircraft type created successfully'
+        })
+    
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["PUT", "POST"])
+def aircraft_type_api_update(request, pk):
+    """API endpoint to update an existing aircraft type"""
+    try:
+        aircraft = get_object_or_404(AircraftType, pk=pk)
+        
+        # Get data from request
+        if request.method == 'PUT':
+            # For PUT requests, we need to parse the request body
+            import json
+            try:
+                data = json.loads(request.body)
+                files = {}
+            except:
+                # If JSON parsing fails, try to get from POST data
+                data = request.POST
+                files = request.FILES
+        else:
+            data = request.POST
+            files = request.FILES
+        
+        # Update fields if provided
+        if 'name' in data:
+            aircraft.name = data['name']
+        
+        if 'description' in data:
+            aircraft.description = data['description']
+        
+        if 'passenger_capacity' in data:
+            try:
+                capacity = int(data['passenger_capacity'])
+                if capacity <= 0:
+                    return JsonResponse({'error': 'Passenger capacity must be positive'}, status=400)
+                aircraft.passenger_capacity = capacity
+            except ValueError:
+                return JsonResponse({'error': 'Invalid passenger capacity'}, status=400)
+        
+        if 'range_nautical_miles' in data:
+            try:
+                range_nm = int(data['range_nautical_miles'])
+                if range_nm <= 0:
+                    return JsonResponse({'error': 'Range must be positive'}, status=400)
+                aircraft.range_nautical_miles = range_nm
+            except ValueError:
+                return JsonResponse({'error': 'Invalid range value'}, status=400)
+        
+        if 'speed_knots' in data:
+            try:
+                speed = int(data['speed_knots'])
+                if speed <= 0:
+                    return JsonResponse({'error': 'Speed must be positive'}, status=400)
+                aircraft.speed_knots = speed
+            except ValueError:
+                return JsonResponse({'error': 'Invalid speed value'}, status=400)
+        
+        # Handle image update
+        if 'image' in files:
+            # Delete old image if exists
+            if aircraft.image:
+                old_image_path = aircraft.image.path
+                if os.path.exists(old_image_path):
+                    os.remove(old_image_path)
+            
+            aircraft.image = files['image']
+        
+        aircraft.save()
+        
+        return JsonResponse({
+            'id': aircraft.id,
+            'name': aircraft.name,
+            'description': aircraft.description,
+            'image': aircraft.image.url if aircraft.image else None,
+            'passenger_capacity': aircraft.passenger_capacity,
+            'range_nautical_miles': aircraft.range_nautical_miles,
+            'speed_knots': aircraft.speed_knots,
+            'message': 'Aircraft type updated successfully'
+        })
+    
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["DELETE"])
+def aircraft_type_api_delete(request, pk):
+    """API endpoint to delete an aircraft type"""
+    try:
+        aircraft = get_object_or_404(AircraftType, pk=pk)
+        
+        # Delete associated image file if exists
+        if aircraft.image:
+            image_path = aircraft.image.path
+            if os.path.exists(image_path):
+                os.remove(image_path)
+        
+        aircraft_name = aircraft.name
+        aircraft.delete()
+        
+        return JsonResponse({
+            'message': f'Aircraft type "{aircraft_name}" deleted successfully'
+        })
+    
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+# Combined API view for handling multiple HTTP methods
+@csrf_exempt
+def aircraft_types_api(request):
+    """Combined API endpoint for aircraft types"""
+    if request.method == 'GET':
+        return aircraft_types_api_list(request)
+    elif request.method == 'POST':
+        return aircraft_type_api_create(request)
+    else:
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+
+@csrf_exempt  
+def aircraft_type_api(request, pk):
+    """Combined API endpoint for individual aircraft type"""
+    if request.method == 'GET':
+        return aircraft_type_api_detail(request, pk)
+    elif request.method in ['PUT', 'POST']:
+        return aircraft_type_api_update(request, pk)
+    elif request.method == 'DELETE':
+        return aircraft_type_api_delete(request, pk)
+    else:
+        return JsonResponse({'error': 'Method not allowed'}, status=405)

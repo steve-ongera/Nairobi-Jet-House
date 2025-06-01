@@ -1,0 +1,691 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Aircraft Types Management{% endblock %}
+{% block content %}
+
+<style>
+    .aircraft-card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        cursor: pointer;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        overflow: hidden;
+        background: white;
+        margin-bottom: 20px;
+    }
+    
+    .aircraft-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .aircraft-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        background: #f8f9fa;
+    }
+    
+    .aircraft-info {
+        padding: 15px;
+    }
+    
+    .aircraft-title {
+        font-size: 1.2em;
+        font-weight: bold;
+        margin-bottom: 8px;
+        color: #333;
+    }
+    
+    .aircraft-specs {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 10px;
+        font-size: 0.9em;
+        color: #666;
+    }
+    
+    .spec-item {
+        text-align: center;
+    }
+    
+    .spec-value {
+        font-weight: bold;
+        color: #007bff;
+    }
+    
+    .action-buttons {
+        padding: 10px 15px;
+        border-top: 1px solid #eee;
+        background: #f8f9fa;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+    }
+    
+    .btn-sm {
+        padding: 5px 12px;
+        font-size: 0.875rem;
+    }
+    
+    .modal-header {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+    }
+    
+    .modal-header .btn-close {
+        filter: invert(1);
+    }
+    
+    .detail-row {
+        border-bottom: 1px solid #eee;
+        padding: 10px 0;
+    }
+    
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+    
+    .detail-label {
+        font-weight: bold;
+        color: #495057;
+    }
+    
+    .detail-value {
+        color: #6c757d;
+    }
+    
+    .loading-spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #007bff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-right: 10px;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .no-data {
+        text-align: center;
+        padding: 60px 20px;
+        color: #6c757d;
+    }
+    
+    .no-data i {
+        font-size: 4em;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+    
+    .search-container {
+        margin-bottom: 30px;
+    }
+    
+    .filters-container {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .alert {
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+</style>
+
+
+
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1">Aircraft Types Management</h1>
+                    <p class="text-muted">Manage different types of aircraft in your fleet</p>
+                </div>
+                <button class="btn btn-primary" onclick="showAddForm()">
+                    <i class="fas fa-plus me-2"></i>Add New Aircraft Type
+                </button>
+            </div>
+
+            <!-- Search and Filters -->
+            <div class="filters-container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" class="form-control" id="searchInput" placeholder="Search aircraft types...">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="sortBy">
+                            <option value="name">Sort by Name</option>
+                            <option value="passenger_capacity">Sort by Capacity</option>
+                            <option value="range_nautical_miles">Sort by Range</option>
+                            <option value="speed_knots">Sort by Speed</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="filterCapacity">
+                            <option value="">All Capacities</option>
+                            <option value="small">Small (1-10)</option>
+                            <option value="medium">Medium (11-50)</option>
+                            <option value="large">Large (50+)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alerts -->
+            <div id="alertContainer"></div>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="text-center py-5" style="display: none;">
+                <div class="loading-spinner"></div>
+                <span>Loading aircraft types...</span>
+            </div>
+
+            <!-- Aircraft Types Grid -->
+            <div id="aircraftGrid" class="row">
+                <!-- Aircraft cards will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal fade" id="detailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plane me-2"></i>
+                    <span id="detailTitle">Aircraft Details</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="detailContent">
+                <!-- Details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-warning" id="editBtn">
+                    <i class="fas fa-edit me-2"></i>Edit
+                </button>
+                <button type="button" class="btn btn-danger" id="deleteBtn">
+                    <i class="fas fa-trash me-2"></i>Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Form Modal -->
+<div class="modal fade" id="formModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus me-2"></i>
+                    <span id="formTitle">Add Aircraft Type</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="aircraftForm" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Name *</label>
+                                <input type="text" class="form-control" id="name" name="name" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="passenger_capacity" class="form-label">Passenger Capacity *</label>
+                                <input type="number" class="form-control" id="passenger_capacity" name="passenger_capacity" min="1" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="range_nautical_miles" class="form-label">Range (Nautical Miles) *</label>
+                                <input type="number" class="form-control" id="range_nautical_miles" name="range_nautical_miles" min="1" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="speed_knots" class="form-label">Speed (Knots) *</label>
+                                <input type="number" class="form-control" id="speed_knots" name="speed_knots" min="1" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="image" class="form-label">Image</label>
+                        <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                        <div id="currentImage" class="mt-2" style="display: none;">
+                            <small class="text-muted">Current image:</small>
+                            <img id="currentImagePreview" src="" alt="Current image" class="img-thumbnail mt-1" style="max-width: 200px;">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <span id="submitText">Save Aircraft Type</span>
+                        <div class="loading-spinner" id="submitSpinner" style="display: none;"></div>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Confirm Delete
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this aircraft type?</p>
+                <p><strong id="deleteItemName"></strong></p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                    <i class="fas fa-trash me-2"></i>Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let aircraftTypes = [];
+let currentEditId = null;
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if we have initial data from the server
+    {% if aircraft_data_json %}
+        aircraftTypes = {{ aircraft_data_json|safe }};
+        filterAndDisplay();
+        showLoading(false);
+    {% else %}
+        loadAircraftTypes();
+    {% endif %}
+    
+    setupEventListeners();
+    
+    // Set initial form values if they exist
+    {% if search %}
+        document.getElementById('searchInput').value = '{{ search }}';
+    {% endif %}
+    {% if sort_by %}
+        document.getElementById('sortBy').value = '{{ sort_by }}';
+    {% endif %}
+    {% if capacity_filter %}
+        document.getElementById('filterCapacity').value = '{{ capacity_filter }}';
+    {% endif %}
+});
+
+function setupEventListeners() {
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', filterAndDisplay);
+    document.getElementById('sortBy').addEventListener('change', filterAndDisplay);
+    document.getElementById('filterCapacity').addEventListener('change', filterAndDisplay);
+    
+    // Form submission
+    document.getElementById('aircraftForm').addEventListener('submit', handleFormSubmit);
+    
+    // Delete confirmation
+    document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
+}
+
+// Load all aircraft types
+function loadAircraftTypes() {
+    showLoading(true);
+    
+    fetch('/api/aircraft-types/')
+        .then(response => response.json())
+        .then(data => {
+            aircraftTypes = data;
+            filterAndDisplay();
+            showLoading(false);
+        })
+        .catch(error => {
+            console.error('Error loading aircraft types:', error);
+            showAlert('Error loading aircraft types. Please try again.', 'danger');
+            showLoading(false);
+        });
+}
+
+// Filter and display aircraft types
+function filterAndDisplay() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const sortBy = document.getElementById('sortBy').value;
+    const capacityFilter = document.getElementById('filterCapacity').value;
+    
+    let filtered = aircraftTypes.filter(aircraft => {
+        const matchesSearch = aircraft.name.toLowerCase().includes(searchTerm) || 
+                            aircraft.description.toLowerCase().includes(searchTerm);
+        
+        let matchesCapacity = true;
+        if (capacityFilter) {
+            const capacity = aircraft.passenger_capacity;
+            switch(capacityFilter) {
+                case 'small':
+                    matchesCapacity = capacity <= 10;
+                    break;
+                case 'medium':
+                    matchesCapacity = capacity > 10 && capacity <= 50;
+                    break;
+                case 'large':
+                    matchesCapacity = capacity > 50;
+                    break;
+            }
+        }
+        
+        return matchesSearch && matchesCapacity;
+    });
+    
+    // Sort results
+    filtered.sort((a, b) => {
+        if (sortBy === 'name') {
+            return a.name.localeCompare(b.name);
+        } else {
+            return b[sortBy] - a[sortBy];
+        }
+    });
+    
+    displayAircraftTypes(filtered);
+}
+
+// Display aircraft types in grid
+function displayAircraftTypes(aircraftList) {
+    const grid = document.getElementById('aircraftGrid');
+    
+    if (aircraftList.length === 0) {
+        grid.innerHTML = `
+            <div class="col-12">
+                <div class="no-data">
+                    <i class="fas fa-plane"></i>
+                    <h4>No aircraft types found</h4>
+                    <p>Try adjusting your search criteria or add a new aircraft type.</p>
+                </div>
+            </div>
+        `;
+        return;
+    }
+    
+    grid.innerHTML = aircraftList.map(aircraft => `
+        <div class="col-lg-4 col-md-6 col-sm-12">
+            <div class="aircraft-card" onclick="viewDetails(${aircraft.id})">
+                <img src="${aircraft.image || '/static/img/default-aircraft.png'}" 
+                     alt="${aircraft.name}" class="aircraft-image">
+                <div class="aircraft-info">
+                    <div class="aircraft-title">${aircraft.name}</div>
+                    <div class="text-muted small">
+                        ${aircraft.description ? aircraft.description.substring(0, 100) + '...' : 'No description available'}
+                    </div>
+                    <div class="aircraft-specs">
+                        <div class="spec-item">
+                            <div class="spec-value">${aircraft.passenger_capacity}</div>
+                            <div>Passengers</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-value">${aircraft.range_nautical_miles.toLocaleString()}</div>
+                            <div>NM Range</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-value">${aircraft.speed_knots}</div>
+                            <div>Knots</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-outline-primary btn-sm" onclick="event.stopPropagation(); viewDetails(${aircraft.id})">
+                        <i class="fas fa-eye me-1"></i>View
+                    </button>
+                    <button class="btn btn-outline-warning btn-sm" onclick="event.stopPropagation(); editAircraft(${aircraft.id})">
+                        <i class="fas fa-edit me-1"></i>Edit
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm" onclick="event.stopPropagation(); deleteAircraft(${aircraft.id})">
+                        <i class="fas fa-trash me-1"></i>Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// View aircraft details
+function viewDetails(id) {
+    const aircraft = aircraftTypes.find(a => a.id === id);
+    if (!aircraft) return;
+    
+    document.getElementById('detailTitle').textContent = aircraft.name;
+    document.getElementById('detailContent').innerHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <img src="${aircraft.image || '/static/img/default-aircraft.png'}" 
+                     alt="${aircraft.name}" class="img-fluid rounded">
+            </div>
+            <div class="col-md-6">
+                <div class="detail-row">
+                    <div class="detail-label">Name</div>
+                    <div class="detail-value">${aircraft.name}</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Passenger Capacity</div>
+                    <div class="detail-value">${aircraft.passenger_capacity} passengers</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Range</div>
+                    <div class="detail-value">${aircraft.range_nautical_miles.toLocaleString()} nautical miles</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Cruising Speed</div>
+                    <div class="detail-value">${aircraft.speed_knots} knots</div>
+                </div>
+                <div class="detail-row">
+                    <div class="detail-label">Description</div>
+                    <div class="detail-value">${aircraft.description || 'No description available'}</div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Set up modal action buttons
+    document.getElementById('editBtn').onclick = () => {
+        bootstrap.Modal.getInstance(document.getElementById('detailModal')).hide();
+        editAircraft(id);
+    };
+    document.getElementById('deleteBtn').onclick = () => {
+        bootstrap.Modal.getInstance(document.getElementById('detailModal')).hide();
+        deleteAircraft(id);
+    };
+    
+    new bootstrap.Modal(document.getElementById('detailModal')).show();
+}
+
+// Show add form
+function showAddForm() {
+    currentEditId = null;
+    document.getElementById('formTitle').textContent = 'Add Aircraft Type';
+    document.getElementById('submitText').textContent = 'Save Aircraft Type';
+    document.getElementById('aircraftForm').reset();
+    document.getElementById('currentImage').style.display = 'none';
+    new bootstrap.Modal(document.getElementById('formModal')).show();
+}
+
+// Edit aircraft
+function editAircraft(id) {
+    const aircraft = aircraftTypes.find(a => a.id === id);
+    if (!aircraft) return;
+    
+    currentEditId = id;
+    document.getElementById('formTitle').textContent = 'Edit Aircraft Type';
+    document.getElementById('submitText').textContent = 'Update Aircraft Type';
+    
+    // Populate form
+    document.getElementById('name').value = aircraft.name;
+    document.getElementById('description').value = aircraft.description || '';
+    document.getElementById('passenger_capacity').value = aircraft.passenger_capacity;
+    document.getElementById('range_nautical_miles').value = aircraft.range_nautical_miles;
+    document.getElementById('speed_knots').value = aircraft.speed_knots;
+    
+    // Show current image if exists
+    if (aircraft.image) {
+        document.getElementById('currentImage').style.display = 'block';
+        document.getElementById('currentImagePreview').src = aircraft.image;
+    } else {
+        document.getElementById('currentImage').style.display = 'none';
+    }
+    
+    new bootstrap.Modal(document.getElementById('formModal')).show();
+}
+
+// Handle form submission
+function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const submitSpinner = document.getElementById('submitSpinner');
+    
+    submitBtn.disabled = true;
+    submitText.style.display = 'none';
+    submitSpinner.style.display = 'inline-block';
+    
+    const formData = new FormData(e.target);
+    const url = currentEditId ? `/api/aircraft-types/${currentEditId}/` : '/api/aircraft-types/';
+    const method = currentEditId ? 'PUT' : 'POST';
+    
+    fetch(url, {
+        method: method,
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        bootstrap.Modal.getInstance(document.getElementById('formModal')).hide();
+        showAlert(`Aircraft type ${currentEditId ? 'updated' : 'created'} successfully!`, 'success');
+        loadAircraftTypes();
+    })
+    .catch(error => {
+        console.error('Error saving aircraft type:', error);
+        showAlert('Error saving aircraft type. Please try again.', 'danger');
+    })
+    .finally(() => {
+        submitBtn.disabled = false;
+        submitText.style.display = 'inline';
+        submitSpinner.style.display = 'none';
+    });
+}
+
+// Delete aircraft
+function deleteAircraft(id) {
+    const aircraft = aircraftTypes.find(a => a.id === id);
+    if (!aircraft) return;
+    
+    document.getElementById('deleteItemName').textContent = aircraft.name;
+    document.getElementById('confirmDeleteBtn').onclick = () => confirmDelete(id);
+    new bootstrap.Modal(document.getElementById('deleteModal')).show();
+}
+
+// Confirm delete
+function confirmDelete(id) {
+    fetch(`/api/aircraft-types/${id}/`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+            showAlert('Aircraft type deleted successfully!', 'success');
+            loadAircraftTypes();
+        } else {
+            throw new Error('Failed to delete aircraft type');
+        }
+    })
+    .catch(error => {
+        console.error('Error deleting aircraft type:', error);
+        showAlert('Error deleting aircraft type. Please try again.', 'danger');
+    });
+}
+
+// Utility functions
+function showLoading(show) {
+    document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
+    document.getElementById('aircraftGrid').style.display = show ? 'none' : 'block';
+}
+
+function showAlert(message, type) {
+    const alertContainer = document.getElementById('alertContainer');
+    const alertId = 'alert-' + Date.now();
+    
+    alertContainer.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" id="${alertId}">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        const alert = document.getElementById(alertId);
+        if (alert) {
+            bootstrap.Alert.getOrCreateInstance(alert).close();
+        }
+    }, 5000);
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

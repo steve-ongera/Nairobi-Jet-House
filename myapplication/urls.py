@@ -49,5 +49,18 @@ urlpatterns = [
     # Dropdown data endpoint
     path('aircraft/dropdown-data/', views.get_dropdown_data, name='aircraft_dropdown_data'),
 
+    path('aircrafts-types', views.aircraft_types_view, name='aircraft_types'),
+    
+    # API endpoints
+    path('api/aircraft-types/', views.aircraft_types_api, name='aircraft_types_api'),
+    path('api/aircraft-types/<int:pk>/', views.aircraft_type_api, name='aircraft_type_api'),
+
+    path('api/aircraft-types/list/', views.aircraft_types_api_list, name='aircraft_types_list'),
+    path('api/aircraft-types/create/', views.aircraft_type_api_create, name='aircraft_type_create'),
+    path('api/aircraft-types/<int:pk>/detail/', views.aircraft_type_api_detail, name='aircraft_type_detail'),
+    path('api/aircraft-types/<int:pk>/update/', views.aircraft_type_api_update, name='aircraft_type_update'),
+    path('api/aircraft-types/<int:pk>/delete/', views.aircraft_type_api_delete, name='aircraft_type_delete'),
+
+
     
 ]
