@@ -1,0 +1,222 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Client Management{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+    <h1>Client Management</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+            <li class="breadcrumb-item active">Clients</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Client List</h5>
+                    
+                    <!-- Client Table -->
+                    <div class="table-responsive">
+                        <table class="table table-hover datatable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Company</th>
+                                    <th>Verified</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for client in page_obj %}
+                                <tr>
+                                    <td>{{ client.id }}</td>
+                                    <td>{{ client.get_full_name }}</td>
+                                    <td>{{ client.email }}</td>
+                                    <td>{{ client.phone_number }}</td>
+                                    <td>{{ client.company_name|default:"-" }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if client.verified %}success{% else %}warning{% endif %}">
+                                            {% if client.verified %}Verified{% else %}Pending{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary view-client" 
+                                                data-client-id="{{ client.id }}"
+                                                title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1" aria-label="First">
+                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Client Detail Modal -->
+<div class="modal fade" id="clientDetailModal" tabindex="-1" aria-labelledby="clientDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="clientDetailModalLabel">Client Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Full Name:</label>
+                            <p id="client-full-name" class="form-control-static">-</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Email:</label>
+                            <p id="client-email" class="form-control-static">-</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Phone Number:</label>
+                            <p id="client-phone" class="form-control-static">-</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Company:</label>
+                            <p id="client-company" class="form-control-static">-</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Tax ID:</label>
+                            <p id="client-tax-id" class="form-control-static">-</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Verification Status:</label>
+                            <p id="client-verified" class="form-control-static">-</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Date Joined:</label>
+                            <p id="client-date-joined" class="form-control-static">-</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Last Login:</label>
+                            <p id="client-last-login" class="form-control-static">-</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Address:</label>
+                    <p id="client-address" class="form-control-static">-</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Client detail modal handler
+    $('.view-client').click(function() {
+        const clientId = $(this).data('client-id');
+        const modal = new bootstrap.Modal(document.getElementById('clientDetailModal'));
+        
+        // Show loading state
+        $('#clientDetailModal .modal-body p').text('Loading...');
+        
+        // Fetch client details via AJAX
+        $.ajax({
+            url: '/clients/' + clientId + '/detail/',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    const client = response.client;
+                    
+                    // Update modal content
+                    $('#client-full-name').text(client.full_name);
+                    $('#client-email').text(client.email);
+                    $('#client-phone').text(client.phone_number);
+                    $('#client-company').text(client.company_name || '-');
+                    $('#client-tax-id').text(client.tax_id || '-');
+                    $('#client-verified').text(client.verified);
+                    $('#client-address').text(client.address || '-');
+                    $('#client-date-joined').text(client.date_joined);
+                    $('#client-last-login').text(client.last_login);
+                    
+                    // Update modal title
+                    $('#clientDetailModalLabel').text('Client Details: ' + client.full_name);
+                } else {
+                    alert(response.error || 'Failed to load client details');
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('Error fetching client details: ' + error);
+            },
+            complete: function() {
+                modal.show();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
