@@ -1,42 +1,59 @@
 {% extends 'base/base.html' %}
+{% load static %}
 
 {% block title %}Aircraft Management{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
+<div class="pagetitle">
+    <h1>Aircraft Management</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Home</a></li>
+            <li class="breadcrumb-item active">Aircraft</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
     <div class="row">
-        <div class="col-12">
+        <div class="col-lg-12">
             <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="card-title mb-0">Aircraft Management</h3>
-                </div>
                 <div class="card-body">
-                    <!-- Search and Filter Form -->
-                    <form method="GET" class="mb-4">
-                        <div class="row">
-                            <div class="col-md-6">
+                    <h5 class="card-title">Aircraft List</h5>
+                    
+                    <!-- Search and Filter -->
+                    <form method="GET" class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="input-group">
                                 <input type="text" name="search" class="form-control" 
                                        placeholder="Search by registration, model, or owner..." 
                                        value="{{ search }}">
-                            </div>
-                            <div class="col-md-3">
-                                <select name="is_active" class="form-control">
-                                    <option value="">All Status</option>
-                                    <option value="true" {% if is_active == 'true' %}selected{% endif %}>Active Only</option>
-                                    <option value="false" {% if is_active == 'false' %}selected{% endif %}>Inactive Only</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <button type="submit" class="btn btn-primary">Search</button>
-                                <a href="{% url 'aircraft_list' %}" class="btn btn-secondary">Clear</a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-search"></i>
+                                </button>
                             </div>
                         </div>
+                        <div class="col-md-3">
+                            <select name="is_active" class="form-select">
+                                <option value="">All Status</option>
+                                <option value="true" {% if is_active == 'true' %}selected{% endif %}>Active Only</option>
+                                <option value="false" {% if is_active == 'false' %}selected{% endif %}>Inactive Only</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <a href="{% url 'aircraft_list' %}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                            </a>
+                            <button class="btn btn-success" id="addAircraftBtn">
+                                <i class="bi bi-plus-lg"></i> Add Aircraft
+                            </button>
+                        </div>
                     </form>
-
+                    
                     <!-- Aircraft Table -->
                     <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead class="thead-dark">
+                        <table class="table table-hover datatable">
+                            <thead>
                                 <tr>
                                     <th>Registration</th>
                                     <th>Model</th>
@@ -57,17 +74,27 @@
                                     <td>{{ aircraft.owner.get_full_name|default:aircraft.owner.username }}</td>
                                     <td>{{ aircraft.year_manufactured }}</td>
                                     <td>
-                                        {% if aircraft.is_active %}
-                                            <span class="badge badge-success">Active</span>
-                                        {% else %}
-                                            <span class="badge badge-danger">Inactive</span>
-                                        {% endif %}
+                                        <span class="badge bg-{% if aircraft.is_active %}success{% else %}danger{% endif %}">
+                                            {% if aircraft.is_active %}Active{% else %}Inactive{% endif %}
+                                        </span>
                                     </td>
                                     <td>${{ aircraft.hourly_rate }}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-info view-aircraft" data-id="{{ aircraft.id }}">View</button>
-                                        <button class="btn btn-sm btn-warning edit-aircraft" data-id="{{ aircraft.id }}">Edit</button>
-                                        <button class="btn btn-sm btn-danger delete-aircraft" data-id="{{ aircraft.id }}">Delete</button>
+                                        <button class="btn btn-sm btn-primary view-aircraft" 
+                                                data-aircraft-id="{{ aircraft.id }}"
+                                                title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-warning edit-aircraft" 
+                                                data-aircraft-id="{{ aircraft.id }}"
+                                                title="Edit Aircraft">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger delete-aircraft" 
+                                                data-aircraft-id="{{ aircraft.id }}"
+                                                title="Delete Aircraft">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
                                     </td>
                                 </tr>
                                 {% empty %}
@@ -78,33 +105,43 @@
                             </tbody>
                         </table>
                     </div>
-
+                    
                     <!-- Pagination -->
                     {% if aircrafts.has_other_pages %}
-                    <nav aria-label="Aircraft pagination">
+                    <nav aria-label="Page navigation">
                         <ul class="pagination justify-content-center">
                             {% if aircrafts.has_previous %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ aircrafts.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if is_active %}&is_active={{ is_active }}{% endif %}">Previous</a>
-                                </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if is_active %}&is_active={{ is_active }}{% endif %}" aria-label="First">
+                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ aircrafts.previous_page_number }}{% if search %}&search={{ search }}{% endif %}{% if is_active %}&is_active={{ is_active }}{% endif %}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
                             {% endif %}
                             
                             {% for num in aircrafts.paginator.page_range %}
                                 {% if aircrafts.number == num %}
-                                    <li class="page-item active">
-                                        <span class="page-link">{{ num }}</span>
-                                    </li>
-                                {% else %}
-                                    <li class="page-item">
-                                        <a class="page-link" href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}{% if is_active %}&is_active={{ is_active }}{% endif %}">{{ num }}</a>
-                                    </li>
+                                <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                                {% elif num > aircrafts.number|add:'-3' and num < aircrafts.number|add:'3' %}
+                                <li class="page-item"><a class="page-link" href="?page={{ num }}{% if search %}&search={{ search }}{% endif %}{% if is_active %}&is_active={{ is_active }}{% endif %}">{{ num }}</a></li>
                                 {% endif %}
                             {% endfor %}
                             
                             {% if aircrafts.has_next %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ aircrafts.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if is_active %}&is_active={{ is_active }}{% endif %}">Next</a>
-                                </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ aircrafts.next_page_number }}{% if search %}&search={{ search }}{% endif %}{% if is_active %}&is_active={{ is_active }}{% endif %}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ aircrafts.paginator.num_pages }}{% if search %}&search={{ search }}{% endif %}{% if is_active %}&is_active={{ is_active }}{% endif %}" aria-label="Last">
+                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                </a>
+                            </li>
                             {% endif %}
                         </ul>
                     </nav>
@@ -113,284 +150,406 @@
             </div>
         </div>
     </div>
-</div>
+</section>
 
-<!-- Aircraft Modal -->
-<div class="modal fade" id="aircraftModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
+<!-- View Aircraft Modal -->
+<div class="modal fade" id="viewAircraftModal" tabindex="-1" aria-labelledby="viewAircraftModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="modalTitle">Aircraft Details</h5>
-                <button type="button" class="close text-white" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewAircraftModalLabel">Aircraft Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="aircraftForm">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Registration Number</label>
-                                <input type="text" class="form-control" id="registration_number" required>
-                            </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Registration Number:</label>
+                            <p id="aircraft-registration" class="form-control-static">-</p>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Model Name</label>
-                                <input type="text" class="form-control" id="model_name" required>
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Model Name:</label>
+                            <p id="aircraft-model" class="form-control-static">-</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Aircraft Type:</label>
+                            <p id="aircraft-type" class="form-control-static">-</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Owner:</label>
+                            <p id="aircraft-owner" class="form-control-static">-</p>
                         </div>
                     </div>
-                    
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Year Manufactured:</label>
+                            <p id="aircraft-year" class="form-control-static">-</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Base Airport:</label>
+                            <p id="aircraft-base" class="form-control-static">-</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Current Location:</label>
+                            <p id="aircraft-location" class="form-control-static">-</p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Status:</label>
+                            <p id="aircraft-status" class="form-control-static">-</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Hourly Rate:</label>
+                            <p id="aircraft-rate" class="form-control-static">-</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Minimum Hours:</label>
+                            <p id="aircraft-min-hours" class="form-control-static">-</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Features:</label>
+                    <div id="aircraft-features" class="p-3 bg-light rounded">-</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Aircraft Modal -->
+<div class="modal fade" id="editAircraftModal" tabindex="-1" aria-labelledby="editAircraftModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editAircraftModalLabel">Edit Aircraft</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editAircraftForm">
+                <div class="modal-body">
+                    <input type="hidden" id="edit-aircraft-id">
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Aircraft Type</label>
-                                <select class="form-control" id="aircraft_type_id" required>
+                            <div class="mb-3">
+                                <label for="edit-registration" class="form-label">Registration Number</label>
+                                <input type="text" class="form-control" id="edit-registration" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit-model" class="form-label">Model Name</label>
+                                <input type="text" class="form-control" id="edit-model" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit-type" class="form-label">Aircraft Type</label>
+                                <select class="form-select" id="edit-type" required>
                                     <option value="">Select Type</option>
                                 </select>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Owner</label>
-                                <select class="form-control" id="owner_id" required>
+                            <div class="mb-3">
+                                <label for="edit-owner" class="form-label">Owner</label>
+                                <select class="form-select" id="edit-owner" required>
                                     <option value="">Select Owner</option>
                                 </select>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Year Manufactured</label>
-                                <input type="number" class="form-control" id="year_manufactured" min="1900" max="2030" required>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="edit-year" class="form-label">Year Manufactured</label>
+                                <input type="number" class="form-control" id="edit-year" min="1900" max="2030" required>
                             </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Base Airport</label>
-                                <input type="text" class="form-control" id="base_airport" maxlength="10" placeholder="ICAO Code">
+                            <div class="mb-3">
+                                <label for="edit-base" class="form-label">Base Airport (ICAO)</label>
+                                <input type="text" class="form-control" id="edit-base" maxlength="10">
                             </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Current Location</label>
-                                <input type="text" class="form-control" id="current_location" maxlength="10" placeholder="ICAO Code">
+                            <div class="mb-3">
+                                <label for="edit-location" class="form-label">Current Location (ICAO)</label>
+                                <input type="text" class="form-control" id="edit-location" maxlength="10">
                             </div>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Hourly Rate ($)</label>
-                                <input type="number" class="form-control" id="hourly_rate" step="0.01" min="0" required>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Minimum Hours</label>
-                                <input type="number" class="form-control" id="minimum_hours" step="0.1" min="0" required>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Status</label>
-                                <select class="form-control" id="is_active">
+                            <div class="mb-3">
+                                <label for="edit-status" class="form-label">Status</label>
+                                <select class="form-select" id="edit-status">
                                     <option value="true">Active</option>
                                     <option value="false">Inactive</option>
                                 </select>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="form-group">
-                        <label>Features</label>
-                        <textarea class="form-control" id="features" rows="3" placeholder="Aircraft features and amenities"></textarea>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="edit-rate" class="form-label">Hourly Rate ($)</label>
+                                <input type="number" class="form-control" id="edit-rate" step="0.01" min="0" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="edit-min-hours" class="form-label">Minimum Hours</label>
+                                <input type="number" class="form-control" id="edit-min-hours" step="0.1" min="0" required>
+                            </div>
+                        </div>
                     </div>
-                </form>
+                    <div class="mb-3">
+                        <label for="edit-features" class="form-label">Features</label>
+                        <textarea class="form-control" id="edit-features" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteAircraftModal" tabindex="-1" aria-labelledby="deleteAircraftModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteAircraftModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this aircraft?</p>
+                <p class="fw-bold" id="delete-aircraft-info"></p>
+                <p class="text-danger">This action cannot be undone.</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="saveAircraft" style="display: none;">Save Changes</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirm-aircraft-delete">Delete</button>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Add Aircraft Modal (similar to edit but with empty fields) -->
+
 <script>
 $(document).ready(function() {
-    let currentAircraftId = null;
-    let isViewMode = true;
-    
-    // Load dropdown data on page load
-    loadDropdownData();
-    
+    // View Aircraft Modal
+    $('.view-aircraft').click(function() {
+        const aircraftId = $(this).data('aircraft-id');
+        const modal = new bootstrap.Modal(document.getElementById('viewAircraftModal'));
+        
+        // Show loading state
+        $('#viewAircraftModal .modal-body p, #aircraft-features').text('Loading...');
+        
+        // Fetch aircraft details via AJAX
+        $.ajax({
+            url: `/aircraft/${aircraftId}/detail/`,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    const aircraft = response.data;
+                    
+                    // Update modal content
+                    $('#aircraft-registration').text(aircraft.registration_number);
+                    $('#aircraft-model').text(aircraft.model_name);
+                    $('#aircraft-type').text(aircraft.aircraft_type.name);
+                    $('#aircraft-owner').text(aircraft.owner.get_full_name || aircraft.owner.username);
+                    $('#aircraft-year').text(aircraft.year_manufactured);
+                    $('#aircraft-base').text(aircraft.base_airport || '-');
+                    $('#aircraft-location').text(aircraft.current_location || '-');
+                    $('#aircraft-status').html(aircraft.is_active ? 
+                        '<span class="badge bg-success">Active</span>' : 
+                        '<span class="badge bg-danger">Inactive</span>');
+                    $('#aircraft-rate').text('$' + aircraft.hourly_rate);
+                    $('#aircraft-min-hours').text(aircraft.minimum_hours);
+                    $('#aircraft-features').text(aircraft.features || '-');
+                    
+                    // Update modal title
+                    $('#viewAircraftModalLabel').text(`Aircraft: ${aircraft.registration_number}`);
+                } else {
+                    alert(response.error || 'Failed to load aircraft details');
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('Error fetching aircraft details: ' + error);
+            },
+            complete: function() {
+                modal.show();
+            }
+        });
+    });
+
+    // Edit Aircraft Modal
+    $('.edit-aircraft').click(function() {
+        const aircraftId = $(this).data('aircraft-id');
+        const modal = new bootstrap.Modal(document.getElementById('editAircraftModal'));
+        
+        // First load dropdown data if not already loaded
+        if ($('#edit-type option').length <= 1) {
+            loadDropdownData();
+        }
+        
+        // Fetch aircraft details via AJAX
+        $.ajax({
+            url: `/aircraft/${aircraftId}/detail/`,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    const aircraft = response.data;
+                    
+                    // Populate form fields
+                    $('#edit-aircraft-id').val(aircraft.id);
+                    $('#edit-registration').val(aircraft.registration_number);
+                    $('#edit-model').val(aircraft.model_name);
+                    $('#edit-year').val(aircraft.year_manufactured);
+                    $('#edit-base').val(aircraft.base_airport || '');
+                    $('#edit-location').val(aircraft.current_location || '');
+                    $('#edit-features').val(aircraft.features || '');
+                    $('#edit-rate').val(aircraft.hourly_rate);
+                    $('#edit-min-hours').val(aircraft.minimum_hours);
+                    $('#edit-status').val(aircraft.is_active.toString());
+                    $('#edit-owner').val(aircraft.owner_id);
+                    $('#edit-type').val(aircraft.aircraft_type_id);
+                    
+                    // Update modal title
+                    $('#editAircraftModalLabel').text(`Edit Aircraft: ${aircraft.registration_number}`);
+                } else {
+                    alert(response.error || 'Failed to load aircraft details');
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('Error fetching aircraft details: ' + error);
+            },
+            complete: function() {
+                modal.show();
+            }
+        });
+    });
+
+    // Load dropdown data for edit form
     function loadDropdownData() {
-        fetch('/aircraft/dropdown-data/')
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
+        $.ajax({
+            url: '/aircraft/dropdown-data/',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
                     // Populate owners dropdown
-                    let ownerSelect = $('#owner_id');
+                    let ownerSelect = $('#edit-owner');
                     ownerSelect.empty().append('<option value="">Select Owner</option>');
-                    data.owners.forEach(function(owner) {
+                    response.owners.forEach(function(owner) {
                         let name = owner.first_name && owner.last_name ? 
                             `${owner.first_name} ${owner.last_name}` : owner.username;
                         ownerSelect.append(`<option value="${owner.id}">${name}</option>`);
                     });
                     
                     // Populate aircraft types dropdown
-                    let typeSelect = $('#aircraft_type_id');
+                    let typeSelect = $('#edit-type');
                     typeSelect.empty().append('<option value="">Select Type</option>');
-                    data.aircraft_types.forEach(function(type) {
+                    response.aircraft_types.forEach(function(type) {
                         typeSelect.append(`<option value="${type.id}">${type.name}</option>`);
                     });
                 }
-            })
-            .catch(error => console.error('Error loading dropdown data:', error));
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading dropdown data:', error);
+            }
+        });
     }
-    
-    // View aircraft details
-    $('.view-aircraft').click(function() {
-        currentAircraftId = $(this).data('id');
-        isViewMode = true;
-        loadAircraftData(currentAircraftId, true);
-    });
-    
-    // Edit aircraft
-    $('.edit-aircraft').click(function() {
-        currentAircraftId = $(this).data('id');
-        isViewMode = false;
-        loadAircraftData(currentAircraftId, false);
-    });
-    
-    // Delete aircraft
-    $('.delete-aircraft').click(function() {
-        let aircraftId = $(this).data('id');
-        if (confirm('Are you sure you want to delete this aircraft?')) {
-            fetch(`/aircraft/${aircraftId}/delete/`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken'),
-                    'Content-Type': 'application/json',
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error occurred while deleting aircraft');
-            });
-        }
-    });
-    
-    function loadAircraftData(aircraftId, viewOnly) {
-        fetch(`/aircraft/${aircraftId}/detail/`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    let aircraftData = data.data;
-                    
-                    // Populate form
-                    $('#registration_number').val(aircraftData.registration_number);
-                    $('#model_name').val(aircraftData.model_name);
-                    $('#year_manufactured').val(aircraftData.year_manufactured);
-                    $('#base_airport').val(aircraftData.base_airport);
-                    $('#current_location').val(aircraftData.current_location);
-                    $('#features').val(aircraftData.features);
-                    $('#hourly_rate').val(aircraftData.hourly_rate);
-                    $('#minimum_hours').val(aircraftData.minimum_hours);
-                    $('#is_active').val(aircraftData.is_active.toString());
-                    $('#owner_id').val(aircraftData.owner_id);
-                    $('#aircraft_type_id').val(aircraftData.aircraft_type_id);
-                    
-                    // Set modal title and form state
-                    if (viewOnly) {
-                        $('#modalTitle').text('View Aircraft Details');
-                        $('#aircraftForm input, #aircraftForm select, #aircraftForm textarea').prop('disabled', true);
-                        $('#saveAircraft').hide();
-                    } else {
-                        $('#modalTitle').text('Edit Aircraft');
-                        $('#aircraftForm input, #aircraftForm select, #aircraftForm textarea').prop('disabled', false);
-                        $('#saveAircraft').show();
-                    }
-                    
-                    $('#aircraftModal').modal('show');
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error occurred while loading aircraft data');
-            });
-    }
-    
-    // Save aircraft changes
-    $('#saveAircraft').click(function() {
-        let formData = {
-            registration_number: $('#registration_number').val(),
-            model_name: $('#model_name').val(),
-            year_manufactured: $('#year_manufactured').val(),
-            base_airport: $('#base_airport').val(),
-            current_location: $('#current_location').val(),
-            features: $('#features').val(),
-            hourly_rate: $('#hourly_rate').val(),
-            minimum_hours: $('#minimum_hours').val(),
-            is_active: $('#is_active').val() === 'true',
-            owner_id: $('#owner_id').val(),
-            aircraft_type_id: $('#aircraft_type_id').val()
+
+    // Submit Edit Form
+    $('#editAircraftForm').submit(function(e) {
+        e.preventDefault();
+        
+        const aircraftId = $('#edit-aircraft-id').val();
+        const formData = {
+            'registration_number': $('#edit-registration').val(),
+            'model_name': $('#edit-model').val(),
+            'year_manufactured': $('#edit-year').val(),
+            'base_airport': $('#edit-base').val(),
+            'current_location': $('#edit-location').val(),
+            'features': $('#edit-features').val(),
+            'hourly_rate': $('#edit-rate').val(),
+            'minimum_hours': $('#edit-min-hours').val(),
+            'is_active': $('#edit-status').val() === 'true',
+            'owner_id': $('#edit-owner').val(),
+            'aircraft_type_id': $('#edit-type').val(),
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
         };
         
-        fetch(`/aircraft/${currentAircraftId}/update/`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/json',
+        $.ajax({
+            url: `/aircraft/${aircraftId}/update/`,
+            type: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    alert(response.message);
+                    location.reload();
+                } else {
+                    alert(response.message || 'Failed to update aircraft');
+                }
             },
-            body: JSON.stringify(formData)
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                $('#aircraftModal').modal('hide');
-                location.reload();
-            } else {
-                alert('Error: ' + data.error);
+            error: function(xhr, status, error) {
+                alert('Error updating aircraft: ' + error);
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error occurred while updating aircraft');
         });
     });
-    
-    // Helper function to get CSRF token
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
+
+    // Delete Aircraft Modal
+    $('.delete-aircraft').click(function() {
+        const aircraftId = $(this).data('aircraft-id');
+        const row = $(this).closest('tr');
+        const registration = row.find('td:nth-child(1)').text().trim();
+        const model = row.find('td:nth-child(2)').text().trim();
+        
+        $('#delete-aircraft-info').html(`
+            <strong>Registration:</strong> ${registration}<br>
+            <strong>Model:</strong> ${model}
+        `);
+        $('#confirm-aircraft-delete').data('aircraft-id', aircraftId);
+        
+        const modal = new bootstrap.Modal(document.getElementById('deleteAircraftModal'));
+        modal.show();
+    });
+
+    // Confirm Delete
+    $('#confirm-aircraft-delete').click(function() {
+        const aircraftId = $(this).data('aircraft-id');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('deleteAircraftModal'));
+        
+        $.ajax({
+            url: `/aircraft/${aircraftId}/delete/`,
+            type: 'POST',
+            data: {
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    alert(response.message);
+                    location.reload();
+                } else {
+                    alert(response.message || 'Failed to delete aircraft');
                 }
+            },
+            error: function(xhr, status, error) {
+                alert('Error deleting aircraft: ' + error);
+            },
+            complete: function() {
+                modal.hide();
             }
-        }
-        return cookieValue;
-    }
+        });
+    });
+
+    // Add Aircraft button (would open a similar modal to edit)
+    $('#addAircraftBtn').click(function() {
+        // Implementation for adding a new aircraft would go here
+        alert('Add new aircraft functionality would be implemented here');
+    });
 });
 </script>
 {% endblock %}
