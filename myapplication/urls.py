@@ -31,6 +31,8 @@ urlpatterns = [
     path('admin-dashboard/' , views.admin_dashboard , name='admin_dashboard'),
     path('admin-login-dasboard/' , views.admin_login_view , name='admin-login'),
     path('adminpage/logout/', views.admin_logout_view, name='admin_logout'),
+    path('clients/', views.client_list, name='client_list'),
+    path('clients/<int:client_id>/detail/', views.client_detail, name='client_detail'),
 
     
 ]

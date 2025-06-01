@@ -8,7 +8,7 @@
     <h1>Client Management</h1>
     <nav>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Home</a></li>
             <li class="breadcrumb-item active">Clients</li>
         </ol>
     </nav>
@@ -170,9 +170,7 @@
     </div>
 </div>
 
-{% endblock %}
 
-{% block scripts %}
 <script>
 $(document).ready(function() {
     // Client detail modal handler
