@@ -95,5 +95,15 @@ urlpatterns = [
     path('contact-submissions/', views.contact_submission_list, name='contact_submission_list'),
     path('contact-submissions/<int:submission_id>/detail/', views.contact_submission_detail, name='contact_submission_detail'),
     path('contact-submissions/<int:submission_id>/delete/', views.delete_contact_submission, name='delete_contact_submission'),
+
+    path('agents/', views.booking_agents_list, name='booking_agents_list'),
+    path('agents/<int:agent_id>/detail/', views.agent_detail, name='agent_detail'),
+    path('agents/<int:agent_id>/update/', views.update_agent, name='update_agent'),
+    path('agents/<int:agent_id>/delete/', views.delete_agent, name='delete_agent'),
+
+    path('admins/', views.admin_users_list, name='admin_users_list'),
+    path('admins/<int:admin_id>/detail/', views.admin_detail, name='admin_detail'),
+    path('admins/<int:admin_id>/update/', views.update_admin, name='update_admin'),
+    path('admins/<int:admin_id>/delete/', views.delete_admin, name='delete_admin'),
   
 ]

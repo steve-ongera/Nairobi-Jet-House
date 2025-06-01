@@ -2887,3 +2887,177 @@ def delete_contact_submission(request, submission_id):
             'error': str(e)
         }
     return JsonResponse(data)
+
+
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from .models import User
+
+@login_required
+def booking_agents_list(request):
+    """View to display all booking agents"""
+    agents = User.objects.filter(user_type='agent').order_by('-date_joined')
+    
+    # Pagination
+    paginator = Paginator(agents, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+    }
+    return render(request, 'agents/booking_agents_list.html', context)
+
+@login_required
+@require_http_methods(["GET"])
+def agent_detail(request, agent_id):
+    """AJAX view to get agent details"""
+    agent = get_object_or_404(User, id=agent_id, user_type='agent')
+    
+    data = {
+        'success': True,
+        'agent': {
+            'id': agent.id,
+            'username': agent.username,
+            'email': agent.email,
+            'first_name': agent.first_name,
+            'last_name': agent.last_name,
+            'phone_number': agent.phone_number,
+            'company_name': agent.company_name,
+            'tax_id': agent.tax_id,
+            'address': agent.address,
+            'date_joined': agent.date_joined.strftime("%b %d, %Y %H:%M"),
+            'last_login': agent.last_login.strftime("%b %d, %Y %H:%M") if agent.last_login else 'Never',
+            'verified': 'Yes' if agent.verified else 'No',
+        }
+    }
+    return JsonResponse(data)
+
+@login_required
+@require_http_methods(["POST"])
+def update_agent(request, agent_id):
+    """AJAX view to update agent details"""
+    agent = get_object_or_404(User, id=agent_id, user_type='agent')
+    
+    # Update fields
+    agent.first_name = request.POST.get('first_name', agent.first_name)
+    agent.last_name = request.POST.get('last_name', agent.last_name)
+    agent.email = request.POST.get('email', agent.email)
+    agent.phone_number = request.POST.get('phone_number', agent.phone_number)
+    agent.company_name = request.POST.get('company_name', agent.company_name)
+    agent.tax_id = request.POST.get('tax_id', agent.tax_id)
+    agent.address = request.POST.get('address', agent.address)
+    agent.verified = 'verified' in request.POST
+    
+    try:
+        agent.save()
+        return JsonResponse({'success': True, 'message': 'Agent updated successfully'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)
+
+@login_required
+@require_http_methods(["POST"])
+def delete_agent(request, agent_id):
+    """AJAX view to delete an agent"""
+    agent = get_object_or_404(User, id=agent_id, user_type='agent')
+    
+    try:
+        agent.delete()
+        return JsonResponse({'success': True, 'message': 'Agent deleted successfully'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)
+
+
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.paginator import Paginator
+from .models import User
+
+def is_superuser(user):
+    """Check if user is superuser"""
+    return user.is_superuser
+
+@login_required
+@user_passes_test(is_superuser)
+def admin_users_list(request):
+    """View to display all system admins"""
+    admins = User.objects.filter(user_type='admin').order_by('-date_joined')
+    
+    # Pagination
+    paginator = Paginator(admins, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+    }
+    return render(request, 'admins/admin_users_list.html', context)
+
+@login_required
+@user_passes_test(is_superuser)
+@require_http_methods(["GET"])
+def admin_detail(request, admin_id):
+    """AJAX view to get admin details"""
+    admin = get_object_or_404(User, id=admin_id, user_type='admin')
+    
+    data = {
+        'success': True,
+        'admin': {
+            'id': admin.id,
+            'username': admin.username,
+            'email': admin.email,
+            'first_name': admin.first_name,
+            'last_name': admin.last_name,
+            'phone_number': admin.phone_number,
+            'is_superuser': 'Yes' if admin.is_superuser else 'No',
+            'is_staff': 'Yes' if admin.is_staff else 'No',
+            'address': admin.address,
+            'date_joined': admin.date_joined.strftime("%b %d, %Y %H:%M"),
+            'last_login': admin.last_login.strftime("%b %d, %Y %H:%M") if admin.last_login else 'Never',
+        }
+    }
+    return JsonResponse(data)
+
+@login_required
+@user_passes_test(is_superuser)
+@require_http_methods(["POST"])
+def update_admin(request, admin_id):
+    """AJAX view to update admin details"""
+    admin = get_object_or_404(User, id=admin_id, user_type='admin')
+    
+    # Update fields
+    admin.first_name = request.POST.get('first_name', admin.first_name)
+    admin.last_name = request.POST.get('last_name', admin.last_name)
+    admin.email = request.POST.get('email', admin.email)
+    admin.phone_number = request.POST.get('phone_number', admin.phone_number)
+    admin.address = request.POST.get('address', admin.address)
+    admin.is_superuser = 'is_superuser' in request.POST
+    admin.is_staff = 'is_staff' in request.POST
+    
+    try:
+        admin.save()
+        return JsonResponse({'success': True, 'message': 'Admin updated successfully'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)
+
+@login_required
+@user_passes_test(is_superuser)
+@require_http_methods(["POST"])
+def delete_admin(request, admin_id):
+    """AJAX view to delete an admin"""
+    admin = get_object_or_404(User, id=admin_id, user_type='admin')
+    
+    # Prevent deleting yourself
+    if admin == request.user:
+        return JsonResponse({'success': False, 'message': 'You cannot delete your own account'}, status=400)
+    
+    try:
+        admin.delete()
+        return JsonResponse({'success': True, 'message': 'Admin deleted successfully'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)}, status=400)
