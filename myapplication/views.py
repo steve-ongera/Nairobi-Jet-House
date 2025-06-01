@@ -2592,3 +2592,224 @@ def delete_cargo_request(request, request_id):
             'error': str(e)
         }
     return JsonResponse(data)
+
+
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.core.paginator import Paginator
+from django.views.decorators.http import require_http_methods
+from django.utils import timezone
+from .models import AircraftLeasingInquiry
+
+def leasing_inquiry_list(request):
+    # Get all leasing inquiries
+    inquiries = AircraftLeasingInquiry.objects.all().order_by('-created_at')
+    
+    # Filter by leasing type if provided
+    leasing_type = request.GET.get('type')
+    if leasing_type in dict(AircraftLeasingInquiry.LEASING_TYPE_CHOICES).keys():
+        inquiries = inquiries.filter(leasing_type=leasing_type)
+    
+    # Pagination
+    paginator = Paginator(inquiries, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'leasing_types': AircraftLeasingInquiry.LEASING_TYPE_CHOICES,
+    }
+    return render(request, 'leasing/leasing_inquiry_list.html', context)
+
+def leasing_inquiry_detail(request, inquiry_id):
+    try:
+        inquiry = AircraftLeasingInquiry.objects.get(id=inquiry_id)
+        data = {
+            'success': True,
+            'inquiry': {
+                'id': inquiry.id,
+                'leasing_type': inquiry.get_leasing_type_display(),
+                'leasing_type_code': inquiry.leasing_type,
+                'name': inquiry.name,
+                'company': inquiry.company,
+                'email': inquiry.email,
+                'telephone': inquiry.telephone,
+                'requirements': inquiry.requirements,
+                'duration': inquiry.duration or 'Not specified',
+                'created_at': inquiry.created_at.strftime("%Y-%m-%d %H:%M"),
+            }
+        }
+    except AircraftLeasingInquiry.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Leasing inquiry not found'
+        }
+    return JsonResponse(data)
+
+@require_http_methods(["POST"])
+def update_leasing_inquiry(request, inquiry_id):
+    try:
+        inquiry = AircraftLeasingInquiry.objects.get(id=inquiry_id)
+        inquiry.leasing_type = request.POST.get('leasing_type', inquiry.leasing_type)
+        inquiry.name = request.POST.get('name', inquiry.name)
+        inquiry.company = request.POST.get('company', inquiry.company)
+        inquiry.email = request.POST.get('email', inquiry.email)
+        inquiry.telephone = request.POST.get('telephone', inquiry.telephone)
+        inquiry.requirements = request.POST.get('requirements', inquiry.requirements)
+        inquiry.duration = request.POST.get('duration', inquiry.duration)
+        inquiry.save()
+        
+        data = {
+            'success': True,
+            'message': 'Leasing inquiry updated successfully',
+            'inquiry': {
+                'id': inquiry.id,
+                'leasing_type': inquiry.get_leasing_type_display(),
+            }
+        }
+    except AircraftLeasingInquiry.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Leasing inquiry not found'
+        }
+    except Exception as e:
+        data = {
+            'success': False,
+            'error': str(e)
+        }
+    return JsonResponse(data)
+
+@require_http_methods(["POST"])
+def delete_leasing_inquiry(request, inquiry_id):
+    try:
+        inquiry = AircraftLeasingInquiry.objects.get(id=inquiry_id)
+        leasing_type = inquiry.get_leasing_type_display()
+        inquiry.delete()
+        
+        data = {
+            'success': True,
+            'message': f'{leasing_type} inquiry deleted successfully'
+        }
+    except AircraftLeasingInquiry.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Leasing inquiry not found'
+        }
+    except Exception as e:
+        data = {
+            'success': False,
+            'error': str(e)
+        }
+    return JsonResponse(data)
+
+
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.core.paginator import Paginator
+from django.views.decorators.http import require_http_methods
+from django.utils import timezone
+from .models import GroupInquiry
+
+def group_inquiry_list(request):
+    # Get all group inquiries ordered by submission date
+    inquiries = GroupInquiry.objects.all().order_by('-submitted_at')
+    
+    # Filter by date range if provided
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+    
+    if start_date and end_date:
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+            inquiries = inquiries.filter(
+                travel_date__gte=start_date,
+                travel_date__lte=end_date
+            )
+        except ValueError:
+            pass
+    
+    # Pagination
+    paginator = Paginator(inquiries, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'current_date': timezone.now().date(),
+    }
+    return render(request, 'group_inquiries/group_inquiry_list.html', context)
+
+def group_inquiry_detail(request, inquiry_id):
+    try:
+        inquiry = GroupInquiry.objects.get(id=inquiry_id)
+        data = {
+            'success': True,
+            'inquiry': {
+                'id': inquiry.id,
+                'group_name': inquiry.group_name,
+                'contact_email': inquiry.contact_email,
+                'passenger_count': inquiry.passenger_count,
+                'travel_date': inquiry.travel_date.strftime("%Y-%m-%d"),
+                'submitted_at': inquiry.submitted_at.strftime("%Y-%m-%d %H:%M"),
+            }
+        }
+    except GroupInquiry.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Group inquiry not found'
+        }
+    return JsonResponse(data)
+
+@require_http_methods(["POST"])
+def update_group_inquiry(request, inquiry_id):
+    try:
+        inquiry = GroupInquiry.objects.get(id=inquiry_id)
+        inquiry.group_name = request.POST.get('group_name', inquiry.group_name)
+        inquiry.contact_email = request.POST.get('contact_email', inquiry.contact_email)
+        inquiry.passenger_count = request.POST.get('passenger_count', inquiry.passenger_count)
+        inquiry.travel_date = request.POST.get('travel_date', inquiry.travel_date)
+        inquiry.save()
+        
+        data = {
+            'success': True,
+            'message': 'Group inquiry updated successfully',
+            'inquiry': {
+                'id': inquiry.id,
+                'group_name': inquiry.group_name,
+            }
+        }
+    except GroupInquiry.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Group inquiry not found'
+        }
+    except Exception as e:
+        data = {
+            'success': False,
+            'error': str(e)
+        }
+    return JsonResponse(data)
+
+@require_http_methods(["POST"])
+def delete_group_inquiry(request, inquiry_id):
+    try:
+        inquiry = GroupInquiry.objects.get(id=inquiry_id)
+        group_name = inquiry.group_name
+        inquiry.delete()
+        
+        data = {
+            'success': True,
+            'message': f'Group inquiry "{group_name}" deleted successfully'
+        }
+    except GroupInquiry.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Group inquiry not found'
+        }
+    except Exception as e:
+        data = {
+            'success': False,
+            'error': str(e)
+        }
+    return JsonResponse(data)
