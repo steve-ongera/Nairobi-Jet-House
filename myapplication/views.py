@@ -2474,3 +2474,121 @@ def delete_inquiry(request, inquiry_id):
             'error': str(e)
         }
     return JsonResponse(data)
+
+
+
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.core.paginator import Paginator
+from django.views.decorators.http import require_http_methods
+from django.utils import timezone
+from .models import AirCargoRequest
+
+def cargo_request_list(request):
+    # Get all cargo requests
+    cargo_requests = AirCargoRequest.objects.all().order_by('-created_at')
+    
+    # Filter by request type if provided
+    request_type = request.GET.get('type')
+    if request_type in dict(AirCargoRequest.REQUEST_TYPE_CHOICES).keys():
+        cargo_requests = cargo_requests.filter(request_type=request_type)
+    
+    # Pagination
+    paginator = Paginator(cargo_requests, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'request_types': AirCargoRequest.REQUEST_TYPE_CHOICES,
+    }
+    return render(request, 'cargo/cargo_request_list.html', context)
+
+def cargo_request_detail(request, request_id):
+    try:
+        cargo_request = AirCargoRequest.objects.get(id=request_id)
+        data = {
+            'success': True,
+            'cargo_request': {
+                'id': cargo_request.id,
+                'request_type': cargo_request.get_request_type_display(),
+                'request_type_code': cargo_request.request_type,
+                'departure': cargo_request.departure,
+                'destination': cargo_request.destination,
+                'date': cargo_request.date.strftime("%Y-%m-%d"),
+                'departure_time': cargo_request.departure_time.strftime("%H:%M") if cargo_request.departure_time else None,
+                'name': cargo_request.name,
+                'company': cargo_request.company,
+                'email': cargo_request.email,
+                'telephone': cargo_request.telephone,
+                'cargo_details': cargo_request.cargo_details,
+                'special_requirements': cargo_request.special_requirements or 'None',
+                'created_at': cargo_request.created_at.strftime("%Y-%m-%d %H:%M"),
+            }
+        }
+    except AirCargoRequest.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Cargo request not found'
+        }
+    return JsonResponse(data)
+
+@require_http_methods(["POST"])
+def update_cargo_request(request, request_id):
+    try:
+        cargo_request = AirCargoRequest.objects.get(id=request_id)
+        cargo_request.request_type = request.POST.get('request_type', cargo_request.request_type)
+        cargo_request.departure = request.POST.get('departure', cargo_request.departure)
+        cargo_request.destination = request.POST.get('destination', cargo_request.destination)
+        cargo_request.date = request.POST.get('date', cargo_request.date)
+        cargo_request.departure_time = request.POST.get('departure_time', cargo_request.departure_time)
+        cargo_request.name = request.POST.get('name', cargo_request.name)
+        cargo_request.company = request.POST.get('company', cargo_request.company)
+        cargo_request.email = request.POST.get('email', cargo_request.email)
+        cargo_request.telephone = request.POST.get('telephone', cargo_request.telephone)
+        cargo_request.cargo_details = request.POST.get('cargo_details', cargo_request.cargo_details)
+        cargo_request.special_requirements = request.POST.get('special_requirements', cargo_request.special_requirements)
+        cargo_request.save()
+        
+        data = {
+            'success': True,
+            'message': 'Cargo request updated successfully',
+            'cargo_request': {
+                'id': cargo_request.id,
+                'request_type': cargo_request.get_request_type_display(),
+            }
+        }
+    except AirCargoRequest.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Cargo request not found'
+        }
+    except Exception as e:
+        data = {
+            'success': False,
+            'error': str(e)
+        }
+    return JsonResponse(data)
+
+@require_http_methods(["POST"])
+def delete_cargo_request(request, request_id):
+    try:
+        cargo_request = AirCargoRequest.objects.get(id=request_id)
+        route = f"{cargo_request.departure} to {cargo_request.destination}"
+        cargo_request.delete()
+        
+        data = {
+            'success': True,
+            'message': f'Cargo request {route} deleted successfully'
+        }
+    except AirCargoRequest.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Cargo request not found'
+        }
+    except Exception as e:
+        data = {
+            'success': False,
+            'error': str(e)
+        }
+    return JsonResponse(data)

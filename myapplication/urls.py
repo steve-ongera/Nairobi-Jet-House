@@ -76,5 +76,10 @@ urlpatterns = [
     path('inquiries/<int:inquiry_id>/detail/', views.inquiry_detail, name='inquiry_detail'),
     path('inquiries/<int:inquiry_id>/update/', views.update_inquiry, name='update_inquiry'),
     path('inquiries/<int:inquiry_id>/delete/', views.delete_inquiry, name='delete_inquiry'),
+
+    path('cargo-requests/', views.cargo_request_list, name='cargo_request_list'),
+    path('cargo-requests/<int:request_id>/detail/', views.cargo_request_detail, name='cargo_request_detail'),
+    path('cargo-requests/<int:request_id>/update/', views.update_cargo_request, name='update_cargo_request'),
+    path('cargo-requests/<int:request_id>/delete/', views.delete_cargo_request, name='delete_cargo_request'),
   
 ]
