@@ -71,5 +71,10 @@ urlpatterns = [
     path('bookings/<int:booking_id>/detail/', views.booking_detail, name='booking_detail'),
     path('bookings/<int:booking_id>/update/', views.update_booking_status, name='update_booking_status'),
     path('bookings/<int:booking_id>/delete/', views.delete_booking, name='delete_booking'),
+
+    path('inquiries/', views.inquiry_list, name='inquiry_list'),
+    path('inquiries/<int:inquiry_id>/detail/', views.inquiry_detail, name='inquiry_detail'),
+    path('inquiries/<int:inquiry_id>/update/', views.update_inquiry, name='update_inquiry'),
+    path('inquiries/<int:inquiry_id>/delete/', views.delete_inquiry, name='delete_inquiry'),
   
 ]

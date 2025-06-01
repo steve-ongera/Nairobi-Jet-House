@@ -2371,3 +2371,106 @@ def delete_booking(request, booking_id):
             'error': str(e)
         }
     return JsonResponse(data)
+
+
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.core.paginator import Paginator
+from django.views.decorators.http import require_http_methods
+from .models import Inquiry, AircraftType
+from django.utils import timezone
+
+def inquiry_list(request):
+    # Get all inquiries with related aircraft type
+    inquiries = Inquiry.objects.select_related('aircraft_type').order_by('-submitted_at')
+    
+    # Filter by processed status if provided
+    processed_filter = request.GET.get('processed')
+    if processed_filter in ['true', 'false']:
+        inquiries = inquiries.filter(is_processed=processed_filter == 'true')
+    
+    # Pagination
+    paginator = Paginator(inquiries, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'aircraft_types': AircraftType.objects.all(),
+    }
+    return render(request, 'inquiries/inquiry_list.html', context)
+
+def inquiry_detail(request, inquiry_id):
+    try:
+        inquiry = Inquiry.objects.select_related('aircraft_type').get(id=inquiry_id)
+        data = {
+            'success': True,
+            'inquiry': {
+                'id': inquiry.id,
+                'full_name': inquiry.full_name,
+                'email': inquiry.email,
+                'phone': inquiry.phone,
+                'aircraft_type': inquiry.aircraft_type.name if inquiry.aircraft_type else 'Not specified',
+                'departure': inquiry.departure,
+                'destination': inquiry.destination,
+                'passengers': inquiry.passengers,
+                'travel_date': inquiry.travel_date.strftime("%Y-%m-%d"),
+                'submitted_at': inquiry.submitted_at.strftime("%Y-%m-%d %H:%M"),
+                'is_processed': inquiry.is_processed,
+            }
+        }
+    except Inquiry.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Inquiry not found'
+        }
+    return JsonResponse(data)
+
+@require_http_methods(["POST"])
+def update_inquiry(request, inquiry_id):
+    try:
+        inquiry = Inquiry.objects.get(id=inquiry_id)
+        inquiry.is_processed = request.POST.get('is_processed') == 'true'
+        inquiry.save()
+        
+        data = {
+            'success': True,
+            'message': 'Inquiry updated successfully',
+            'inquiry': {
+                'id': inquiry.id,
+                'is_processed': inquiry.is_processed,
+            }
+        }
+    except Inquiry.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Inquiry not found'
+        }
+    except Exception as e:
+        data = {
+            'success': False,
+            'error': str(e)
+        }
+    return JsonResponse(data)
+
+@require_http_methods(["POST"])
+def delete_inquiry(request, inquiry_id):
+    try:
+        inquiry = Inquiry.objects.get(id=inquiry_id)
+        inquiry.delete()
+        
+        data = {
+            'success': True,
+            'message': 'Inquiry deleted successfully'
+        }
+    except Inquiry.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Inquiry not found'
+        }
+    except Exception as e:
+        data = {
+            'success': False,
+            'error': str(e)
+        }
+    return JsonResponse(data)
