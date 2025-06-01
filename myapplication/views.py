@@ -2215,3 +2215,159 @@ def delete_availability(request, availability_id):
             'error': str(e)
         }
     return JsonResponse(data)
+
+
+
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.core.paginator import Paginator
+from django.views.decorators.http import require_http_methods
+from django.db.models import Prefetch
+from .models import Booking, FlightLeg, User, Aircraft
+from datetime import datetime
+
+def booking_list(request):
+    # Get all bookings with related data
+    bookings = Booking.objects.select_related(
+        'client',
+        'aircraft',
+        'aircraft__aircraft_type'
+    ).prefetch_related(
+        Prefetch('flight_legs', queryset=FlightLeg.objects.select_related(
+            'departure_airport',
+            'arrival_airport'
+        ))
+    ).order_by('-created_at')
+    
+    # Filter by status if provided
+    status_filter = request.GET.get('status')
+    if status_filter and status_filter in dict(Booking.STATUS_CHOICES).keys():
+        bookings = bookings.filter(status=status_filter)
+    
+    # Pagination
+    paginator = Paginator(bookings, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+        'status_choices': Booking.STATUS_CHOICES,
+    }
+    return render(request, 'bookings/booking_list.html', context)
+
+def booking_detail(request, booking_id):
+    try:
+        booking = Booking.objects.select_related(
+            'client',
+            'aircraft',
+            'aircraft__aircraft_type'
+        ).prefetch_related(
+            Prefetch('flight_legs', queryset=FlightLeg.objects.select_related(
+                'departure_airport',
+                'arrival_airport'
+            ))
+        ).get(id=booking_id)
+        
+        flight_legs = []
+        for leg in booking.flight_legs.all():
+            flight_legs.append({
+                'departure': leg.departure_airport.icao_code,
+                'arrival': leg.arrival_airport.icao_code,
+                'departure_datetime': leg.departure_datetime.strftime("%Y-%m-%d %H:%M"),
+                'arrival_datetime': leg.arrival_datetime.strftime("%Y-%m-%d %H:%M"),
+                'passenger_count': leg.passenger_count,
+                'flight_hours': str(leg.flight_hours),
+                'leg_price': str(leg.leg_price),
+            })
+        
+        data = {
+            'success': True,
+            'booking': {
+                'id': booking.id,
+                'booking_order_id': booking.booking_order_id,
+                'client': {
+                    'name': booking.client.get_full_name(),
+                    'email': booking.client.email,
+                    'phone': booking.client.phone_number,
+                },
+                'aircraft': {
+                    'model': booking.aircraft.model_name,
+                    'registration': booking.aircraft.registration_number,
+                    'type': booking.aircraft.aircraft_type.name,
+                },
+                'trip_type': booking.get_trip_type_display(),
+                'status': booking.get_status_display(),
+                'status_code': booking.status,
+                'created_at': booking.created_at.strftime("%Y-%m-%d %H:%M"),
+                'updated_at': booking.updated_at.strftime("%Y-%m-%d %H:%M"),
+                'total_price': str(booking.total_price),
+                'payment_status': 'Paid' if booking.payment_status else 'Pending',
+                'commission_rate': str(booking.commission_rate),
+                'agent_commission': str(booking.agent_commission),
+                'owner_earnings': str(booking.owner_earnings),
+                'special_requests': booking.special_requests or 'None',
+                'flight_legs': flight_legs,
+            }
+        }
+    except Booking.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Booking not found'
+        }
+    return JsonResponse(data)
+
+@require_http_methods(["POST"])
+def update_booking_status(request, booking_id):
+    try:
+        booking = Booking.objects.get(id=booking_id)
+        new_status = request.POST.get('status')
+        
+        if new_status not in dict(Booking.STATUS_CHOICES).keys():
+            raise ValueError("Invalid status")
+            
+        booking.status = new_status
+        booking.save()
+        
+        data = {
+            'success': True,
+            'message': 'Booking status updated successfully',
+            'booking': {
+                'id': booking.id,
+                'status': booking.get_status_display(),
+                'status_code': booking.status,
+            }
+        }
+    except Booking.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Booking not found'
+        }
+    except Exception as e:
+        data = {
+            'success': False,
+            'error': str(e)
+        }
+    return JsonResponse(data)
+
+@require_http_methods(["POST"])
+def delete_booking(request, booking_id):
+    try:
+        booking = Booking.objects.get(id=booking_id)
+        booking_order_id = booking.booking_order_id
+        booking.delete()
+        
+        data = {
+            'success': True,
+            'message': f'Booking {booking_order_id} deleted successfully'
+        }
+    except Booking.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Booking not found'
+        }
+    except Exception as e:
+        data = {
+            'success': False,
+            'error': str(e)
+        }
+    return JsonResponse(data)
