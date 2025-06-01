@@ -1432,3 +1432,49 @@ def admin_login_view(request):
             messages.error(request, 'Invalid username or password.')
 
     return render(request, 'auth/login.html')
+
+
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.core.paginator import Paginator
+from .models import User
+
+def client_list(request):
+    # Get all clients (filter by user_type='client')
+    clients = User.objects.filter(user_type='client').order_by('-date_joined')
+    
+    # Pagination
+    paginator = Paginator(clients, 10)  # Show 10 clients per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+    }
+    return render(request, 'clients/clients.html', context)
+
+def client_detail(request, client_id):
+    try:
+        client = User.objects.get(id=client_id, user_type='client')
+        data = {
+            'success': True,
+            'client': {
+                'id': client.id,
+                'full_name': client.get_full_name(),
+                'email': client.email,
+                'phone_number': client.phone_number,
+                'company_name': client.company_name,
+                'address': client.address,
+                'tax_id': client.tax_id,
+                'verified': 'Yes' if client.verified else 'No',
+                'date_joined': client.date_joined.strftime("%b %d, %Y %I:%M %p"),
+                'last_login': client.last_login.strftime("%b %d, %Y %I:%M %p") if client.last_login else 'Never',
+            }
+        }
+    except User.DoesNotExist:
+        data = {
+            'success': False,
+            'error': 'Client not found'
+        }
+    return JsonResponse(data)
