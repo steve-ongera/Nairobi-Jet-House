@@ -1572,3 +1572,162 @@ def delete_aircraft_owner(request, owner_id):
             'error': str(e)
         }
     return JsonResponse(data)
+
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+from django.core.paginator import Paginator
+from django.db import IntegrityError
+import json
+from .models import Aircraft, AircraftType, User
+
+def aircraft_list(request):
+    """List all aircrafts with pagination"""
+    aircrafts = Aircraft.objects.select_related('owner', 'aircraft_type').all()
+    
+    # Filter by active status if specified
+    is_active = request.GET.get('is_active')
+    if is_active is not None:
+        aircrafts = aircrafts.filter(is_active=is_active.lower() == 'true')
+    
+    # Search functionality
+    search = request.GET.get('search', '')
+    if search:
+        aircrafts = aircrafts.filter(
+            models.Q(registration_number__icontains=search) |
+            models.Q(model_name__icontains=search) |
+            models.Q(owner__username__icontains=search)
+        )
+    
+    # Pagination
+    paginator = Paginator(aircrafts, 10)  # 10 aircrafts per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'aircrafts': page_obj,
+        'search': search,
+        'is_active': is_active,
+    }
+    return render(request, 'aircraft/aircraft_list.html', context)
+
+@require_http_methods(["GET"])
+def aircraft_detail_ajax(request, aircraft_id):
+    """Get aircraft details via AJAX"""
+    try:
+        aircraft = get_object_or_404(
+            Aircraft.objects.select_related('owner', 'aircraft_type'),
+            id=aircraft_id
+        )
+        
+        data = {
+            'id': aircraft.id,
+            'registration_number': aircraft.registration_number,
+            'model_name': aircraft.model_name,
+            'year_manufactured': aircraft.year_manufactured,
+            'base_airport': aircraft.base_airport,
+            'current_location': aircraft.current_location,
+            'is_active': aircraft.is_active,
+            'features': aircraft.features,
+            'hourly_rate': str(aircraft.hourly_rate),
+            'minimum_hours': str(aircraft.minimum_hours),
+            'owner_id': aircraft.owner.id,
+            'owner_name': aircraft.owner.get_full_name() or aircraft.owner.username,
+            'aircraft_type_id': aircraft.aircraft_type.id,
+            'aircraft_type_name': aircraft.aircraft_type.name,
+        }
+        
+        return JsonResponse({'success': True, 'data': data})
+        
+    except Aircraft.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Aircraft not found'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def aircraft_update_ajax(request, aircraft_id):
+    """Update aircraft via AJAX"""
+    try:
+        aircraft = get_object_or_404(Aircraft, id=aircraft_id)
+        data = json.loads(request.body)
+        
+        # Update fields
+        aircraft.registration_number = data.get('registration_number', aircraft.registration_number)
+        aircraft.model_name = data.get('model_name', aircraft.model_name)
+        aircraft.year_manufactured = int(data.get('year_manufactured', aircraft.year_manufactured))
+        aircraft.base_airport = data.get('base_airport', aircraft.base_airport)
+        aircraft.current_location = data.get('current_location', aircraft.current_location)
+        aircraft.is_active = data.get('is_active', aircraft.is_active)
+        aircraft.features = data.get('features', aircraft.features)
+        aircraft.hourly_rate = float(data.get('hourly_rate', aircraft.hourly_rate))
+        aircraft.minimum_hours = float(data.get('minimum_hours', aircraft.minimum_hours))
+        
+        # Update foreign keys if provided
+        if 'owner_id' in data:
+            owner = get_object_or_404(User, id=data['owner_id'])
+            aircraft.owner = owner
+            
+        if 'aircraft_type_id' in data:
+            aircraft_type = get_object_or_404(AircraftType, id=data['aircraft_type_id'])
+            aircraft.aircraft_type = aircraft_type
+        
+        aircraft.save()
+        
+        return JsonResponse({
+            'success': True, 
+            'message': 'Aircraft updated successfully',
+            'data': {
+                'id': aircraft.id,
+                'registration_number': aircraft.registration_number,
+                'model_name': aircraft.model_name,
+                'is_active': aircraft.is_active,
+            }
+        })
+        
+    except Aircraft.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Aircraft not found'})
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Owner not found'})
+    except AircraftType.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Aircraft type not found'})
+    except ValueError as e:
+        return JsonResponse({'success': False, 'error': f'Invalid data: {str(e)}'})
+    except IntegrityError as e:
+        return JsonResponse({'success': False, 'error': 'Registration number already exists'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+@csrf_exempt
+@require_http_methods(["DELETE"])
+def aircraft_delete_ajax(request, aircraft_id):
+    """Delete aircraft via AJAX"""
+    try:
+        aircraft = get_object_or_404(Aircraft, id=aircraft_id)
+        aircraft_info = f"{aircraft.model_name} ({aircraft.registration_number})"
+        aircraft.delete()
+        
+        return JsonResponse({
+            'success': True, 
+            'message': f'Aircraft {aircraft_info} deleted successfully'
+        })
+        
+    except Aircraft.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Aircraft not found'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+def get_dropdown_data(request):
+    """Get data for dropdowns (owners and aircraft types)"""
+    try:
+        owners = User.objects.filter(user_type__in=['owner', 'admin']).values('id', 'username', 'first_name', 'last_name')
+        aircraft_types = AircraftType.objects.all().values('id', 'name')
+        
+        return JsonResponse({
+            'success': True,
+            'owners': list(owners),
+            'aircraft_types': list(aircraft_types)
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
