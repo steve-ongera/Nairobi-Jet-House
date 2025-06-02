@@ -19,6 +19,11 @@ class User(AbstractUser):
     tax_id = models.CharField(max_length=50, blank=True, null=True)
     verified = models.BooleanField(default=False)
 
+    def __str__(self):
+        if self.get_full_name():
+            return f"{self.get_full_name()} ({self.email})"
+        return self.email
+
 class AircraftType(models.Model):
     """Different types of aircraft (jets, helicopters, etc.)"""
     name = models.CharField(max_length=100)

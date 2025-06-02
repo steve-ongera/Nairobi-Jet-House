@@ -106,5 +106,11 @@ urlpatterns = [
     path('admins/<int:admin_id>/detail/', views.admin_detail, name='admin_detail'),
     path('admins/<int:admin_id>/update/', views.update_admin, name='update_admin'),
     path('admins/<int:admin_id>/delete/', views.delete_admin, name='delete_admin'),
-  
+
+    path('bookings/new/', views.new_booking, name='new_booking'),
+    
+    # AJAX endpoints for dynamic functionality
+    path('ajax/check-availability/', views.ajax_check_availability, name='ajax_check_availability'),
+    path('ajax/calculate-price/', views.ajax_calculate_price, name='ajax_calculate_price'),
+    
 ]

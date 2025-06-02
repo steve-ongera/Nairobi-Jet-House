@@ -1,0 +1,1224 @@
+{% extends 'base/base.html' %}
+
+{% block title %}New Booking{% endblock %}
+
+{% block content %}
+<style>
+    .form-section {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .form-section h4 {
+        color: #495057;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .flight-leg {
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 15px;
+        background: white;
+    }
+    
+    .passenger-form {
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 15px;
+        background: white;
+    }
+    
+    .availability-status {
+        padding: 10px;
+        border-radius: 5px;
+        margin: 10px 0;
+        display: none;
+    }
+    
+    .availability-available {
+        background-color: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+    
+    .availability-unavailable {
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+    
+    .pricing-info {
+        background: #e9ecef;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        padding: 15px;
+        margin: 15px 0;
+    }
+    
+    .btn-add {
+        background-color: #28a745;
+        border-color: #28a745;
+    }
+    
+    .btn-remove {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+    
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+    
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(0,0,0,.1);
+        border-radius: 50%;
+        border-top-color: #007bff;
+        animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    .client-toggle {
+        margin-bottom: 20px;
+    }
+    
+    .client-selection {
+        display: block;
+    }
+    
+    .client-creation {
+        display: none;
+    }
+    
+    .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -5px;
+    }
+    
+    .form-col {
+        flex: 1;
+        padding: 0 5px;
+        min-width: 200px;
+    }
+    
+    .required-field {
+        color: #dc3545;
+    }
+</style>
+
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-plane"></i> New Booking
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="booking-form">
+                        {% csrf_token %}
+                        
+                        <!-- Client Selection/Creation Section -->
+                        <!-- Client Information Section -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h5>Client Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- Client Selection Radio Buttons -->
+                                <div class="mb-3">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="client_selection" id="existing_client" 
+                                            value="existing" {% if client_selection == 'existing' or not client_selection %}checked{% endif %}>
+                                        <label class="form-check-label" for="existing_client">
+                                            Select Existing Client
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="client_selection" id="new_client" 
+                                            value="new" {% if client_selection == 'new' %}checked{% endif %}>
+                                        <label class="form-check-label" for="new_client">
+                                            Create New Client
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Existing Client Selection -->
+                                <div id="existing-client-section" class="mb-3">
+                                    <label for="id_client" class="form-label">Select Client *</label>
+                                    <select name="client" id="id_client" class="form-select" required>
+                                        <option value="">Choose a client...</option>
+                                        {% for client in clients %}
+                                            <option value="{{ client.id }}">
+                                                {{ client.get_full_name|default:client.username }} ({{ client.email }})
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <!-- New Client Creation Form -->
+                                <div id="new-client-section" style="display: none;">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="{{ account_form.first_name.id_for_label }}" class="form-label">First Name *</label>
+                                                {{ account_form.first_name }}
+                                                {% if account_form.first_name.errors %}
+                                                    <div class="text-danger">{{ account_form.first_name.errors }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="{{ account_form.last_name.id_for_label }}" class="form-label">Last Name *</label>
+                                                {{ account_form.last_name }}
+                                                {% if account_form.last_name.errors %}
+                                                    <div class="text-danger">{{ account_form.last_name.errors }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="{{ account_form.email.id_for_label }}" class="form-label">Email *</label>
+                                                {{ account_form.email }}
+                                                {% if account_form.email.errors %}
+                                                    <div class="text-danger">{{ account_form.email.errors }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="{{ account_form.phone_number.id_for_label }}" class="form-label">Phone</label>
+                                                {{ account_form.phone_number }}
+                                                {% if account_form.phone_number.errors %}
+                                                    <div class="text-danger">{{ account_form.phone_number.errors }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Additional fields for new client -->
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="{{ account_form.username.id_for_label }}" class="form-label">Username *</label>
+                                                {{ account_form.username }}
+                                                {% if account_form.username.errors %}
+                                                    <div class="text-danger">{{ account_form.username.errors }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="{{ account_form.password1.id_for_label }}" class="form-label">Password *</label>
+                                                {{ account_form.password1 }}
+                                                {% if account_form.password1.errors %}
+                                                    <div class="text-danger">{{ account_form.password1.errors }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="{{ account_form.password2.id_for_label }}" class="form-label">Confirm Password *</label>
+                                                {{ account_form.password2 }}
+                                                {% if account_form.password2.errors %}
+                                                    <div class="text-danger">{{ account_form.password2.errors }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="{{ account_form.company_name.id_for_label }}" class="form-label">Company Name</label>
+                                                {{ account_form.company_name }}
+                                                {% if account_form.company_name.errors %}
+                                                    <div class="text-danger">{{ account_form.company_name.errors }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="{{ account_form.address.id_for_label }}" class="form-label">Address</label>
+                                        {{ account_form.address }}
+                                        {% if account_form.address.errors %}
+                                            <div class="text-danger">{{ account_form.address.errors }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const existingClientRadio = document.getElementById('existing_client');
+                            const newClientRadio = document.getElementById('new_client');
+                            const existingClientSection = document.getElementById('existing-client-section');
+                            const newClientSection = document.getElementById('new-client-section');
+                            const clientSelect = document.getElementById('id_client');
+
+                            function toggleClientSections() {
+                                if (existingClientRadio.checked) {
+                                    existingClientSection.style.display = 'block';
+                                    newClientSection.style.display = 'none';
+                                    clientSelect.required = true;
+                                    
+                                    // Remove required from new client form fields
+                                    const newClientInputs = newClientSection.querySelectorAll('input[required]');
+                                    newClientInputs.forEach(input => input.required = false);
+                                } else if (newClientRadio.checked) {
+                                    existingClientSection.style.display = 'none';
+                                    newClientSection.style.display = 'block';
+                                    clientSelect.required = false;
+                                    clientSelect.value = '';
+                                    
+                                    // Add required to new client form fields
+                                    const requiredFields = ['id_first_name', 'id_last_name', 'id_email', 'id_username', 'id_password1', 'id_password2'];
+                                    requiredFields.forEach(fieldId => {
+                                        const field = document.getElementById(fieldId);
+                                        if (field) field.required = true;
+                                    });
+                                }
+                            }
+
+                            // Initial setup
+                            toggleClientSections();
+
+                            // Add event listeners
+                            existingClientRadio.addEventListener('change', toggleClientSections);
+                            newClientRadio.addEventListener('change', toggleClientSections);
+                        });
+                        </script>
+
+                        <!-- Booking Details Section -->
+                        <div class="form-section">
+                            <h4><i class="fas fa-calendar"></i> Booking Details</h4>
+                            
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label for="{{ booking_form.aircraft.id_for_label }}">Aircraft <span class="required-field">*</span></label>
+                                        {{ booking_form.aircraft }}
+                                    </div>
+                                </div>
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label for="{{ booking_form.trip_type.id_for_label }}">Trip Type <span class="required-field">*</span></label>
+                                        {{ booking_form.trip_type }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label for="passenger_count">Number of Passengers <span class="required-field">*</span></label>
+                                        <input type="number" class="form-control" id="passenger_count" name="passenger_count" value="1" min="1" max="20">
+                                    </div>
+                                </div>
+                                <div class="form-col">
+                                    <div class="form-group">
+                                        <label for="leg_count">Number of Flight Legs <span class="required-field">*</span></label>
+                                        <input type="number" class="form-control" id="leg_count" name="leg_count" value="1" min="1" max="10">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ booking_form.special_requests.id_for_label }}">Special Requests</label>
+                                {{ booking_form.special_requests }}
+                            </div>
+                        </div>
+
+                        <!-- Flight Legs Section -->
+                        <div class="form-section">
+                            <h4><i class="fas fa-route"></i> Flight Legs</h4>
+                            <div id="flight-legs-container">
+                                {% for leg_form in leg_forms %}
+                                <div class="flight-leg" data-leg-index="0">
+                                    <h5>Flight Leg #1</h5>
+                                    <div class="form-row">
+                                        <div class="form-col">
+                                            <div class="form-group">
+                                                <label>Departure Airport <span class="required-field">*</span></label>
+                                                {{ leg_form.departure_airport }}
+                                            </div>
+                                        </div>
+                                        <div class="form-col">
+                                            <div class="form-group">
+                                                <label>Arrival Airport <span class="required-field">*</span></label>
+                                                {{ leg_form.arrival_airport }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-col">
+                                            <div class="form-group">
+                                                <label>Departure Date & Time <span class="required-field">*</span></label>
+                                                {{ leg_form.departure_datetime }}
+                                            </div>
+                                        </div>
+                                        <div class="form-col">
+                                            <div class="form-group">
+                                                <label>Arrival Date & Time <span class="required-field">*</span></label>
+                                                {{ leg_form.arrival_datetime }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-col">
+                                            <div class="form-group">
+                                                <label>Flight Hours <span class="required-field">*</span></label>
+                                                {{ leg_form.flight_hours }}
+                                            </div>
+                                        </div>
+                                        <div class="form-col">
+                                            <button type="button" class="btn btn-remove btn-sm remove-leg" style="margin-top: 32px;">
+                                                <i class="fas fa-trash"></i> Remove Leg
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <button type="button" class="btn btn-add btn-sm" id="add-leg">
+                                <i class="fas fa-plus"></i> Add Flight Leg
+                            </button>
+                        </div>
+
+                        <!-- Availability Check Section -->
+                        <div class="form-section">
+                            <h4><i class="fas fa-check-circle"></i> Availability & Pricing</h4>
+                            <button type="button" class="btn btn-info" id="check-availability">
+                                <i class="fas fa-search"></i> Check Availability
+                            </button>
+                            <button type="button" class="btn btn-success" id="calculate-price">
+                                <i class="fas fa-calculator"></i> Calculate Price
+                            </button>
+                            
+                            <div class="availability-status" id="availability-status"></div>
+                            <div class="pricing-info" id="pricing-info" style="display: none;"></div>
+                        </div>
+
+                        <!-- Passengers Section -->
+                        <div class="form-section">
+                            <h4><i class="fas fa-users"></i> Passengers</h4>
+                            <div id="passengers-container">
+                                {% for passenger_form in passenger_forms %}
+                                <div class="passenger-form" data-passenger-index="0">
+                                    <h5>Passenger #1</h5>
+                                    <div class="form-row">
+                                        <div class="form-col">
+                                            <div class="form-group">
+                                                <label>Full Name <span class="required-field">*</span></label>
+                                                {{ passenger_form.name }}
+                                            </div>
+                                        </div>
+                                        <div class="form-col">
+                                            <div class="form-group">
+                                                <label>Nationality</label>
+                                                {{ passenger_form.nationality }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-col">
+                                            <div class="form-group">
+                                                <label>Date of Birth</label>
+                                                {{ passenger_form.date_of_birth }}
+                                            </div>
+                                        </div>
+                                        <div class="form-col">
+                                            <div class="form-group">
+                                                <label>Passport Number</label>
+                                                {{ passenger_form.passport_number }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Submit Section -->
+                        <div class="form-section">
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-save"></i> Create Booking
+                                </button>
+                                <a href="{% url 'booking_list' %}" class="btn btn-secondary btn-lg">
+                                    <i class="fas fa-times"></i> Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- View Booking Modal -->
+<div class="modal fade" id="viewBookingModal" tabindex="-1" aria-labelledby="viewBookingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewBookingModalLabel">Booking Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title">Booking Information</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Booking ID:</label>
+                                            <p id="booking-id" class="form-control-static">-</p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Trip Type:</label>
+                                            <p id="booking-trip-type" class="form-control-static">-</p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Status:</label>
+                                            <p id="booking-status" class="form-control-static">-</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Created:</label>
+                                            <p id="booking-created" class="form-control-static">-</p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Last Updated:</label>
+                                            <p id="booking-updated" class="form-control-static">-</p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Payment Status:</label>
+                                            <p id="booking-payment" class="form-control-static">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title">Client Information</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Name:</label>
+                                    <p id="client-name" class="form-control-static">-</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Email:</label>
+                                    <p id="client-email" class="form-control-static">-</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Phone:</label>
+                                    <p id="client-phone" class="form-control-static">-</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title">Aircraft Information</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Model:</label>
+                                    <p id="aircraft-model" class="form-control-static">-</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Registration:</label>
+                                    <p id="aircraft-reg" class="form-control-static">-</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Type:</label>
+                                    <p id="aircraft-type" class="form-control-static">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h6 class="card-title">Financial Information</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Total Price:</label>
+                                            <p id="total-price" class="form-control-static">-</p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Commission Rate:</label>
+                                            <p id="commission-rate" class="form-control-static">-</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Agent Commission:</label>
+                                            <p id="agent-commission" class="form-control-static">-</p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Owner Earnings:</label>
+                                            <p id="owner-earnings" class="form-control-static">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="card-title">Flight Legs</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm" id="flight-legs-table">
+                                <thead>
+                                    <tr>
+                                        <th>Departure</th>
+                                        <th>Arrival</th>
+                                        <th>Date & Time</th>
+                                        <th>Passengers</th>
+                                        <th>Flight Hours</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="card-title">Special Requests</h6>
+                    </div>
+                    <div class="card-body">
+                        <p id="special-requests" class="form-control-static">-</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+$(document).ready(function() {
+    // Client type toggle
+    $('input[name="client_type"]').change(function() {
+        if ($(this).val() === 'existing') {
+            $('#client-selection').show();
+            $('#client-creation').hide();
+            $('#client-creation input').prop('required', false);
+        } else {
+            $('#client-selection').hide();
+            $('#client-creation').show();
+            $('#client-creation input[type="email"], #client-creation input[name*="first_name"], #client-creation input[name*="last_name"]').prop('required', true);
+        }
+    });
+
+    // Dynamic leg count
+    $('#leg_count').change(function() {
+        updateFlightLegs(parseInt($(this).val()));
+    });
+
+    // Dynamic passenger count
+    $('#passenger_count').change(function() {
+        updatePassengers(parseInt($(this).val()));
+    });
+
+    // Add flight leg
+    $('#add-leg').click(function() {
+        var currentCount = $('#flight-legs-container .flight-leg').length;
+        $('#leg_count').val(currentCount + 1).trigger('change');
+    });
+
+    // Remove flight leg
+    $(document).on('click', '.remove-leg', function() {
+        var legContainer = $(this).closest('.flight-leg');
+        var currentCount = $('#flight-legs-container .flight-leg').length;
+        
+        if (currentCount > 1) {
+            legContainer.remove();
+            $('#leg_count').val(currentCount - 1);
+            updateLegNumbers();
+        } else {
+            alert('At least one flight leg is required.');
+        }
+    });
+
+    // Check availability
+    $('#check-availability').click(function() {
+        checkAvailability();
+    });
+
+    // Calculate price
+    $('#calculate-price').click(function() {
+        calculatePrice();
+    });
+
+    // Auto-calculate flight hours when departure/arrival times change
+    $(document).on('change', 'input[name*="departure_datetime"], input[name*="arrival_datetime"]', function() {
+        var legContainer = $(this).closest('.flight-leg');
+        calculateFlightHours(legContainer);
+    });
+
+    // Form submission with client type handling
+    $('#booking-form').submit(function(e) {
+        var clientType = $('input[name="client_type"]:checked').val();
+        
+        if (clientType === 'new') {
+            // Add create_account flag
+            $(this).append('<input type="hidden" name="create_account" value="1">');
+        }
+    });
+
+    function updateFlightLegs(count) {
+        var container = $('#flight-legs-container');
+        var currentCount = container.find('.flight-leg').length;
+        
+        if (count > currentCount) {
+            // Add new legs
+            for (var i = currentCount; i < count; i++) {
+                addFlightLeg(i);
+            }
+        } else if (count < currentCount) {
+            // Remove legs
+            container.find('.flight-leg').slice(count).remove();
+        }
+        
+        updateLegNumbers();
+    }
+
+    function addFlightLeg(index) {
+        var legHtml = `
+            <div class="flight-leg" data-leg-index="${index}">
+                <h5>Flight Leg #${index + 1}</h5>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>Departure Airport <span class="required-field">*</span></label>
+                            <select name="leg_${index}-departure_airport" class="form-control" required>
+                                <option value="">Select Airport</option>
+                                {% for airport in airports %}
+                                <option value="{{ airport.id }}">{{ airport.code }} - {{ airport.name }} ({{ airport.city }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>Arrival Airport <span class="required-field">*</span></label>
+                            <select name="leg_${index}-arrival_airport" class="form-control" required>
+                                <option value="">Select Airport</option>
+                                {% for airport in airports %}
+                                <option value="{{ airport.id }}">{{ airport.code }} - {{ airport.name }} ({{ airport.city }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>Departure Date & Time <span class="required-field">*</span></label>
+                            <input type="datetime-local" name="leg_${index}-departure_datetime" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>Arrival Date & Time <span class="required-field">*</span></label>
+                            <input type="datetime-local" name="leg_${index}-arrival_datetime" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>Flight Hours <span class="required-field">*</span></label>
+                            <input type="number" name="leg_${index}-flight_hours" class="form-control" step="0.1" min="0.1" required>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <button type="button" class="btn btn-remove btn-sm remove-leg" style="margin-top: 32px;">
+                            <i class="fas fa-trash"></i> Remove Leg
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        $('#flight-legs-container').append(legHtml);
+    }
+
+    function updatePassengers(count) {
+        var container = $('#passengers-container');
+        var currentCount = container.find('.passenger-form').length;
+        
+        if (count > currentCount) {
+            // Add new passengers
+            for (var i = currentCount; i < count; i++) {
+                addPassengerForm(i);
+            }
+        } else if (count < currentCount) {
+            // Remove passengers
+            container.find('.passenger-form').slice(count).remove();
+        }
+        
+        updatePassengerNumbers();
+    }
+
+    function addPassengerForm(index) {
+        var passengerHtml = `
+            <div class="passenger-form" data-passenger-index="${index}">
+                <h5>Passenger #${index + 1}</h5>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>Full Name <span class="required-field">*</span></label>
+                            <input type="text" name="passenger_${index}-name" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>Nationality</label>
+                            <input type="text" name="passenger_${index}-nationality" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>Date of Birth</label>
+                            <input type="date" name="passenger_${index}-date_of_birth" class="form-control">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label>Passport Number</label>
+                            <input type="text" name="passenger_${index}-passport_number" class="form-control">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        $('#passengers-container').append(passengerHtml);
+    }
+
+    function updateLegNumbers() {
+        $('#flight-legs-container .flight-leg').each(function(index) {
+            $(this).find('h5').text('Flight Leg #' + (index + 1));
+            $(this).attr('data-leg-index', index);
+        });
+    }
+
+    function updatePassengerNumbers() {
+        $('#passengers-container .passenger-form').each(function(index) {
+            $(this).find('h5').text('Passenger #' + (index + 1));
+            $(this).attr('data-passenger-index', index);
+        });
+    }
+
+    function calculateFlightHours(legContainer) {
+        var departureInput = legContainer.find('input[name*="departure_datetime"]');
+        var arrivalInput = legContainer.find('input[name*="arrival_datetime"]');
+        var hoursInput = legContainer.find('input[name*="flight_hours"]');
+        
+        var departureTime = new Date(departureInput.val());
+        var arrivalTime = new Date(arrivalInput.val());
+        
+        if (departureTime && arrivalTime && arrivalTime > departureTime) {
+            var diffInMs = arrivalTime - departureTime;
+            var diffInHours = diffInMs / (1000 * 60 * 60);
+            hoursInput.val(diffInHours.toFixed(1));
+        }
+    }
+
+    function checkAvailability() {
+        var aircraftId = $('select[name="aircraft"]').val();
+        var flightLegs = getFlightLegsData();
+        
+        if (!aircraftId) {
+            alert('Please select an aircraft first.');
+            return;
+        }
+        
+        if (flightLegs.length === 0) {
+            alert('Please fill in at least one flight leg.');
+            return;
+        }
+        
+        var button = $('#check-availability');
+        var originalText = button.html();
+        button.html('<span class="spinner"></span> Checking...').prop('disabled', true);
+        
+        $.ajax({
+            url: '{% url "ajax_check_availability" %}',
+            method: 'POST',
+            data: JSON.stringify({
+                aircraft_id: aircraftId,
+                flight_legs: flightLegs
+            }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                var statusDiv = $('#availability-status');
+                statusDiv.removeClass('availability-available availability-unavailable');
+                
+                if (response.available) {
+                    statusDiv.addClass('availability-available');
+                    statusDiv.html('<i class="fas fa-check-circle"></i> ' + response.message);
+                } else {
+                    statusDiv.addClass('availability-unavailable');
+                    statusDiv.html('<i class="fas fa-exclamation-triangle"></i> ' + response.message);
+                }
+                
+                statusDiv.show();
+            },
+            error: function(xhr) {
+                var errorMsg = 'Error checking availability';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                }
+                
+                $('#availability-status')
+                    .removeClass('availability-available')
+                    .addClass('availability-unavailable')
+                    .html('<i class="fas fa-exclamation-triangle"></i> ' + errorMsg)
+                    .show();
+            },
+            complete: function() {
+                button.html(originalText).prop('disabled', false);
+            }
+        });
+    }
+
+    function calculatePrice() {
+        var aircraftId = $('select[name="aircraft"]').val();
+        var flightLegs = getFlightLegsData();
+        var tripType = $('select[name="trip_type"]').val();
+        
+        if (!aircraftId) {
+            alert('Please select an aircraft first.');
+            return;
+        }
+        
+        if (flightLegs.length === 0) {
+            alert('Please fill in at least one flight leg.');
+            return;
+        }
+        
+        var button = $('#calculate-price');
+        var originalText = button.html();
+        button.html('<span class="spinner"></span> Calculating...').prop('disabled', true);
+        
+        $.ajax({
+            url: '{% url "ajax_calculate_price" %}',
+            method: 'POST',
+            data: JSON.stringify({
+                aircraft_id: aircraftId,
+                flight_legs: flightLegs,
+                trip_type: tripType
+            }),
+            contentType: 'application/json',
+            headers: {
+                'X-CSRFToken': $('[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                var pricingDiv = $('#pricing-info');
+                var html = `
+                    <h5><i class="fas fa-calculator"></i> Pricing Breakdown</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Total Flight Hours:</strong> ${response.total_hours} hours</p>
+                            <p><strong>Base Hourly Rate:</strong> $${response.base_hourly_rate.toFixed(2)}</p>
+                            <p><strong>Commission Rate:</strong> ${response.commission_rate.toFixed(1)}%</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Total Price:</strong> <span class="text-success h5">$${response.total_price.toFixed(2)}</span></p>
+                            <p><strong>Agent Commission:</strong> $${response.agent_commission.toFixed(2)}</p>
+                            <p><strong>Owner Earnings:</strong> $${response.owner_earnings.toFixed(2)}</p>
+                        </div>
+                    </div>
+                `;
+                pricingDiv.html(html).show();
+            },
+            error: function(xhr) {
+                var errorMsg = 'Error calculating price';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMsg = xhr.responseJSON.error;
+                }
+                
+                $('#pricing-info')
+                    .html('<div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> ' + errorMsg + '</div>')
+                    .show();
+            },
+            complete: function() {
+                button.html(originalText).prop('disabled', false);
+            }
+        });
+    }
+
+    function getFlightLegsData() {
+        var legs = [];
+        
+        $('#flight-legs-container .flight-leg').each(function() {
+            var legIndex = $(this).data('leg-index');
+            var departureAirport = $(this).find('select[name*="departure_airport"]').val();
+            var arrivalAirport = $(this).find('select[name*="arrival_airport"]').val();
+            var departureDateTime = $(this).find('input[name*="departure_datetime"]').val();
+            var arrivalDateTime = $(this).find('input[name*="arrival_datetime"]').val();
+            var flightHours = $(this).find('input[name*="flight_hours"]').val();
+            
+            if (departureAirport && arrivalAirport && departureDateTime && arrivalDateTime && flightHours) {
+                legs.push({
+                    departure_airport: departureAirport,
+                    arrival_airport: arrivalAirport,
+                    departure_datetime: new Date(departureDateTime).toISOString(),
+                    arrival_datetime: new Date(arrivalDateTime).toISOString(),
+                    flight_hours: parseFloat(flightHours)
+                });
+            }
+        });
+        
+        return legs;
+    }
+});
+</script>
+
+
+<script>
+$(document).ready(function() {
+    // Status filter functionality
+    $('#applyFilter').click(function() {
+        const status = $('#statusFilter').val();
+        if (status) {
+            window.location.href = `?status=${status}`;
+        } else {
+            window.location.href = '?';
+        }
+    });
+
+    // View Booking Modal
+    $('.view-booking').click(function() {
+        const bookingId = $(this).data('booking-id');
+        const modal = new bootstrap.Modal(document.getElementById('viewBookingModal'));
+        
+        // Show loading state
+        $('#viewBookingModal .modal-body p').text('Loading...');
+        $('#flight-legs-table tbody').html('<tr><td colspan="6" class="text-center">Loading...</td></tr>');
+        
+        // Fetch booking details via AJAX
+        $.ajax({
+            url: '/bookings/' + bookingId + '/detail/',
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    const booking = response.booking;
+                    
+                    // Update booking info
+                    $('#booking-id').text(booking.booking_order_id);
+                    $('#booking-trip-type').text(booking.trip_type);
+                    $('#booking-status').text(booking.status);
+                    $('#booking-created').text(booking.created_at);
+                    $('#booking-updated').text(booking.updated_at);
+                    $('#booking-payment').text(booking.payment_status);
+                    
+                    // Update client info
+                    $('#client-name').text(booking.client.name);
+                    $('#client-email').text(booking.client.email);
+                    $('#client-phone').text(booking.client.phone);
+                    
+                    // Update aircraft info
+                    $('#aircraft-model').text(booking.aircraft.model);
+                    $('#aircraft-reg').text(booking.aircraft.registration);
+                    $('#aircraft-type').text(booking.aircraft.type);
+                    
+                    // Update financial info
+                    $('#total-price').text('$' + booking.total_price);
+                    $('#commission-rate').text(booking.commission_rate + '%');
+                    $('#agent-commission').text('$' + booking.agent_commission);
+                    $('#owner-earnings').text('$' + booking.owner_earnings);
+                    
+                    // Update flight legs
+                    const legsTable = $('#flight-legs-table tbody');
+                    legsTable.empty();
+                    
+                    if (booking.flight_legs.length > 0) {
+                        booking.flight_legs.forEach(function(leg) {
+                            legsTable.append(`
+                                <tr>
+                                    <td>${leg.departure}</td>
+                                    <td>${leg.arrival}</td>
+                                    <td>
+                                        ${leg.departure_datetime}<br>
+                                        to ${leg.arrival_datetime}
+                                    </td>
+                                    <td>${leg.passenger_count}</td>
+                                    <td>${leg.flight_hours}</td>
+                                    <td>$${leg.leg_price}</td>
+                                </tr>
+                            `);
+                        });
+                    } else {
+                        legsTable.append('<tr><td colspan="6" class="text-center">No flight legs found</td></tr>');
+                    }
+                    
+                    // Update special requests
+                    $('#special-requests').text(booking.special_requests);
+                    
+                    // Update modal title
+                    $('#viewBookingModalLabel').text(`Booking Details: ${booking.booking_order_id}`);
+                } else {
+                    alert(response.error || 'Failed to load booking details');
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('Error fetching booking details: ' + error);
+            },
+            complete: function() {
+                modal.show();
+            }
+        });
+    });
+
+    // Edit Booking Modal
+    $('.edit-booking').click(function() {
+        const bookingId = $(this).data('booking-id');
+        const row = $(this).closest('tr');
+        const currentStatus = row.find('td:nth-child(6) .badge').text().trim();
+        
+        $('#edit-booking-id').val(bookingId);
+        
+        // Set current status in dropdown
+        $('#booking-status-select').val(function() {
+            const statusMap = {
+                'Pending': 'pending',
+                'Confirmed': 'confirmed',
+                'Completed': 'completed',
+                'Cancelled': 'cancelled'
+            };
+            return statusMap[currentStatus] || 'pending';
+        });
+        
+        const modal = new bootstrap.Modal(document.getElementById('editBookingModal'));
+        modal.show();
+    });
+
+    // Submit Edit Form
+    $('#editBookingForm').submit(function(e) {
+        e.preventDefault();
+        const bookingId = $('#edit-booking-id').val();
+        
+        $.ajax({
+            url: '/bookings/' + bookingId + '/update/',
+            type: 'POST',
+            data: $(this).serialize(),
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    alert(response.message);
+                    // Refresh the page to see changes
+                    location.reload();
+                } else {
+                    alert(response.error || 'Failed to update booking status');
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('Error updating booking status: ' + error);
+            }
+        });
+    });
+
+    // Delete Booking Modal
+    $('.delete-booking').click(function() {
+        const bookingId = $(this).data('booking-id');
+        const row = $(this).closest('tr');
+        const bookingRef = row.find('td:nth-child(1)').text().trim();
+        
+        $('#delete-booking-id').text(bookingRef);
+        $('#confirm-booking-delete').data('booking-id', bookingId);
+        
+        const modal = new bootstrap.Modal(document.getElementById('deleteBookingModal'));
+        modal.show();
+    });
+
+    // Confirm Delete
+    $('#confirm-booking-delete').click(function() {
+        const bookingId = $(this).data('booking-id');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('deleteBookingModal'));
+        
+        $.ajax({
+            url: '/bookings/' + bookingId + '/delete/',
+            type: 'POST',
+            data: {
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    alert(response.message);
+                    // Refresh the page to see changes
+                    location.reload();
+                } else {
+                    alert(response.error || 'Failed to delete booking');
+                }
+            },
+            error: function(xhr, status, error) {
+                alert('Error deleting booking: ' + error);
+            },
+            complete: function() {
+                modal.hide();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

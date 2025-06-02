@@ -3181,3 +3181,378 @@ def custom_page_not_found(request, exception):
 
 def custom_server_error(request):
     return render(request, '500.html', status=500)
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.db import transaction
+from django.http import JsonResponse
+from django.utils import timezone
+from django.core.exceptions import ValidationError
+from datetime import datetime, timedelta
+from decimal import Decimal
+import json
+
+from .models import (
+    User, Aircraft, Airport, Booking, FlightLeg, Passenger, 
+    PricingRule, Availability, AircraftType
+)
+from .forms import (
+    BookingForm, FlightLegForm, PassengerForm, ClientAccountForm
+)
+
+def check_aircraft_availability(aircraft, flight_legs):
+    """
+    Check if aircraft is available for all flight legs
+    Returns: (is_available, message)
+    """
+    for leg in flight_legs:
+        departure_time = leg['departure_datetime']
+        arrival_time = leg['arrival_datetime']
+        
+        # Check for overlapping bookings
+        overlapping_bookings = Booking.objects.filter(
+            aircraft=aircraft,
+            status__in=['confirmed', 'pending'],
+            flight_legs__departure_datetime__lt=arrival_time,
+            flight_legs__arrival_datetime__gt=departure_time
+        ).exists()
+        
+        if overlapping_bookings:
+            return False, f"Aircraft not available from {departure_time} to {arrival_time}"
+        
+        # Check availability windows if they exist
+        availability_exists = Availability.objects.filter(
+            aircraft=aircraft,
+            start_datetime__lte=departure_time,
+            end_datetime__gte=arrival_time,
+            is_available=True
+        ).exists()
+        
+        # If availability records exist, aircraft must be in an available window
+        if Availability.objects.filter(aircraft=aircraft).exists() and not availability_exists:
+            return False, f"Aircraft not in available window for {departure_time} to {arrival_time}"
+    
+    return True, "Aircraft is available"
+
+def calculate_pricing(aircraft, flight_legs, trip_type):
+    """
+    Calculate pricing for the booking based on aircraft, legs, and various factors
+    Returns: pricing_details dictionary
+    """
+    try:
+        pricing_rule = PricingRule.objects.get(aircraft_type=aircraft.aircraft_type)
+        base_rate = pricing_rule.base_hourly_rate
+        minimum_hours = pricing_rule.minimum_hours
+    except PricingRule.DoesNotExist:
+        # Fall back to aircraft hourly rate
+        base_rate = aircraft.hourly_rate
+        minimum_hours = aircraft.minimum_hours
+    
+    total_hours = Decimal('0.0')
+    total_base_price = Decimal('0.0')
+    
+    for leg in flight_legs:
+        flight_hours = leg['flight_hours']
+        # Apply minimum hours per leg
+        billable_hours = max(flight_hours, minimum_hours)
+        total_hours += billable_hours
+        
+        leg_base_price = base_rate * billable_hours
+        
+        # Apply surcharges
+        departure_time = leg['departure_datetime']
+        
+        # Weekend surcharge (Saturday = 5, Sunday = 6)
+        if hasattr(pricing_rule, 'weekend_surcharge') and departure_time.weekday() >= 5:
+            weekend_multiplier = 1 + (pricing_rule.weekend_surcharge / 100)
+            leg_base_price *= weekend_multiplier
+        
+        # Last minute surcharge (within 24 hours)
+        if hasattr(pricing_rule, 'last_minute_surcharge'):
+            hours_until_departure = (departure_time - timezone.now()).total_seconds() / 3600
+            if hours_until_departure < 24:
+                last_minute_multiplier = 1 + (pricing_rule.last_minute_surcharge / 100)
+                leg_base_price *= last_minute_multiplier
+        
+        # Peak season multiplier (can be customized based on dates)
+        if hasattr(pricing_rule, 'peak_season_multiplier'):
+            leg_base_price *= pricing_rule.peak_season_multiplier
+        
+        total_base_price += leg_base_price
+    
+    # Trip type discounts
+    if trip_type == 'round_trip' and len(flight_legs) == 2:
+        # 5% discount for round trips
+        total_base_price *= Decimal('0.95')
+    elif trip_type == 'multi_leg' and len(flight_legs) > 2:
+        # 3% discount for multi-leg trips
+        total_base_price *= Decimal('0.97')
+    
+    # Calculate commission (default 10%)
+    commission_rate = Decimal('10.00')  # 10%
+    agent_commission = total_base_price * (commission_rate / 100)
+    owner_earnings = total_base_price - agent_commission
+    
+    return {
+        'total_price': total_base_price,
+        'commission_rate': commission_rate,
+        'agent_commission': agent_commission,
+        'owner_earnings': owner_earnings,
+        'total_hours': total_hours,
+        'base_hourly_rate': base_rate
+    }
+
+@transaction.atomic
+def new_booking(request):
+    """
+    Complete booking view that handles:
+    - Client selection or creation
+    - Booking details
+    - Flight legs
+    - Passengers
+    - Availability checking
+    - Automatic pricing calculation
+    """
+    if request.method == 'POST':
+        # Initialize forms
+        booking_form = BookingForm(request.POST)
+        
+        # Get passenger count and create forms
+        passenger_count = int(request.POST.get('passenger_count', 1))
+        passenger_forms = [
+            PassengerForm(request.POST, prefix=f'passenger_{i}') 
+            for i in range(passenger_count)
+        ]
+        
+        # Client handling
+        client_selection = request.POST.get('client_selection')  # 'existing' or 'new'
+        account_form = None
+        client = None
+        
+        if client_selection == 'new':
+            # Create new client account
+            account_form = ClientAccountForm(request.POST)
+            if account_form.is_valid():
+                user = account_form.save(commit=False)
+                user.user_type = 'client'
+                user.is_active = True
+                user.save()
+                client = user
+                messages.success(request, 'Client account created successfully!')
+            else:
+                messages.error(request, 'Please correct the client account information.')
+                
+        elif client_selection == 'existing':
+            # Use existing client
+            client_id = request.POST.get('client')
+            if not client_id:
+                messages.error(request, 'Please select a client.')
+            else:
+                try:
+                    client = User.objects.get(id=client_id, user_type='client', is_active=True)
+                except User.DoesNotExist:
+                    messages.error(request, 'Invalid client selected.')
+                    client = None
+        else:
+            messages.error(request, 'Please select how to handle client information.')
+        
+        # Continue only if we have a valid client
+        if client and booking_form.is_valid():
+            # Get flight leg count and create leg forms
+            leg_count = int(request.POST.get('leg_count', 1))
+            leg_forms = []
+            valid_legs = []
+            
+            for i in range(leg_count):
+                leg_form = FlightLegForm(request.POST, prefix=f'leg_{i}')
+                leg_forms.append(leg_form)
+                if leg_form.is_valid():
+                    valid_legs.append(leg_form.cleaned_data)
+            
+            # Validate passengers
+            valid_passenger_forms = [form for form in passenger_forms if form.is_valid()]
+            
+            # Check all validations
+            if not valid_legs:
+                messages.error(request, 'Please provide at least one valid flight leg.')
+            elif len(valid_passenger_forms) != passenger_count:
+                messages.error(request, 'Please correct all passenger information.')
+            else:
+                # All forms are valid, proceed with booking creation
+                booking = booking_form.save(commit=False)
+                booking.client = client
+                
+                aircraft = booking.aircraft
+                trip_type = booking.trip_type
+                
+                # Check aircraft availability
+                available, availability_message = check_aircraft_availability(aircraft, valid_legs)
+                if not available:
+                    messages.error(request, f'Aircraft not available: {availability_message}')
+                else:
+                    # Calculate pricing
+                    try:
+                        pricing_details = calculate_pricing(aircraft, valid_legs, trip_type)
+                        
+                        # Set booking financials
+                        booking.total_price = pricing_details['total_price']
+                        booking.commission_rate = pricing_details['commission_rate']
+                        booking.agent_commission = pricing_details['agent_commission']
+                        booking.owner_earnings = pricing_details['owner_earnings']
+                        
+                        # Save the booking
+                        booking.save()
+                        
+                        # Save flight legs
+                        for i, leg_data in enumerate(valid_legs):
+                            FlightLeg.objects.create(
+                                booking=booking,
+                                sequence=i + 1,
+                                departure_airport=leg_data['departure_airport'],
+                                arrival_airport=leg_data['arrival_airport'],
+                                departure_datetime=leg_data['departure_datetime'],
+                                arrival_datetime=leg_data['arrival_datetime'],
+                                flight_hours=leg_data['flight_hours'],
+                                passenger_count=passenger_count,
+                                leg_price=pricing_details['total_price'] / len(valid_legs)
+                            )
+                        
+                        # Save passengers
+                        for form in valid_passenger_forms:
+                            passenger_data = form.cleaned_data
+                            Passenger.objects.create(
+                                booking=booking,
+                                name=passenger_data['name'],
+                                nationality=passenger_data.get('nationality', ''),
+                                date_of_birth=passenger_data.get('date_of_birth'),
+                                passport_number=passenger_data.get('passport_number', '')
+                            )
+                        
+                        messages.success(
+                            request, 
+                            f'Booking created successfully! Booking ID: {booking.booking_order_id}. '
+                            f'Total Price: ${pricing_details["total_price"]:.2f}'
+                        )
+                        return redirect('booking_detail', booking_id=booking.id)
+                        
+                    except Exception as e:
+                        messages.error(request, f'Error calculating pricing: {str(e)}')
+        
+        # If we reach here, there were validation errors or missing client
+        # Prepare forms for re-rendering
+        if not account_form:
+            account_form = ClientAccountForm()
+            
+        # Recreate leg forms if they don't exist
+        if 'leg_forms' not in locals():
+            leg_count = int(request.POST.get('leg_count', 1))
+            leg_forms = [FlightLegForm(request.POST, prefix=f'leg_{i}') for i in range(leg_count)]
+        
+        context = {
+            'booking_form': booking_form,
+            'passenger_forms': passenger_forms,
+            'account_form': account_form,
+            'leg_forms': leg_forms,
+            'aircrafts': Aircraft.objects.filter(is_active=True),
+            'airports': Airport.objects.all(),
+            'clients': User.objects.filter(user_type='client', is_active=True).order_by('first_name', 'last_name'),
+            'client_selection': client_selection,  # Pass back the selection
+        }
+        return render(request, 'bookings/new_booking.html', context)
+    
+    else:
+        # GET request - show empty forms
+        booking_form = BookingForm()
+        passenger_forms = [PassengerForm(prefix='passenger_0')]
+        account_form = ClientAccountForm()
+        leg_forms = [FlightLegForm(prefix='leg_0')]
+    
+    # Get data for dropdowns
+    clients = User.objects.filter(user_type='client', is_active=True).order_by('first_name', 'last_name')
+    aircrafts = Aircraft.objects.filter(is_active=True).select_related('aircraft_type', 'owner')
+    airports = Airport.objects.all().order_by('city', 'name')
+    
+    context = {
+        'booking_form': booking_form,
+        'passenger_forms': passenger_forms,
+        'account_form': account_form,
+        'leg_forms': leg_forms,
+        'clients': clients,
+        'aircrafts': aircrafts,
+        'airports': airports,
+        'client_selection': 'existing',  # Default selection
+    }
+    
+    return render(request, 'bookings/new_booking.html', context)
+
+def ajax_check_availability(request):
+    """
+    AJAX endpoint to check aircraft availability for given dates
+    """
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            aircraft_id = data.get('aircraft_id')
+            flight_legs = data.get('flight_legs', [])
+            
+            aircraft = get_object_or_404(Aircraft, id=aircraft_id)
+            
+            # Convert string dates to datetime objects
+            for leg in flight_legs:
+                leg['departure_datetime'] = datetime.fromisoformat(leg['departure_datetime'].replace('Z', '+00:00'))
+                leg['arrival_datetime'] = datetime.fromisoformat(leg['arrival_datetime'].replace('Z', '+00:00'))
+            
+            available, message = check_aircraft_availability(aircraft, flight_legs)
+            
+            return JsonResponse({
+                'available': available,
+                'message': message
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'available': False,
+                'message': f'Error checking availability: {str(e)}'
+            }, status=400)
+    
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def ajax_calculate_price(request):
+    """
+    AJAX endpoint to calculate pricing for given flight details
+    """
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            aircraft_id = data.get('aircraft_id')
+            flight_legs = data.get('flight_legs', [])
+            trip_type = data.get('trip_type', 'one_way')
+            
+            aircraft = get_object_or_404(Aircraft, id=aircraft_id)
+            
+            # Convert string dates to datetime objects and ensure flight_hours is Decimal
+            for leg in flight_legs:
+                leg['departure_datetime'] = datetime.fromisoformat(leg['departure_datetime'].replace('Z', '+00:00'))
+                leg['arrival_datetime'] = datetime.fromisoformat(leg['arrival_datetime'].replace('Z', '+00:00'))
+                leg['flight_hours'] = Decimal(str(leg['flight_hours']))
+            
+            pricing_details = calculate_pricing(aircraft, flight_legs, trip_type)
+            
+            # Convert Decimal objects to float for JSON serialization
+            response_data = {
+                'total_price': float(pricing_details['total_price']),
+                'commission_rate': float(pricing_details['commission_rate']),
+                'agent_commission': float(pricing_details['agent_commission']),
+                'owner_earnings': float(pricing_details['owner_earnings']),
+                'total_hours': float(pricing_details['total_hours']),
+                'base_hourly_rate': float(pricing_details['base_hourly_rate'])
+            }
+            
+            return JsonResponse(response_data)
+            
+        except Exception as e:
+            return JsonResponse({
+                'error': f'Error calculating price: {str(e)}'
+            }, status=400)
+    
+    return JsonResponse({'error': 'Invalid request'}, status=400)
