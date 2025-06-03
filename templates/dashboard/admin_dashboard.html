@@ -174,9 +174,22 @@
                                         <td>{{ booking.client.get_full_name }}</td>
                                         <td>{{ booking.aircraft.model_name }}</td>
                                         <td>{{ booking.flight_legs.first.departure_datetime|date:"M d, Y H:i" }}</td>
-                                        <td><span class="badge bg-{% if booking.status == 'confirmed' %}success{% elif booking.status == 'cancelled' %}danger{% else %}warning{% endif %}">
+                                       <td>
+                                        <span class="badge 
+                                            {% if booking.status == 'confirmed' %}
+                                                bg-success
+                                            {% elif booking.status == 'complete' %}
+                                                bg-primary
+                                            {% elif booking.status == 'cancelled' %}
+                                                bg-danger
+                                            {% else %}
+                                                bg-warning
+                                            {% endif %}">
                                             {{ booking.get_status_display }}
-                                        </span></td>
+                                        </span>
+</td>
+
+
                                         <td>${{ booking.total_price }}</td>
                                     </tr>
                                     {% endfor %}

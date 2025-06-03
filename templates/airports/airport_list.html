@@ -1,0 +1,401 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Airport Management{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+    <h1>Airport Management</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Home</a></li>
+            <li class="breadcrumb-item active">Airports</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title">Airport List</h5>
+                        <div class="search-bar">
+                            <form class="search-form d-flex align-items-center" method="GET" action="">
+                                <input type="text" name="q" placeholder="Search airports..." title="Enter search keyword" value="{{ search_query }}">
+                                <button type="submit" title="Search"><i class="bi bi-search"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Airport Table -->
+                    <div class="table-responsive">
+                        <table class="table table-hover datatable">
+                            <thead>
+                                <tr>
+                                    <th>ICAO</th>
+                                    <th>IATA</th>
+                                    <th>Name</th>
+                                    <th>City</th>
+                                    <th>Country</th>
+                                    <th>Private Friendly</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for airport in page_obj %}
+                                <tr>
+                                    <td>{{ airport.icao_code }}</td>
+                                    <td>{{ airport.iata_code|default:"-" }}</td>
+                                    <td>{{ airport.name }}</td>
+                                    <td>{{ airport.city }}</td>
+                                    <td>{{ airport.country }}</td>
+                                    <td>
+                                        <span class="badge bg-{% if airport.is_private_aviation_friendly %}success{% else %}danger{% endif %}">
+                                            {% if airport.is_private_aviation_friendly %}Yes{% else %}No{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary view-airport" 
+                                                data-airport-id="{{ airport.id }}"
+                                                title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-warning edit-airport" 
+                                                data-airport-id="{{ airport.id }}"
+                                                title="Edit">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger delete-airport" 
+                                                data-airport-id="{{ airport.id }}"
+                                                title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center">No airports found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if page_obj.paginator.num_pages > 1 %}
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}" aria-label="First">
+                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item"><a class="page-link" href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}">{{ num }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}" aria-label="Last">
+                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Airport Detail Modal -->
+<div class="modal fade" id="airportDetailModal" tabindex="-1" aria-labelledby="airportDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="airportDetailModalLabel">Airport Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="airport-detail-content">
+                <!-- Content will be loaded via AJAX -->
+                <div class="text-center my-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Airport Edit Modal -->
+<div class="modal fade" id="airportEditModal" tabindex="-1" aria-labelledby="airportEditModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="airportEditModalLabel">Edit Airport</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="airport-edit-form">
+                <div class="modal-body" id="airport-edit-content">
+                    <!-- Content will be loaded via AJAX -->
+                    <div class="text-center my-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Airport Delete Confirmation Modal -->
+<div class="modal fade" id="airportDeleteModal" tabindex="-1" aria-labelledby="airportDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="airportDeleteModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this airport? This action cannot be undone.</p>
+                <input type="hidden" id="airport-id-to-delete">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirm-delete">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    // Airport detail modal handler
+    $('.view-airport').click(function() {
+        const airportId = $(this).data('airport-id');
+        const modal = new bootstrap.Modal(document.getElementById('airportDetailModal'));
+        
+        $.ajax({
+            url: '/airports/' + airportId + '/detail/',
+            type: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    const airport = response.airport;
+                    const content = `
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">ICAO Code:</label>
+                                    <p class="form-control-static">${airport.icao_code}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">IATA Code:</label>
+                                    <p class="form-control-static">${airport.iata_code || '-'}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Name:</label>
+                                    <p class="form-control-static">${airport.name}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">City:</label>
+                                    <p class="form-control-static">${airport.city}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Country:</label>
+                                    <p class="form-control-static">${airport.country}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Coordinates:</label>
+                                    <p class="form-control-static">${airport.latitude}, ${airport.longitude}</p>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Private Aviation Friendly:</label>
+                                    <p class="form-control-static">
+                                        <span class="badge bg-${airport.is_private_aviation_friendly ? 'success' : 'danger'}">
+                                            ${airport.is_private_aviation_friendly ? 'Yes' : 'No'}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    $('#airport-detail-content').html(content);
+                    $('#airportDetailModalLabel').text(`Airport Details: ${airport.icao_code}`);
+                } else {
+                    $('#airport-detail-content').html('<div class="alert alert-danger">Failed to load airport details</div>');
+                }
+            },
+            error: function() {
+                $('#airport-detail-content').html('<div class="alert alert-danger">Error loading airport details</div>');
+            }
+        });
+        
+        modal.show();
+    });
+
+    // Airport edit modal handler
+    $('.edit-airport').click(function() {
+        const airportId = $(this).data('airport-id');
+        const modal = new bootstrap.Modal(document.getElementById('airportEditModal'));
+        
+        $.ajax({
+            url: '/airports/' + airportId + '/detail/',
+            type: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    const airport = response.airport;
+                    const content = `
+                        <input type="hidden" name="id" value="${airport.id}">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">ICAO Code:</label>
+                                    <input type="text" class="form-control" name="icao_code" value="${airport.icao_code}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">IATA Code:</label>
+                                    <input type="text" class="form-control" name="iata_code" value="${airport.iata_code || ''}">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Name:</label>
+                                    <input type="text" class="form-control" name="name" value="${airport.name}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">City:</label>
+                                    <input type="text" class="form-control" name="city" value="${airport.city}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Country:</label>
+                                    <input type="text" class="form-control" name="country" value="${airport.country}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Private Aviation Friendly:</label>
+                                    <select class="form-select" name="is_private_aviation_friendly">
+                                        <option value="true" ${airport.is_private_aviation_friendly ? 'selected' : ''}>Yes</option>
+                                        <option value="false" ${!airport.is_private_aviation_friendly ? 'selected' : ''}>No</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Latitude:</label>
+                                    <input type="number" step="0.000001" class="form-control" name="latitude" value="${airport.latitude}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Longitude:</label>
+                                    <input type="number" step="0.000001" class="form-control" name="longitude" value="${airport.longitude}" required>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    $('#airport-edit-content').html(content);
+                    $('#airportEditModalLabel').text(`Edit Airport: ${airport.icao_code}`);
+                } else {
+                    $('#airport-edit-content').html('<div class="alert alert-danger">Failed to load airport data</div>');
+                }
+            },
+            error: function() {
+                $('#airport-edit-content').html('<div class="alert alert-danger">Error loading airport data</div>');
+            }
+        });
+        
+        modal.show();
+    });
+
+    // Handle edit form submission
+    $('#airport-edit-form').submit(function(e) {
+        e.preventDefault();
+        const formData = $(this).serialize();
+        const airportId = $(this).find('input[name="id"]').val();
+        
+        $.ajax({
+            url: '/airports/' + airportId + '/update/',
+            type: 'POST',
+            data: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    location.reload(); // Refresh the page to see changes
+                } else {
+                    alert('Failed to update airport');
+                }
+            },
+            error: function() {
+                alert('Error updating airport');
+            }
+        });
+    });
+
+    // Airport delete modal handler
+    $('.delete-airport').click(function() {
+        const airportId = $(this).data('airport-id');
+        $('#airport-id-to-delete').val(airportId);
+        const modal = new bootstrap.Modal(document.getElementById('airportDeleteModal'));
+        modal.show();
+    });
+
+    // Confirm delete button handler
+    $('#confirm-delete').click(function() {
+        const airportId = $('#airport-id-to-delete').val();
+        
+        $.ajax({
+            url: '/airports/' + airportId + '/delete/',
+            type: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    location.reload(); // Refresh the page to see changes
+                } else {
+                    alert('Failed to delete airport');
+                }
+            },
+            error: function() {
+                alert('Error deleting airport');
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

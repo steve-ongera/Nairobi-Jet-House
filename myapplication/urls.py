@@ -112,5 +112,10 @@ urlpatterns = [
     # AJAX endpoints for dynamic functionality
     path('ajax/check-availability/', views.ajax_check_availability, name='ajax_check_availability'),
     path('ajax/calculate-price/', views.ajax_calculate_price, name='ajax_calculate_price'),
+
+    path('airports/', views.airport_list, name='airport_list'),
+    path('airports/<int:pk>/detail/', views.airport_detail, name='airport_detail'),
+    path('airports/<int:pk>/update/', views.airport_update, name='airport_update'),
+    path('airports/<int:pk>/delete/', views.airport_delete, name='airport_delete'),
     
 ]

@@ -3556,3 +3556,74 @@ def ajax_calculate_price(request):
             }, status=400)
     
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
+
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.core.paginator import Paginator
+from django.db.models import Q
+from .models import Airport
+
+def airport_list(request):
+    query = request.GET.get('q', '')
+    airports = Airport.objects.all()
+    
+    if query:
+        airports = airports.filter(
+            Q(icao_code__icontains=query) |
+            Q(iata_code__icontains=query) |
+            Q(name__icontains=query) |
+            Q(city__icontains=query) |
+            Q(country__icontains=query)
+        )
+    
+    paginator = Paginator(airports, 10)  # Show 10 airports per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'airports/airport_list.html', {
+        'page_obj': page_obj,
+        'search_query': query
+    })
+
+def airport_detail(request, pk):
+    airport = get_object_or_404(Airport, pk=pk)
+    data = {
+        'success': True,
+        'airport': {
+            'id': airport.id,
+            'icao_code': airport.icao_code,
+            'iata_code': airport.iata_code,
+            'name': airport.name,
+            'city': airport.city,
+            'country': airport.country,
+            'latitude': float(airport.latitude),
+            'longitude': float(airport.longitude),
+            'is_private_aviation_friendly': airport.is_private_aviation_friendly,
+        }
+    }
+    return JsonResponse(data)
+
+def airport_update(request, pk):
+    if request.method == 'POST':
+        airport = get_object_or_404(Airport, pk=pk)
+        airport.icao_code = request.POST.get('icao_code', airport.icao_code)
+        airport.iata_code = request.POST.get('iata_code', airport.iata_code)
+        airport.name = request.POST.get('name', airport.name)
+        airport.city = request.POST.get('city', airport.city)
+        airport.country = request.POST.get('country', airport.country)
+        airport.latitude = request.POST.get('latitude', airport.latitude)
+        airport.longitude = request.POST.get('longitude', airport.longitude)
+        airport.is_private_aviation_friendly = request.POST.get('is_private_aviation_friendly', 'false') == 'true'
+        airport.save()
+        
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+
+def airport_delete(request, pk):
+    if request.method == 'POST':
+        airport = get_object_or_404(Airport, pk=pk)
+        airport.delete()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
