@@ -3627,3 +3627,112 @@ def airport_delete(request, pk):
         airport.delete()
         return JsonResponse({'success': True})
     return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.core.paginator import Paginator
+from django.db.models import Q
+from .models import FlightLeg, Booking, Airport
+
+def flightleg_list(request):
+    query = request.GET.get('q', '')
+    flightlegs = FlightLeg.objects.select_related('booking', 'departure_airport', 'arrival_airport').all()
+    
+    if query:
+        flightlegs = flightlegs.filter(
+            Q(booking__booking_order_id__icontains=query) |
+            Q(departure_airport__icao_code__icontains=query) |
+            Q(departure_airport__name__icontains=query) |
+            Q(arrival_airport__icao_code__icontains=query) |
+            Q(arrival_airport__name__icontains=query)
+        )
+    
+    paginator = Paginator(flightlegs, 10)  # Show 10 flight legs per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'flightlegs/flightleg_list.html', {
+        'page_obj': page_obj,
+        'search_query': query
+    })
+
+def flightleg_detail(request, pk):
+    flightleg = get_object_or_404(
+        FlightLeg.objects.select_related(
+            'booking', 
+            'departure_airport', 
+            'arrival_airport'
+        ), 
+        pk=pk
+    )
+    
+    data = {
+        'success': True,
+        'flightleg': {
+            'id': flightleg.id,
+            'booking_id': flightleg.booking.id,
+            'booking_order_id': flightleg.booking.booking_order_id,
+            'departure_airport': {
+                'icao_code': flightleg.departure_airport.icao_code,
+                'name': flightleg.departure_airport.name,
+                'city': flightleg.departure_airport.city,
+                'country': flightleg.departure_airport.country,
+            },
+            'arrival_airport': {
+                'icao_code': flightleg.arrival_airport.icao_code,
+                'name': flightleg.arrival_airport.name,
+                'city': flightleg.arrival_airport.city,
+                'country': flightleg.arrival_airport.country,
+            },
+            'departure_datetime': flightleg.departure_datetime.strftime('%Y-%m-%d %H:%M'),
+            'arrival_datetime': flightleg.arrival_datetime.strftime('%Y-%m-%d %H:%M'),
+            'flight_hours': float(flightleg.flight_hours),
+            'passenger_count': flightleg.passenger_count,
+            'leg_price': float(flightleg.leg_price),
+            'sequence': flightleg.sequence,
+        }
+    }
+    return JsonResponse(data)
+
+def flightleg_update(request, pk):
+    if request.method == 'POST':
+        flightleg = get_object_or_404(FlightLeg, pk=pk)
+        
+        try:
+            flightleg.departure_airport = Airport.objects.get(pk=request.POST.get('departure_airport'))
+            flightleg.arrival_airport = Airport.objects.get(pk=request.POST.get('arrival_airport'))
+            flightleg.departure_datetime = request.POST.get('departure_datetime')
+            flightleg.arrival_datetime = request.POST.get('arrival_datetime')
+            flightleg.flight_hours = request.POST.get('flight_hours')
+            flightleg.passenger_count = request.POST.get('passenger_count')
+            flightleg.leg_price = request.POST.get('leg_price')
+            flightleg.sequence = request.POST.get('sequence')
+            flightleg.save()
+            
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    
+    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+
+def flightleg_delete(request, pk):
+    if request.method == 'POST':
+        flightleg = get_object_or_404(FlightLeg, pk=pk)
+        booking_id = flightleg.booking.id
+        flightleg.delete()
+        
+        # Check if booking has any legs left
+        remaining_legs = FlightLeg.objects.filter(booking_id=booking_id).exists()
+        if not remaining_legs:
+            Booking.objects.filter(id=booking_id).delete()
+        
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False, 'error': 'Invalid request'}, status=400)
+
+
+def airport_list_json(request):
+    airports = Airport.objects.all().values('id', 'icao_code', 'name')
+    return JsonResponse({
+        'success': True,
+        'airports': list(airports)
+    })

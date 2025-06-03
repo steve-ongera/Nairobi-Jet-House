@@ -117,5 +117,12 @@ urlpatterns = [
     path('airports/<int:pk>/detail/', views.airport_detail, name='airport_detail'),
     path('airports/<int:pk>/update/', views.airport_update, name='airport_update'),
     path('airports/<int:pk>/delete/', views.airport_delete, name='airport_delete'),
+
+    path('flightlegs/', views.flightleg_list, name='flightleg_list'),
+    path('flightlegs/<int:pk>/detail/', views.flightleg_detail, name='flightleg_detail'),
+    path('flightlegs/<int:pk>/update/', views.flightleg_update, name='flightleg_update'),
+    path('flightlegs/<int:pk>/delete/', views.flightleg_delete, name='flightleg_delete'),
+    # Add this for the airport dropdowns in edit modal
+    path('airports/list/', views.airport_list_json, name='airport_list_json'),
     
 ]
