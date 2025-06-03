@@ -1,0 +1,48 @@
+<!-- templates/pricing_rules/includes/partial_pricing_rule_create.html -->
+<form method="post" action="{% url 'pricing_rule_create' %}" class="js-pricing-rule-form">
+    <div class="modal-header">
+        <h5 class="modal-title">Create New Pricing Rule</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+    <div class="modal-body">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="{{ form.aircraft_type.id_for_label }}" class="form-label">Aircraft Type</label>
+            {{ form.aircraft_type }}
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.base_hourly_rate.id_for_label }}" class="form-label">Base Hourly Rate ($)</label>
+                {{ form.base_hourly_rate }}
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.minimum_hours.id_for_label }}" class="form-label">Minimum Hours</label>
+                {{ form.minimum_hours }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.empty_leg_discount.id_for_label }}" class="form-label">Empty Leg Discount (%)</label>
+                {{ form.empty_leg_discount }}
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.peak_season_multiplier.id_for_label }}" class="form-label">Peak Season Multiplier</label>
+                {{ form.peak_season_multiplier }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.weekend_surcharge.id_for_label }}" class="form-label">Weekend Surcharge (%)</label>
+                {{ form.weekend_surcharge }}
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="{{ form.last_minute_surcharge.id_for_label }}" class="form-label">Last Minute Surcharge (%)</label>
+                {{ form.last_minute_surcharge }}
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Create Rule</button>
+    </div>
+</form>

@@ -1,0 +1,44 @@
+<!-- templates/pricing_rules/includes/partial_pricing_rule_list.html -->
+<div class="table-responsive">
+    <table class="table table-hover" id="pricing-rule-table">
+        <thead>
+            <tr>
+                <th>Aircraft Type</th>
+                <th>Base Rate</th>
+                <th>Min Hours</th>
+                <th>Empty Leg Discount</th>
+                <th>Peak Season Multiplier</th>
+                <th>Weekend Surcharge</th>
+                <th>Last Minute Surcharge</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rule in pricing_rules %}
+            <tr>
+                <td>{{ rule.aircraft_type.name }}</td>
+                <td>${{ rule.base_hourly_rate }}</td>
+                <td>{{ rule.minimum_hours }}h</td>
+                <td>{{ rule.empty_leg_discount }}%</td>
+                <td>{{ rule.peak_season_multiplier }}x</td>
+                <td>{{ rule.weekend_surcharge }}%</td>
+                <td>{{ rule.last_minute_surcharge }}%</td>
+                <td class="action-btns">
+                    <button type="button" class="btn btn-sm btn-outline-primary update-pricing-rule" 
+                            data-url="{% url 'pricing_rule_update' rule.id %}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger delete-pricing-rule" 
+                            data-url="{% url 'pricing_rule_delete' rule.id %}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" class="text-center">No pricing rules found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

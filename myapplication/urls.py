@@ -124,5 +124,17 @@ urlpatterns = [
     path('flightlegs/<int:pk>/delete/', views.flightleg_delete, name='flightleg_delete'),
     # Add this for the airport dropdowns in edit modal
     path('airports/list/', views.airport_list_json, name='airport_list_json'),
+
+    # Main page view
+    path('pricing-rules/', views.pricing_rules_list, name='pricing_rules_list'),
+    
+    # API endpoints for AJAX operations
+    path('api/pricing-rules/', views.api_pricing_rules_list, name='api_pricing_rules_list'),
+    path('api/pricing-rules/create/', views.api_pricing_rule_create, name='api_pricing_rule_create'),
+    path('api/pricing-rules/<int:pk>/', views.api_pricing_rule_detail, name='api_pricing_rule_detail'),
+    path('api/pricing-rules/<int:pk>/update/', views.api_pricing_rule_update, name='api_pricing_rule_update'),
+    path('api/pricing-rules/<int:pk>/delete/', views.api_pricing_rule_delete, name='api_pricing_rule_delete'),
+    path('api/aircraft-types/', views.api_aircraft_types_list, name='api_aircraft_types_list'),
+    
     
 ]

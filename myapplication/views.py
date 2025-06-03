@@ -3736,3 +3736,308 @@ def airport_list_json(request):
         'success': True,
         'airports': list(airports)
     })
+
+
+# views.py
+# views.py
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from django.core.paginator import Paginator
+from django.db import transaction
+from django.contrib import messages
+import json
+from decimal import Decimal
+from .models import PricingRule, AircraftType
+
+
+def pricing_rules_list(request):
+    """Main view for pricing rules management page"""
+    return render(request, 'pricing/pricing_rules.html')
+
+
+
+def api_pricing_rules_list(request):
+    """API endpoint to get all pricing rules"""
+    if request.method == 'GET':
+        # Get search parameter
+        search = request.GET.get('search', '')
+        
+        # Filter pricing rules
+        rules = PricingRule.objects.select_related('aircraft_type').all()
+        if search:
+            rules = rules.filter(aircraft_type__name__icontains=search)
+        
+        # Pagination
+        page = request.GET.get('page', 1)
+        paginator = Paginator(rules, 20)
+        page_obj = paginator.get_page(page)
+        
+        # Serialize data
+        data = []
+        for rule in page_obj:
+            data.append({
+                'id': rule.id,
+                'aircraft_type': {
+                    'id': rule.aircraft_type.id,
+                    'name': rule.aircraft_type.name,
+                    'passenger_capacity': rule.aircraft_type.passenger_capacity,
+                    'range_nautical_miles': rule.aircraft_type.range_nautical_miles,
+                    'speed_knots': rule.aircraft_type.speed_knots,
+                },
+                'base_hourly_rate': str(rule.base_hourly_rate),
+                'minimum_hours': str(rule.minimum_hours),
+                'empty_leg_discount': str(rule.empty_leg_discount),
+                'peak_season_multiplier': str(rule.peak_season_multiplier),
+                'weekend_surcharge': str(rule.weekend_surcharge),
+                'last_minute_surcharge': str(rule.last_minute_surcharge),
+            })
+        
+        return JsonResponse({
+            'results': data,
+            'count': paginator.count,
+            'num_pages': paginator.num_pages,
+            'current_page': page_obj.number,
+        })
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def api_pricing_rule_create(request):
+    """API endpoint to create a new pricing rule"""
+    try:
+        data = json.loads(request.body)
+        
+        # Validate required fields
+        required_fields = ['aircraft_type', 'base_hourly_rate']
+        for field in required_fields:
+            if field not in data or not data[field]:
+                return JsonResponse({
+                    'error': f'{field} is required'
+                }, status=400)
+        
+        # Get aircraft type
+        try:
+            aircraft_type = AircraftType.objects.get(id=data['aircraft_type'])
+        except AircraftType.DoesNotExist:
+            return JsonResponse({
+                'error': 'Invalid aircraft type'
+            }, status=400)
+        
+        # Check if pricing rule already exists for this aircraft type
+        if PricingRule.objects.filter(aircraft_type=aircraft_type).exists():
+            return JsonResponse({
+                'error': 'Pricing rule already exists for this aircraft type'
+            }, status=400)
+        
+        # Create pricing rule
+        with transaction.atomic():
+            pricing_rule = PricingRule.objects.create(
+                aircraft_type=aircraft_type,
+                base_hourly_rate=Decimal(str(data['base_hourly_rate'])),
+                minimum_hours=Decimal(str(data.get('minimum_hours', '1.0'))),
+                empty_leg_discount=Decimal(str(data.get('empty_leg_discount', '0'))),
+                peak_season_multiplier=Decimal(str(data.get('peak_season_multiplier', '1.0'))),
+                weekend_surcharge=Decimal(str(data.get('weekend_surcharge', '0'))),
+                last_minute_surcharge=Decimal(str(data.get('last_minute_surcharge', '0'))),
+            )
+        
+        return JsonResponse({
+            'message': 'Pricing rule created successfully',
+            'id': pricing_rule.id
+        }, status=201)
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+    except ValueError as e:
+        return JsonResponse({'error': f'Invalid data: {str(e)}'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': f'Server error: {str(e)}'}, status=500)
+
+
+def api_pricing_rule_detail(request, pk):
+    """API endpoint to get a specific pricing rule"""
+    rule = get_object_or_404(PricingRule.objects.select_related('aircraft_type'), pk=pk)
+    
+    data = {
+        'id': rule.id,
+        'aircraft_type': {
+            'id': rule.aircraft_type.id,
+            'name': rule.aircraft_type.name,
+            'passenger_capacity': rule.aircraft_type.passenger_capacity,
+            'range_nautical_miles': rule.aircraft_type.range_nautical_miles,
+            'speed_knots': rule.aircraft_type.speed_knots,
+        },
+        'base_hourly_rate': str(rule.base_hourly_rate),
+        'minimum_hours': str(rule.minimum_hours),
+        'empty_leg_discount': str(rule.empty_leg_discount),
+        'peak_season_multiplier': str(rule.peak_season_multiplier),
+        'weekend_surcharge': str(rule.weekend_surcharge),
+        'last_minute_surcharge': str(rule.last_minute_surcharge),
+    }
+    
+    return JsonResponse(data)
+
+
+@csrf_exempt
+@require_http_methods(["PUT"])
+def api_pricing_rule_update(request, pk):
+    """API endpoint to update a pricing rule"""
+    rule = get_object_or_404(PricingRule, pk=pk)
+    
+    try:
+        data = json.loads(request.body)
+        
+        # Update fields if provided
+        if 'aircraft_type' in data:
+            try:
+                aircraft_type = AircraftType.objects.get(id=data['aircraft_type'])
+                # Check if another rule exists for this aircraft type
+                existing = PricingRule.objects.filter(
+                    aircraft_type=aircraft_type
+                ).exclude(id=rule.id)
+                if existing.exists():
+                    return JsonResponse({
+                        'error': 'Pricing rule already exists for this aircraft type'
+                    }, status=400)
+                rule.aircraft_type = aircraft_type
+            except AircraftType.DoesNotExist:
+                return JsonResponse({'error': 'Invalid aircraft type'}, status=400)
+        
+        # Update other fields
+        decimal_fields = [
+            'base_hourly_rate', 'minimum_hours', 'empty_leg_discount',
+            'peak_season_multiplier', 'weekend_surcharge', 'last_minute_surcharge'
+        ]
+        
+        for field in decimal_fields:
+            if field in data:
+                setattr(rule, field, Decimal(str(data[field])))
+        
+        rule.save()
+        
+        return JsonResponse({'message': 'Pricing rule updated successfully'})
+        
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+    except ValueError as e:
+        return JsonResponse({'error': f'Invalid data: {str(e)}'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': f'Server error: {str(e)}'}, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["DELETE"])
+def api_pricing_rule_delete(request, pk):
+    """API endpoint to delete a pricing rule"""
+    rule = get_object_or_404(PricingRule, pk=pk)
+    
+    try:
+        rule.delete()
+        return JsonResponse({'message': 'Pricing rule deleted successfully'})
+    except Exception as e:
+        return JsonResponse({'error': f'Server error: {str(e)}'}, status=500)
+
+
+def api_aircraft_types_list(request):
+    """API endpoint to get all aircraft types"""
+    aircraft_types = AircraftType.objects.all().order_by('name')
+    
+    data = []
+    for aircraft_type in aircraft_types:
+        data.append({
+            'id': aircraft_type.id,
+            'name': aircraft_type.name,
+            'description': aircraft_type.description,
+            'passenger_capacity': aircraft_type.passenger_capacity,
+            'range_nautical_miles': aircraft_type.range_nautical_miles,
+            'speed_knots': aircraft_type.speed_knots,
+        })
+    
+    return JsonResponse({'results': data})
+
+
+# Alternative function-based views for form handling (if you prefer forms over AJAX)
+def pricing_rule_create_view(request):
+    """Traditional form view to create pricing rule"""
+    if request.method == 'POST':
+        try:
+            aircraft_type = get_object_or_404(AircraftType, id=request.POST.get('aircraft_type'))
+            
+            # Check if pricing rule already exists
+            if PricingRule.objects.filter(aircraft_type=aircraft_type).exists():
+                messages.error(request, 'Pricing rule already exists for this aircraft type')
+                return render(request, 'pricing/pricing_rules.html', {
+                    'aircraft_types': AircraftType.objects.all()
+                })
+            
+            pricing_rule = PricingRule.objects.create(
+                aircraft_type=aircraft_type,
+                base_hourly_rate=Decimal(request.POST.get('base_hourly_rate', '0')),
+                minimum_hours=Decimal(request.POST.get('minimum_hours', '1.0')),
+                empty_leg_discount=Decimal(request.POST.get('empty_leg_discount', '0')),
+                peak_season_multiplier=Decimal(request.POST.get('peak_season_multiplier', '1.0')),
+                weekend_surcharge=Decimal(request.POST.get('weekend_surcharge', '0')),
+                last_minute_surcharge=Decimal(request.POST.get('last_minute_surcharge', '0')),
+            )
+            
+            messages.success(request, 'Pricing rule created successfully')
+            
+        except Exception as e:
+            messages.error(request, f'Error creating pricing rule: {str(e)}')
+    
+    return render(request, 'pricing/pricing_rules.html', {
+        'aircraft_types': AircraftType.objects.all()
+    })
+
+
+def pricing_rule_update_view(request, pk):
+    """Traditional form view to update pricing rule"""
+    rule = get_object_or_404(PricingRule, pk=pk)
+    
+    if request.method == 'POST':
+        try:
+            if request.POST.get('aircraft_type'):
+                aircraft_type = get_object_or_404(AircraftType, id=request.POST.get('aircraft_type'))
+                # Check if another rule exists for this aircraft type
+                existing = PricingRule.objects.filter(
+                    aircraft_type=aircraft_type
+                ).exclude(id=rule.id)
+                if existing.exists():
+                    messages.error(request, 'Pricing rule already exists for this aircraft type')
+                else:
+                    rule.aircraft_type = aircraft_type
+            
+            # Update fields
+            rule.base_hourly_rate = Decimal(request.POST.get('base_hourly_rate', rule.base_hourly_rate))
+            rule.minimum_hours = Decimal(request.POST.get('minimum_hours', rule.minimum_hours))
+            rule.empty_leg_discount = Decimal(request.POST.get('empty_leg_discount', rule.empty_leg_discount))
+            rule.peak_season_multiplier = Decimal(request.POST.get('peak_season_multiplier', rule.peak_season_multiplier))
+            rule.weekend_surcharge = Decimal(request.POST.get('weekend_surcharge', rule.weekend_surcharge))
+            rule.last_minute_surcharge = Decimal(request.POST.get('last_minute_surcharge', rule.last_minute_surcharge))
+            
+            rule.save()
+            messages.success(request, 'Pricing rule updated successfully')
+            
+        except Exception as e:
+            messages.error(request, f'Error updating pricing rule: {str(e)}')
+    
+    return render(request, 'pricing/pricing_rules.html', {
+        'aircraft_types': AircraftType.objects.all(),
+        'edit_rule': rule
+    })
+
+
+def pricing_rule_delete_view(request, pk):
+    """Traditional view to delete pricing rule"""
+    rule = get_object_or_404(PricingRule, pk=pk)
+    
+    try:
+        rule.delete()
+        messages.success(request, 'Pricing rule deleted successfully')
+    except Exception as e:
+        messages.error(request, f'Error deleting pricing rule: {str(e)}')
+    
+    return render(request, 'pricing/pricing_rules.html')
+

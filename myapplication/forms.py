@@ -316,3 +316,24 @@ class ClientSelectionForm(forms.Form):
             user_type='client', 
             is_active=True
         ).order_by('first_name', 'last_name')
+
+
+
+
+# forms.py
+from django import forms
+from .models import PricingRule
+
+class PricingRuleForm(forms.ModelForm):
+    class Meta:
+        model = PricingRule
+        fields = '__all__'
+        widgets = {
+            'aircraft_type': forms.Select(attrs={'class': 'form-select'}),
+            'base_hourly_rate': forms.NumberInput(attrs={'class': 'form-control'}),
+            'minimum_hours': forms.NumberInput(attrs={'class': 'form-control'}),
+            'empty_leg_discount': forms.NumberInput(attrs={'class': 'form-control'}),
+            'peak_season_multiplier': forms.NumberInput(attrs={'class': 'form-control'}),
+            'weekend_surcharge': forms.NumberInput(attrs={'class': 'form-control'}),
+            'last_minute_surcharge': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
