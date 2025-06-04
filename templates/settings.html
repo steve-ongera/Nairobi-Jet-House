@@ -1,0 +1,472 @@
+{% extends 'base/base.html'%}
+{% load static %}
+
+{% block content %}
+<div class="message-container" id="system-messages">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+        <i class="bi {% if message.tags == 'success' %}bi-check-circle{% else %}bi-exclamation-triangle{% endif %} me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="pagetitle">
+    <h1><i class="bi bi-gear me-2"></i>System Settings</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="#"><i class="bi bi-house-door"></i> Home</a></li>
+            <li class="breadcrumb-item active">System Settings</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-jet-primary text-white">
+                    <h5 class="card-title mb-0"><i class="bi bi-sliders me-2"></i>System Configuration</h5>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Settings Navigation -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="list-group">
+                                <a href="#general" class="list-group-item list-group-item-action active" data-bs-toggle="tab">
+                                    <i class="bi bi-gear me-2"></i> General
+                                </a>
+                                <a href="#booking" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                                    <i class="bi bi-calendar-check me-2"></i> Booking
+                                </a>
+                                <a href="#payment" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                                    <i class="bi bi-credit-card me-2"></i> Payment
+                                </a>
+                                <a href="#notifications" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                                    <i class="bi bi-bell me-2"></i> Notifications
+                                </a>
+                                <a href="#security" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                                    <i class="bi bi-shield-lock me-2"></i> Security
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Settings Content -->
+                        <div class="col-md-9">
+                            <div class="tab-content">
+                                <!-- General Settings Tab -->
+                                <div class="tab-pane fade show active" id="general">
+                                    <h5 class="text-jet mb-4"><i class="bi bi-building me-2"></i>General Settings</h5>
+                                    
+                                    <form>
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label for="propertyName" class="form-label">Property Name</label>
+                                                <input type="text" class="form-control" id="propertyName" value="Nairobi Jet House">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="timezone" class="form-label">Timezone</label>
+                                                <select class="form-select" id="timezone">
+                                                    <option value="Africa/Nairobi" selected>Africa/Nairobi (EAT)</option>
+                                                    <option value="UTC">UTC</option>
+                                                    <!-- More timezone options would go here -->
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="contactEmail" class="form-label">Contact Email</label>
+                                            <input type="email" class="form-control" id="contactEmail" value="info@nairobi.jet">
+                                        </div>
+                                        
+                                        <div class="row mb-3">
+                                            <div class="col-md-6">
+                                                <label for="phone" class="form-label">Phone Number</label>
+                                                <input type="tel" class="form-control" id="phone" value="+254 700 123 456">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="currency" class="form-label">Default Currency</label>
+                                                <select class="form-select" id="currency">
+                                                    <option value="KES" selected>Kenyan Shilling (KES)</option>
+                                                    <option value="USD">US Dollar (USD)</option>
+                                                    <option value="EUR">Euro (EUR)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="logoUpload" class="form-label">Property Logo</label>
+                                            <input class="form-control" type="file" id="logoUpload">
+                                            <small class="text-muted">Recommended size: 300x100 pixels</small>
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn-jet">
+                                            <i class="bi bi-save me-1"></i> Save Settings
+                                        </button>
+                                    </form>
+                                </div>
+                                
+                                <!-- Booking Settings Tab -->
+                                <div class="tab-pane fade" id="booking">
+                                    <h5 class="text-jet mb-4"><i class="bi bi-calendar-range me-2"></i>Booking Settings</h5>
+                                    
+                                    <form>
+                                        <div class="mb-3">
+                                            <label for="minStay" class="form-label">Minimum Stay (nights)</label>
+                                            <input type="number" class="form-control" id="minStay" value="1" min="1">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="maxStay" class="form-label">Maximum Stay (nights)</label>
+                                            <input type="number" class="form-control" id="maxStay" value="30" min="1">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="checkInTime" class="form-label">Check-in Time</label>
+                                            <input type="time" class="form-control" id="checkInTime" value="14:00">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="checkOutTime" class="form-label">Check-out Time</label>
+                                            <input type="time" class="form-control" id="checkOutTime" value="11:00">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="instantBooking" checked>
+                                                <label class="form-check-label" for="instantBooking">Enable Instant Booking</label>
+                                            </div>
+                                            <small class="text-muted">Allow guests to book without approval</small>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="requireId" checked>
+                                                <label class="form-check-label" for="requireId">Require ID Verification</label>
+                                            </div>
+                                            <small class="text-muted">Guests must upload ID before booking</small>
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn-jet">
+                                            <i class="bi bi-save me-1"></i> Update Booking Settings
+                                        </button>
+                                    </form>
+                                </div>
+                                
+                                <!-- Payment Settings Tab -->
+                                <div class="tab-pane fade" id="payment">
+                                    <h5 class="text-jet mb-4"><i class="bi bi-cash-stack me-2"></i>Payment Settings</h5>
+                                    
+                                    <div class="card mb-4">
+                                        <div class="card-body">
+                                            <h6 class="card-title text-jet">Payment Methods</h6>
+                                            
+                                            <div class="mb-3">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="enableMpesa" checked>
+                                                    <label class="form-check-label" for="enableMpesa">M-Pesa</label>
+                                                </div>
+                                                <small class="text-muted">Kenyan mobile money payments</small>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="enableCard" checked>
+                                                    <label class="form-check-label" for="enableCard">Credit/Debit Cards</label>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="enableBankTransfer">
+                                                    <label class="form-check-label" for="enableBankTransfer">Bank Transfer</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="card-title text-jet">Pricing & Fees</h6>
+                                            
+                                            <div class="mb-3">
+                                                <label for="securityDeposit" class="form-label">Security Deposit (KES)</label>
+                                                <input type="number" class="form-control" id="securityDeposit" value="5000">
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label for="cleaningFee" class="form-label">Cleaning Fee (KES)</label>
+                                                <input type="number" class="form-control" id="cleaningFee" value="1500">
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label for="taxRate" class="form-label">Tax Rate (%)</label>
+                                                <input type="number" class="form-control" id="taxRate" value="16" step="0.1">
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="dynamicPricing">
+                                                    <label class="form-check-label" for="dynamicPricing">Enable Dynamic Pricing</label>
+                                                </div>
+                                                <small class="text-muted">Automatically adjust prices based on demand</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-jet mt-3">
+                                        <i class="bi bi-save me-1"></i> Save Payment Settings
+                                    </button>
+                                </div>
+                                
+                                <!-- Notification Settings Tab -->
+                                <div class="tab-pane fade" id="notifications">
+                                    <h5 class="text-jet mb-4"><i class="bi bi-bell-fill me-2"></i>Notification Settings</h5>
+                                    
+                                    <form>
+                                        <div class="card mb-4">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-jet">Email Notifications</h6>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="adminEmail" class="form-label">Admin Email</label>
+                                                    <input type="email" class="form-control" id="adminEmail" value="admin@nairobi.jet">
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="newBookingEmail" checked>
+                                                        <label class="form-check-label" for="newBookingEmail">New Booking Alerts</label>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="cancellationEmail" checked>
+                                                        <label class="form-check-label" for="cancellationEmail">Booking Cancellations</label>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="paymentEmail" checked>
+                                                        <label class="form-check-label" for="paymentEmail">Payment Received</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="card mb-4">
+                                            <div class="card-body">
+                                                <h6 class="card-title text-jet">SMS Notifications</h6>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="adminPhone" class="form-label">Admin Phone Number</label>
+                                                    <input type="tel" class="form-control" id="adminPhone" value="+254700123456">
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="urgentSMS" checked>
+                                                        <label class="form-check-label" for="urgentSMS">Urgent Alerts</label>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="paymentSMSSwitch">
+                                                        <label class="form-check-label" for="paymentSMSSwitch">Payment Received</label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn-jet">
+                                            <i class="bi bi-save me-1"></i> Save Notification Settings
+                                        </button>
+                                    </form>
+                                </div>
+                                
+                                <!-- Security Settings Tab -->
+                                <div class="tab-pane fade" id="security">
+                                    <h5 class="text-jet mb-4"><i class="bi bi-shield-check me-2"></i>Security Settings</h5>
+                                    
+                                    <div class="card mb-4">
+                                        <div class="card-body">
+                                            <h6 class="card-title text-jet">Password Policy</h6>
+                                            
+                                            <div class="mb-3">
+                                                <label for="minPasswordLength" class="form-label">Minimum Password Length</label>
+                                                <input type="number" class="form-control" id="minPasswordLength" value="8" min="6" max="32">
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="requireUppercase" checked>
+                                                    <label class="form-check-label" for="requireUppercase">Require uppercase letters</label>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="requireNumbers" checked>
+                                                    <label class="form-check-label" for="requireNumbers">Require numbers</label>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="requireSpecialChars">
+                                                    <label class="form-check-label" for="requireSpecialChars">Require special characters</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card mb-4">
+                                        <div class="card-body">
+                                            <h6 class="card-title text-jet">Login Security</h6>
+                                            
+                                            <div class="mb-3">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="enable2FA" checked>
+                                                    <label class="form-check-label" for="enable2FA">Enable Two-Factor Authentication</label>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="failedLoginLock" checked>
+                                                    <label class="form-check-label" for="failedLoginLock">Lock account after failed attempts</label>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label for="failedAttempts" class="form-label">Failed Attempts Before Lock</label>
+                                                <input type="number" class="form-control" id="failedAttempts" value="5" min="1" max="10">
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <label for="lockoutDuration" class="form-label">Lockout Duration (minutes)</label>
+                                                <input type="number" class="form-control" id="lockoutDuration" value="30" min="1" max="1440">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="card-title text-jet">Session Settings</h6>
+                                            
+                                            <div class="mb-3">
+                                                <label for="sessionTimeout" class="form-label">Session Timeout (minutes)</label>
+                                                <input type="number" class="form-control" id="sessionTimeout" value="30" min="5" max="1440">
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox" id="singleSession" checked>
+                                                    <label class="form-check-label" for="singleSession">Single Session Per User</label>
+                                                </div>
+                                                <small class="text-muted">Prevent multiple simultaneous logins</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-jet mt-3">
+                                        <i class="bi bi-save me-1"></i> Save Security Settings
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-jet-light">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        System settings last updated: {% now "M d, Y H:i" %}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    :root {
+        --jet-primary: #1976D2; /* Primary blue */
+        --jet-secondary: #64B5F6; /* Light blue */
+        --jet-light: #E3F2FD; /* Very light blue */
+        --jet-dark: #0D47A1; /* Dark blue */
+    }
+    
+    .bg-jet-primary {
+        background-color: var(--jet-primary) !important;
+    }
+    
+    .bg-jet-secondary {
+        background-color: var(--jet-secondary) !important;
+    }
+    
+    .bg-jet-light {
+        background-color: var(--jet-light) !important;
+    }
+    
+    .bg-jet-dark {
+        background-color: var(--jet-dark) !important;
+    }
+    
+    .btn-jet {
+        background-color: var(--jet-primary);
+        color: white;
+        border-color: var(--jet-primary);
+    }
+    
+    .btn-jet:hover {
+        background-color: var(--jet-dark);
+        border-color: var(--jet-dark);
+    }
+    
+    .btn-outline-jet {
+        color: var(--jet-primary);
+        border-color: var(--jet-primary);
+    }
+    
+    .btn-outline-jet:hover {
+        background-color: var(--jet-primary);
+        color: white;
+    }
+    
+    .text-jet {
+        color: var(--jet-primary);
+    }
+    
+    .border-jet-primary {
+        border-color: var(--jet-primary) !important;
+    }
+    
+    .list-group-item.active {
+        background-color: var(--jet-primary);
+        border-color: var(--jet-primary);
+    }
+    
+    .form-switch .form-check-input:checked {
+        background-color: var(--jet-primary);
+    }
+    
+    .tab-pane {
+        padding: 15px;
+    }
+    
+    .card {
+        border-radius: 8px;
+    }
+    
+    .card-header {
+        border-radius: 8px 8px 0 0 !important;
+    }
+</style>
+
+{% endblock %}

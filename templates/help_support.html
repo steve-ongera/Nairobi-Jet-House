@@ -1,0 +1,468 @@
+{% extends 'base/base.html'%}
+{% load static %}
+
+{% block content %}
+<div class="message-container" id="system-messages">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+        <i class="bi {% if message.tags == 'success' %}bi-check-circle{% else %}bi-exclamation-triangle{% endif %} me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="pagetitle">
+    <h1><i class="bi bi-question-circle me-2"></i>Help & Support</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="#"><i class="bi bi-house-door"></i> Home</a></li>
+            <li class="breadcrumb-item active">Help Center</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-jet-primary text-white">
+                    <h5 class="card-title mb-0"><i class="bi bi-headset me-2"></i>How can we help you today?</h5>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Help Navigation -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="list-group">
+                                <a href="#faqs" class="list-group-item list-group-item-action active" data-bs-toggle="tab">
+                                    <i class="bi bi-question-square me-2"></i> FAQs
+                                </a>
+                                <a href="#contact" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                                    <i class="bi bi-envelope me-2"></i> Contact Us
+                                </a>
+                                <a href="#guides" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                                    <i class="bi bi-journal-text me-2"></i> Guides
+                                </a>
+                                <a href="#feedback" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                                    <i class="bi bi-chat-left-text me-2"></i> Feedback
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Help Content -->
+                        <div class="col-md-9">
+                            <div class="tab-content">
+                                <!-- FAQs Tab -->
+                                <div class="tab-pane fade show active" id="faqs">
+                                    <h5 class="text-jet mb-4"><i class="bi bi-question-circle-fill me-2"></i>Frequently Asked Questions</h5>
+                                    
+                                    <div class="accordion" id="faqAccordion">
+                                        <!-- Booking Questions -->
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#bookingQuestions">
+                                                    <i class="bi bi-calendar-check me-2"></i> Booking Questions
+                                                </button>
+                                            </h2>
+                                            <div id="bookingQuestions" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                                <div class="accordion-body">
+                                                    <div class="mb-3">
+                                                        <h6>How do I make a reservation?</h6>
+                                                        <p>You can book directly through our website, mobile app, or by contacting our reservations team at +254 700 123 456.</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <h6>What is your cancellation policy?</h6>
+                                                        <p>Cancellations made 48 hours before check-in receive a full refund. Late cancellations incur a one-night charge.</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <h6>Can I modify my booking?</h6>
+                                                        <p>Yes, you can modify your booking up to 24 hours before check-in through your account or by contacting us.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Payment Questions -->
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#paymentQuestions">
+                                                    <i class="bi bi-credit-card me-2"></i> Payment Questions
+                                                </button>
+                                            </h2>
+                                            <div id="paymentQuestions" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                                <div class="accordion-body">
+                                                    <div class="mb-3">
+                                                        <h6>What payment methods do you accept?</h6>
+                                                        <p>We accept M-Pesa, credit/debit cards (Visa, Mastercard), and bank transfers.</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <h6>Is my payment information secure?</h6>
+                                                        <p>Yes, we use industry-standard encryption to protect all payment transactions.</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <h6>When will I be charged?</h6>
+                                                        <p>For most reservations, we charge a 20% deposit at booking and the balance at check-in.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Facility Questions -->
+                                        <div class="accordion-item">
+                                            <h2 class="accordion-header">
+                                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#facilityQuestions">
+                                                    <i class="bi bi-building me-2"></i> Facility Questions
+                                                </button>
+                                            </h2>
+                                            <div id="facilityQuestions" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                                <div class="accordion-body">
+                                                    <div class="mb-3">
+                                                        <h6>What time is check-in/check-out?</h6>
+                                                        <p>Check-in is at 2:00 PM and check-out is at 11:00 AM. Early check-in/late check-out may be available upon request.</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <h6>Do you have parking available?</h6>
+                                                        <p>Yes, we offer secure underground parking for all guests at no additional charge.</p>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <h6>Is WiFi available?</h6>
+                                                        <p>Complimentary high-speed WiFi is available throughout the property.</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Contact Tab -->
+                                <div class="tab-pane fade" id="contact">
+                                    <h5 class="text-jet mb-4"><i class="bi bi-telephone me-2"></i>Contact Our Support Team</h5>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="card mb-4 border-jet-primary">
+                                                <div class="card-body text-center">
+                                                    <i class="bi bi-telephone-fill text-jet" style="font-size: 2rem;"></i>
+                                                    <h5 class="mt-3">Phone Support</h5>
+                                                    <p>Available 24/7 for urgent matters</p>
+                                                    <h4 class="text-jet">+254 700 123 456</h4>
+                                                    <p class="text-muted">Main line: +254 20 123 4567</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card mb-4 border-jet-primary">
+                                                <div class="card-body text-center">
+                                                    <i class="bi bi-envelope-fill text-jet" style="font-size: 2rem;"></i>
+                                                    <h5 class="mt-3">Email Support</h5>
+                                                    <p>Typically responds within 2 hours</p>
+                                                    <h4 class="text-jet">support@nairobi.jet</h4>
+                                                    <p class="text-muted">Reservations: book@nairobi.jet</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card mb-4">
+                                        <div class="card-header bg-jet-light">
+                                            <h5 class="mb-0"><i class="bi bi-chat-left-text me-2"></i>Send Us a Message</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <form>
+                                                <div class="row mb-3">
+                                                    <div class="col-md-6">
+                                                        <label for="contactName" class="form-label">Your Name</label>
+                                                        <input type="text" class="form-control" id="contactName" required>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="contactEmail" class="form-label">Email Address</label>
+                                                        <input type="email" class="form-control" id="contactEmail" required>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="contactSubject" class="form-label">Subject</label>
+                                                    <select class="form-select" id="contactSubject">
+                                                        <option>Booking Inquiry</option>
+                                                        <option>Billing Question</option>
+                                                        <option>Facility Question</option>
+                                                        <option>Feedback</option>
+                                                        <option>Other</option>
+                                                    </select>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="contactMessage" class="form-label">Message</label>
+                                                    <textarea class="form-control" id="contactMessage" rows="5" required></textarea>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="contactCopy">
+                                                        <label class="form-check-label" for="contactCopy">Send me a copy of this message</label>
+                                                    </div>
+                                                </div>
+                                                
+                                                <button type="submit" class="btn btn-jet">
+                                                    <i class="bi bi-send me-1"></i> Send Message
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Guides Tab -->
+                                <div class="tab-pane fade" id="guides">
+                                    <h5 class="text-jet mb-4"><i class="bi bi-journal-bookmark me-2"></i>Helpful Guides</h5>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-4 mb-4">
+                                            <div class="card h-100 border-jet-primary">
+                                                <div class="card-body">
+                                                    <div class="text-center mb-3">
+                                                        <i class="bi bi-phone text-jet" style="font-size: 2rem;"></i>
+                                                    </div>
+                                                    <h5 class="card-title text-center">Mobile App Guide</h5>
+                                                    <p class="card-text">Learn how to use all features of our mobile application for bookings and account management.</p>
+                                                </div>
+                                                <div class="card-footer bg-transparent text-center">
+                                                    <a href="#" class="btn btn-outline-jet">View Guide</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-4 mb-4">
+                                            <div class="card h-100 border-jet-primary">
+                                                <div class="card-body">
+                                                    <div class="text-center mb-3">
+                                                        <i class="bi bi-calendar2-check text-jet" style="font-size: 2rem;"></i>
+                                                    </div>
+                                                    <h5 class="card-title text-center">Booking Process</h5>
+                                                    <p class="card-text">Step-by-step instructions for making and managing reservations at Nairobi Jet House.</p>
+                                                </div>
+                                                <div class="card-footer bg-transparent text-center">
+                                                    <a href="#" class="btn btn-outline-jet">View Guide</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-4 mb-4">
+                                            <div class="card h-100 border-jet-primary">
+                                                <div class="card-body">
+                                                    <div class="text-center mb-3">
+                                                        <i class="bi bi-credit-card-2-front text-jet" style="font-size: 2rem;"></i>
+                                                    </div>
+                                                    <h5 class="card-title text-center">Payment Options</h5>
+                                                    <p class="card-text">Detailed information about all payment methods and security measures we employ.</p>
+                                                </div>
+                                                <div class="card-footer bg-transparent text-center">
+                                                    <a href="#" class="btn btn-outline-jet">View Guide</a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="text-center mt-3">
+                                        <a href="#" class="btn btn-jet">
+                                            <i class="bi bi-collection me-1"></i> View All Guides
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <!-- Feedback Tab -->
+                                <div class="tab-pane fade" id="feedback">
+                                    <h5 class="text-jet mb-4"><i class="bi bi-chat-square-text me-2"></i>We Value Your Feedback</h5>
+                                    
+                                    <div class="card mb-4">
+                                        <div class="card-header bg-jet-light">
+                                            <h5 class="mb-0"><i class="bi bi-star-fill me-2"></i>Share Your Experience</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <form>
+                                                <div class="mb-3">
+                                                    <label class="form-label">How would you rate your experience?</label>
+                                                    <div class="rating-stars">
+                                                        <input type="radio" id="star5" name="rating" value="5">
+                                                        <label for="star5"><i class="bi bi-star-fill"></i></label>
+                                                        <input type="radio" id="star4" name="rating" value="4">
+                                                        <label for="star4"><i class="bi bi-star-fill"></i></label>
+                                                        <input type="radio" id="star3" name="rating" value="3">
+                                                        <label for="star3"><i class="bi bi-star-fill"></i></label>
+                                                        <input type="radio" id="star2" name="rating" value="2">
+                                                        <label for="star2"><i class="bi bi-star-fill"></i></label>
+                                                        <input type="radio" id="star1" name="rating" value="1">
+                                                        <label for="star1"><i class="bi bi-star-fill"></i></label>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="feedbackType" class="form-label">Feedback Type</label>
+                                                    <select class="form-select" id="feedbackType">
+                                                        <option>General Feedback</option>
+                                                        <option>Compliment</option>
+                                                        <option>Suggestion</option>
+                                                        <option>Complaint</option>
+                                                    </select>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="feedbackMessage" class="form-label">Your Feedback</label>
+                                                    <textarea class="form-control" id="feedbackMessage" rows="5" placeholder="What did you like or what can we improve?" required></textarea>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="feedbackContact" class="form-label">Contact Information (Optional)</label>
+                                                    <input type="text" class="form-control" id="feedbackContact" placeholder="If you'd like us to follow up with you">
+                                                </div>
+                                                
+                                                <button type="submit" class="btn btn-jet">
+                                                    <i class="bi bi-send me-1"></i> Submit Feedback
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="alert alert-info">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        Thank you for helping us improve Nairobi Jet House! We review all feedback and respond to most within 48 hours.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-jet-light">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-clock-history me-2"></i>Support Hours</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Phone:</strong> 24/7 for urgent matters</li>
+                                <li><strong>Email/Chat:</strong> 7:00 AM - 10:00 PM EAT daily</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-geo-alt me-2"></i>Visit Us</h6>
+                            <address>
+                                Nairobi Jet House<br>
+                                123 Aviation Road<br>
+                                Nairobi, Kenya
+                            </address>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    :root {
+        --jet-primary: #1976D2; /* Primary blue */
+        --jet-secondary: #64B5F6; /* Light blue */
+        --jet-light: #E3F2FD; /* Very light blue */
+        --jet-dark: #0D47A1; /* Dark blue */
+    }
+    
+    .bg-jet-primary {
+        background-color: var(--jet-primary) !important;
+    }
+    
+    .bg-jet-secondary {
+        background-color: var(--jet-secondary) !important;
+    }
+    
+    .bg-jet-light {
+        background-color: var(--jet-light) !important;
+    }
+    
+    .bg-jet-dark {
+        background-color: var(--jet-dark) !important;
+    }
+    
+    .btn-jet {
+        background-color: var(--jet-primary);
+        color: white;
+        border-color: var(--jet-primary);
+    }
+    
+    .btn-jet:hover {
+        background-color: var(--jet-dark);
+        border-color: var(--jet-dark);
+    }
+    
+    .btn-outline-jet {
+        color: var(--jet-primary);
+        border-color: var(--jet-primary);
+    }
+    
+    .btn-outline-jet:hover {
+        background-color: var(--jet-primary);
+        color: white;
+    }
+    
+    .text-jet {
+        color: var(--jet-primary);
+    }
+    
+    .border-jet-primary {
+        border-color: var(--jet-primary) !important;
+    }
+    
+    .list-group-item.active {
+        background-color: var(--jet-primary);
+        border-color: var(--jet-primary);
+    }
+    
+    .form-switch .form-check-input:checked {
+        background-color: var(--jet-primary);
+    }
+    
+    .tab-pane {
+        padding: 15px;
+    }
+    
+    .card {
+        border-radius: 8px;
+    }
+    
+    .card-header {
+        border-radius: 8px 8px 0 0 !important;
+    }
+    
+    /* Rating stars styling */
+    .rating-stars {
+        direction: rtl;
+        unicode-bidi: bidi-override;
+        display: inline-block;
+    }
+    
+    .rating-stars input {
+        display: none;
+    }
+    
+    .rating-stars label {
+        color: #ddd;
+        font-size: 1.5rem;
+        padding: 0 3px;
+        cursor: pointer;
+    }
+    
+    .rating-stars input:checked ~ label,
+    .rating-stars label:hover,
+    .rating-stars label:hover ~ label {
+        color: #FFC107; /* Gold/yellow for stars */
+    }
+    
+    .accordion-button:not(.collapsed) {
+        background-color: var(--jet-light);
+        color: var(--jet-dark);
+    }
+    
+    .accordion-button:focus {
+        box-shadow: 0 0 0 0.25rem rgba(25, 118, 210, 0.25);
+    }
+</style>
+
+{% endblock %}

@@ -4041,3 +4041,11 @@ def pricing_rule_delete_view(request, pk):
     
     return render(request, 'pricing/pricing_rules.html')
 
+
+@login_required
+def settings_view(request): 
+    return render(request, 'settings.html')
+
+@login_required
+def help_support(request):
+    return render(request, 'help_support.html')

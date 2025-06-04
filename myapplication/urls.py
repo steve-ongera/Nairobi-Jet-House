@@ -135,6 +135,9 @@ urlpatterns = [
     path('api/pricing-rules/<int:pk>/update/', views.api_pricing_rule_update, name='api_pricing_rule_update'),
     path('api/pricing-rules/<int:pk>/delete/', views.api_pricing_rule_delete, name='api_pricing_rule_delete'),
     path('api/aircraft-types/', views.api_aircraft_types_list, name='api_aircraft_types_list'),
+
+    path('settings/', views.settings_view, name='settings'),
+    path('help-support/', views.help_support, name='help_support'),
     
     
 ]
