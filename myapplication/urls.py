@@ -140,6 +140,9 @@ urlpatterns = [
     path('help-support/', views.help_support, name='help_support'),
     path('flight-announcement/', views.Flight_Announcement, name='flight_announcement'),
     path('operations-reports/', views.operations_reports, name='operations_reports'),
-    
-    
+
+    path('owner-payments/', views.owner_payments_list, name='owner_payments_list'),
+    path('owner-payments/<int:payment_id>/detail/', views.owner_payment_detail_ajax, name='owner_payment_detail_ajax'),
 ]
+    
+    

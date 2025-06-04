@@ -4053,3 +4053,110 @@ def Flight_Announcement(request):
 @login_required
 def operations_reports(request):
     return render(request, 'operations_reports.html')
+
+
+
+# views.py
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.core.paginator import Paginator
+from django.db.models import Q
+from .models import OwnerPayout
+
+def owner_payments_list(request):
+    """List all owner payments with search and pagination"""
+    
+    # Get search parameter
+    search_query = request.GET.get('search', '')
+    status_filter = request.GET.get('status', '')
+    
+    # Base queryset
+    payments = OwnerPayout.objects.select_related('owner', 'booking', 'booking__aircraft').all()
+    
+    # Apply search filter
+    if search_query:
+        payments = payments.filter(
+            Q(owner__username__icontains=search_query) |
+            Q(owner__email__icontains=search_query) |
+            Q(transaction_reference__icontains=search_query) |
+            Q(booking__booking_order_id__icontains=search_query)
+        )
+    
+    # Apply status filter
+    if status_filter:
+        payments = payments.filter(status=status_filter)
+    
+    # Order by newest first
+    payments = payments.order_by('-payout_date', '-id')
+    
+    # Pagination
+    paginator = Paginator(payments, 20)  # 20 payments per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Status choices for filter dropdown
+    status_choices = OwnerPayout._meta.get_field('status').choices
+    
+    context = {
+        'page_obj': page_obj,
+        'search_query': search_query,
+        'status_filter': status_filter,
+        'status_choices': status_choices,
+    }
+    
+    return render(request, 'payments/owner_payments_list.html', context)
+
+
+def owner_payment_detail_ajax(request, payment_id):
+    """AJAX view to fetch payment details"""
+    
+    if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'error': 'Invalid request'}, status=400)
+    
+    try:
+        payment = get_object_or_404(
+            OwnerPayout.objects.select_related(
+                'owner', 'booking', 'booking__aircraft', 'booking__client'
+            ),
+            id=payment_id
+        )
+        
+        # Prepare response data
+        data = {
+            'id': payment.id,
+            'amount': str(payment.amount),
+            'payout_date': payment.payout_date.strftime('%Y-%m-%d'),
+            'status': payment.status,
+            'transaction_reference': payment.transaction_reference,
+            'owner': {
+                'id': payment.owner.id,
+                'name': payment.owner.get_full_name() or payment.owner.username,
+                'email': payment.owner.email,
+                'phone': getattr(payment.owner, 'phone_number', ''),
+            },
+            'booking': {
+                'id': payment.booking.id,
+                'order_id': payment.booking.booking_order_id,
+                'status': payment.booking.status,
+                'trip_type': payment.booking.get_trip_type_display(),
+                'total_price': str(payment.booking.total_price),
+                'owner_earnings': str(payment.booking.owner_earnings),
+                'agent_commission': str(payment.booking.agent_commission),
+                'created_at': payment.booking.created_at.strftime('%Y-%m-%d %H:%M'),
+                'client': {
+                    'name': payment.booking.client.get_full_name() or payment.booking.client.username,
+                    'email': payment.booking.client.email,
+                },
+                'aircraft': {
+                    'model': payment.booking.aircraft.model_name,
+                    'registration': payment.booking.aircraft.registration_number,
+                    'base_airport': payment.booking.aircraft.base_airport,
+                }
+            }
+        }
+        
+        return JsonResponse(data)
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
