@@ -4049,3 +4049,7 @@ def settings_view(request):
 @login_required
 def help_support(request):
     return render(request, 'help_support.html')
+
+@login_required
+def Flight_Announcement(request):
+    return render(request, 'Flight_Announcement.html')

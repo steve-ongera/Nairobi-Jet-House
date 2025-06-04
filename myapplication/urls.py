@@ -138,6 +138,7 @@ urlpatterns = [
 
     path('settings/', views.settings_view, name='settings'),
     path('help-support/', views.help_support, name='help_support'),
+    path('flight-announcement/', views.Flight_Announcement, name='flight_announcement'),
     
     
 ]

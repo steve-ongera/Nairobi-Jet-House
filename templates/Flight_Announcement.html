@@ -1,0 +1,511 @@
+{% extends 'base/base.html'%}
+{% load static %}
+
+{% block content %}
+<div class="message-container" id="system-messages">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+        <i class="bi {% if message.tags == 'success' %}bi-check-circle{% else %}bi-exclamation-triangle{% endif %} me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="pagetitle">
+    <h1><i class="bi bi-megaphone me-2"></i>Flight Announcements</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="#"><i class="bi bi-house-door"></i> Home</a></li>
+            <li class="breadcrumb-item active">Flight Information</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-jet-primary text-white">
+                    <h5 class="card-title mb-0"><i class="bi bi-airplane me-2"></i>Real-time Flight Updates</h5>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Flight Status Navigation -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="list-group">
+                                <a href="#arrivals" class="list-group-item list-group-item-action active" data-bs-toggle="tab">
+                                    <i class="bi bi-airplane-engines me-2"></i> Arrivals
+                                </a>
+                                <a href="#departures" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                                    <i class="bi bi-airplane-takeoff me-2"></i> Departures
+                                </a>
+                                <a href="#delays" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                                    <i class="bi bi-clock-history me-2"></i> Delays & Cancellations
+                                </a>
+                                <a href="#weather" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                                    <i class="bi bi-cloud-sun me-2"></i> Weather Updates
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Flight Content -->
+                        <div class="col-md-9">
+                            <div class="tab-content">
+                                <!-- Arrivals Tab -->
+                                <div class="tab-pane fade show active" id="arrivals">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h5 class="text-jet mb-0"><i class="bi bi-airplane-engines me-2"></i>Today's Arrivals</h5>
+                                        <div>
+                                            <span class="badge bg-success me-2">Updated: {% now "H:i" %}</span>
+                                            <button class="btn btn-sm btn-outline-jet">
+                                                <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead class="bg-jet-light">
+                                                <tr>
+                                                    <th>Flight</th>
+                                                    <th>From</th>
+                                                    <th>Scheduled</th>
+                                                    <th>Estimated</th>
+                                                    <th>Status</th>
+                                                    <th>Gate</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <strong>NJ 201</strong><br>
+                                                        <small class="text-muted">Nairobi Jet</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>Mombasa (MBA)</strong><br>
+                                                        <small class="text-muted">Kenya</small>
+                                                    </td>
+                                                    <td>08:45</td>
+                                                    <td>08:40</td>
+                                                    <td><span class="badge bg-success">Landed</span></td>
+                                                    <td>A3</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <strong>NJ 305</strong><br>
+                                                        <small class="text-muted">Nairobi Jet</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>Dubai (DXB)</strong><br>
+                                                        <small class="text-muted">UAE</small>
+                                                    </td>
+                                                    <td>10:15</td>
+                                                    <td>10:25</td>
+                                                    <td><span class="badge bg-warning text-dark">Delayed</span></td>
+                                                    <td>B2</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <strong>NJ 412</strong><br>
+                                                        <small class="text-muted">Nairobi Jet</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>Kisumu (KIS)</strong><br>
+                                                        <small class="text-muted">Kenya</small>
+                                                    </td>
+                                                    <td>11:30</td>
+                                                    <td>11:30</td>
+                                                    <td><span class="badge bg-primary">On Time</span></td>
+                                                    <td>A5</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <strong>NJ 108</strong><br>
+                                                        <small class="text-muted">Nairobi Jet</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>London (LHR)</strong><br>
+                                                        <small class="text-muted">UK</small>
+                                                    </td>
+                                                    <td>14:50</td>
+                                                    <td>14:35</td>
+                                                    <td><span class="badge bg-info">Early</span></td>
+                                                    <td>C1</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <strong>NJ 522</strong><br>
+                                                        <small class="text-muted">Nairobi Jet</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>Johannesburg (JNB)</strong><br>
+                                                        <small class="text-muted">South Africa</small>
+                                                    </td>
+                                                    <td>16:20</td>
+                                                    <td>16:20</td>
+                                                    <td><span class="badge bg-primary">On Time</span></td>
+                                                    <td>B4</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <div class="alert alert-info mt-3">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        Arrival times are displayed in East Africa Time (EAT). All times are local to Nairobi.
+                                    </div>
+                                </div>
+                                
+                                <!-- Departures Tab -->
+                                <div class="tab-pane fade" id="departures">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h5 class="text-jet mb-0"><i class="bi bi-airplane-takeoff me-2"></i>Today's Departures</h5>
+                                        <div>
+                                            <span class="badge bg-success me-2">Updated: {% now "H:i" %}</span>
+                                            <button class="btn btn-sm btn-outline-jet">
+                                                <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead class="bg-jet-light">
+                                                <tr>
+                                                    <th>Flight</th>
+                                                    <th>To</th>
+                                                    <th>Scheduled</th>
+                                                    <th>Estimated</th>
+                                                    <th>Status</th>
+                                                    <th>Gate</th>
+                                                    <th>Check-In</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <strong>NJ 202</strong><br>
+                                                        <small class="text-muted">Nairobi Jet</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>Mombasa (MBA)</strong><br>
+                                                        <small class="text-muted">Kenya</small>
+                                                    </td>
+                                                    <td>09:30</td>
+                                                    <td>09:30</td>
+                                                    <td><span class="badge bg-primary">On Time</span></td>
+                                                    <td>A3</td>
+                                                    <td>Open</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <strong>NJ 306</strong><br>
+                                                        <small class="text-muted">Nairobi Jet</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>Dubai (DXB)</strong><br>
+                                                        <small class="text-muted">UAE</small>
+                                                    </td>
+                                                    <td>11:45</td>
+                                                    <td>12:00</td>
+                                                    <td><span class="badge bg-warning text-dark">Delayed</span></td>
+                                                    <td>B2</td>
+                                                    <td>Open</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <strong>NJ 413</strong><br>
+                                                        <small class="text-muted">Nairobi Jet</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>Kisumu (KIS)</strong><br>
+                                                        <small class="text-muted">Kenya</small>
+                                                    </td>
+                                                    <td>12:15</td>
+                                                    <td>12:15</td>
+                                                    <td><span class="badge bg-primary">On Time</span></td>
+                                                    <td>A5</td>
+                                                    <td>Open</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <strong>NJ 109</strong><br>
+                                                        <small class="text-muted">Nairobi Jet</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>London (LHR)</strong><br>
+                                                        <small class="text-muted">UK</small>
+                                                    </td>
+                                                    <td>15:30</td>
+                                                    <td>15:30</td>
+                                                    <td><span class="badge bg-primary">On Time</span></td>
+                                                    <td>C1</td>
+                                                    <td>Opens 13:30</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <strong>NJ 523</strong><br>
+                                                        <small class="text-muted">Nairobi Jet</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>Johannesburg (JNB)</strong><br>
+                                                        <small class="text-muted">South Africa</small>
+                                                    </td>
+                                                    <td>17:45</td>
+                                                    <td>17:45</td>
+                                                    <td><span class="badge bg-primary">On Time</span></td>
+                                                    <td>B4</td>
+                                                    <td>Opens 15:45</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <div class="alert alert-info mt-3">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        Boarding typically begins 40 minutes before departure. Please be at the gate at least 30 minutes prior to departure.
+                                    </div>
+                                </div>
+                                
+                                <!-- Delays & Cancellations Tab -->
+                                <div class="tab-pane fade" id="delays">
+                                    <h5 class="text-jet mb-4"><i class="bi bi-exclamation-triangle me-2"></i>Delays & Cancellations</h5>
+                                    
+                                    <div class="card mb-4 border-warning">
+                                        <div class="card-header bg-warning text-dark">
+                                            <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Current Disruptions</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-3">
+                                                <h6><span class="badge bg-warning text-dark me-2">Delayed</span> NJ 305 from Dubai (DXB)</h6>
+                                                <p>Estimated arrival now 10:25 (originally 10:15) due to late departure from Dubai.</p>
+                                                <p class="text-muted"><small>Last updated: 09:45 EAT</small></p>
+                                            </div>
+                                            
+                                            <div class="mb-3">
+                                                <h6><span class="badge bg-warning text-dark me-2">Delayed</span> NJ 306 to Dubai (DXB)</h6>
+                                                <p>Estimated departure now 12:00 (originally 11:45) due to aircraft rotation delay.</p>
+                                                <p class="text-muted"><small>Last updated: 10:15 EAT</small></p>
+                                            </div>
+                                            
+                                            <div class="alert alert-info">
+                                                <i class="bi bi-info-circle me-2"></i>
+                                                No cancellations reported at this time. Check back for updates.
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card">
+                                        <div class="card-header bg-jet-light">
+                                            <h5 class="mb-0"><i class="bi bi-question-circle me-2"></i>Passenger Assistance</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <h6>What to do if your flight is delayed or cancelled:</h6>
+                                            <ol>
+                                                <li>Check with our staff at the information desk in the terminal</li>
+                                                <li>Visit our customer service center near Gate B1</li>
+                                                <li>Call our 24/7 support line: +254 700 123 456</li>
+                                                <li>Check your email for rebooking options if applicable</li>
+                                            </ol>
+                                            
+                                            <div class="alert alert-light mt-3">
+                                                <i class="bi bi-lightbulb me-2"></i>
+                                                <strong>Tip:</strong> Keep your booking reference handy when seeking assistance.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Weather Updates Tab -->
+                                <div class="tab-pane fade" id="weather">
+                                    <h5 class="text-jet mb-4"><i class="bi bi-cloud-sun me-2"></i>Weather Updates</h5>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="card mb-4">
+                                                <div class="card-header bg-jet-primary text-white">
+                                                    <h5 class="mb-0"><i class="bi bi-geo-alt me-2"></i>Nairobi (NBO)</h5>
+                                                </div>
+                                                <div class="card-body text-center">
+                                                    <div class="display-1 mb-3">
+                                                        <i class="bi bi-sun"></i>
+                                                    </div>
+                                                    <h2>26°C</h2>
+                                                    <p class="mb-1"><strong>Sunny</strong></p>
+                                                    <p class="mb-1">Visibility: Excellent (10km+)</p>
+                                                    <p class="mb-1">Wind: 10 km/h NE</p>
+                                                    <p class="mb-0">Humidity: 45%</p>
+                                                </div>
+                                                <div class="card-footer bg-jet-light">
+                                                    <small class="text-muted">Updated: {% now "H:i" %} EAT</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="card mb-4">
+                                                <div class="card-header bg-jet-primary text-white">
+                                                    <h5 class="mb-0"><i class="bi bi-cloud-lightning-rain me-2"></i>Major Route Weather</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="weather-alert alert alert-warning mb-3">
+                                                        <i class="bi bi-exclamation-triangle me-2"></i>
+                                                        <strong>Thunderstorms</strong> reported in Dubai (DXB) area. Possible delays.
+                                                    </div>
+                                                    
+                                                    <ul class="list-group list-group-flush">
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <strong>Mombasa (MBA)</strong>
+                                                                <div class="text-muted">Partly Cloudy, 29°C</div>
+                                                            </div>
+                                                            <span class="badge bg-success">Normal Ops</span>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <strong>London (LHR)</strong>
+                                                                <div class="text-muted">Light Rain, 14°C</div>
+                                                            </div>
+                                                            <span class="badge bg-success">Normal Ops</span>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <strong>Johannesburg (JNB)</strong>
+                                                                <div class="text-muted">Clear, 22°C</div>
+                                                            </div>
+                                                            <span class="badge bg-success">Normal Ops</span>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <strong>Dubai (DXB)</strong>
+                                                                <div class="text-muted">Thunderstorms, 31°C</div>
+                                                            </div>
+                                                            <span class="badge bg-warning text-dark">Delays Possible</span>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="alert alert-info">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        Weather conditions can change rapidly. This information is updated every 30 minutes.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-jet-light">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-info-circle me-2"></i>Flight Information Services</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-telephone me-2"></i> Flight Info: +254 700 123 789</li>
+                                <li><i class="bi bi-envelope me-2"></i> Email: flights@nairobi.jet</li>
+                                <li><i class="bi bi-signpost me-2"></i> Information Desks: Terminal 1 & 2</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-clock me-2"></i>Real-time Updates</h6>
+                            <p>For the most current flight information:</p>
+                            <div class="d-flex">
+                                <button class="btn btn-sm btn-outline-jet me-2">
+                                    <i class="bi bi-phone me-1"></i> Mobile App
+                                </button>
+                                <button class="btn btn-sm btn-outline-jet">
+                                    <i class="bi bi-broadcast me-1"></i> Flight Alerts
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    :root {
+        --jet-primary: #1976D2; /* Primary blue */
+        --jet-secondary: #64B5F6; /* Light blue */
+        --jet-light: #E3F2FD; /* Very light blue */
+        --jet-dark: #0D47A1; /* Dark blue */
+    }
+    
+    .bg-jet-primary {
+        background-color: var(--jet-primary) !important;
+    }
+    
+    .bg-jet-secondary {
+        background-color: var(--jet-secondary) !important;
+    }
+    
+    .bg-jet-light {
+        background-color: var(--jet-light) !important;
+    }
+    
+    .bg-jet-dark {
+        background-color: var(--jet-dark) !important;
+    }
+    
+    .btn-jet {
+        background-color: var(--jet-primary);
+        color: white;
+        border-color: var(--jet-primary);
+    }
+    
+    .btn-jet:hover {
+        background-color: var(--jet-dark);
+        border-color: var(--jet-dark);
+    }
+    
+    .btn-outline-jet {
+        color: var(--jet-primary);
+        border-color: var(--jet-primary);
+    }
+    
+    .btn-outline-jet:hover {
+        background-color: var(--jet-primary);
+        color: white;
+    }
+    
+    .text-jet {
+        color: var(--jet-primary);
+    }
+    
+    .border-jet-primary {
+        border-color: var(--jet-primary) !important;
+    }
+    
+    .list-group-item.active {
+        background-color: var(--jet-primary);
+        border-color: var(--jet-primary);
+    }
+    
+    .weather-alert {
+        border-left: 4px solid #ffc107;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: var(--jet-light);
+    }
+    
+    .badge.bg-primary {
+        background-color: var(--jet-primary) !important;
+    }
+    
+    .display-1 i.bi-sun {
+        color: #FFC107;
+    }
+    
+    .display-1 i.bi-cloud-lightning-rain {
+        color: #6c757d;
+    }
+</style>
+
+{% endblock %}
