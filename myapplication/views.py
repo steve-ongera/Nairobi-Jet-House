@@ -4053,3 +4053,7 @@ def help_support(request):
 @login_required
 def Flight_Announcement(request):
     return render(request, 'Flight_Announcement.html')
+
+@login_required
+def operations_reports(request):
+    return render(request, 'operations_reports.html')

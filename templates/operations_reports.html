@@ -1,0 +1,893 @@
+{% extends 'base/base.html'%}
+{% load static %}
+
+{% block content %}
+<div class="message-container" id="system-messages">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+        <i class="bi {% if message.tags == 'success' %}bi-check-circle{% else %}bi-exclamation-triangle{% endif %} me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="pagetitle">
+    <h1><i class="bi bi-clipboard-data me-2"></i>Operations Reports</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="#"><i class="bi bi-house-door"></i> Home</a></li>
+            <li class="breadcrumb-item active">Operations Dashboard</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-jet-primary text-white">
+                    <h5 class="card-title mb-0"><i class="bi bi-speedometer2 me-2"></i>Performance Metrics</h5>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Report Navigation -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="list-group">
+                                <a href="#daily" class="list-group-item list-group-item-action active" data-bs-toggle="tab">
+                                    <i class="bi bi-calendar-day me-2"></i> Daily
+                                </a>
+                                <a href="#weekly" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                                    <i class="bi bi-calendar-week me-2"></i> Weekly
+                                </a>
+                                <a href="#monthly" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                                    <i class="bi bi-calendar-month me-2"></i> Monthly
+                                </a>
+                                <a href="#custom" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                                    <i class="bi bi-calendar-range me-2"></i> Custom
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Report Content -->
+                        <div class="col-md-9">
+                            <div class="tab-content">
+                                <!-- Daily Report -->
+                                <div class="tab-pane fade show active" id="daily">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h5 class="text-jet mb-0"><i class="bi bi-calendar-day me-2"></i>Daily Operations Report</h5>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-jet dropdown-toggle" type="button" id="dailyDropdown" data-bs-toggle="dropdown">
+                                                <i class="bi bi-calendar3 me-1"></i> {% now "F j, Y" %}
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#">Today</a></li>
+                                                <li><a class="dropdown-item" href="#">Yesterday</a></li>
+                                                <li><a class="dropdown-item" href="#">Previous Week</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item" href="#">Select Date</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Key Metrics Cards -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-3">
+                                            <div class="card border-jet-primary">
+                                                <div class="card-body text-center">
+                                                    <h6 class="card-subtitle mb-2 text-muted">Flights</h6>
+                                                    <h3 class="card-title text-jet">42</h3>
+                                                    <p class="card-text text-success small">
+                                                        <i class="bi bi-arrow-up"></i> 12% from avg.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card border-jet-primary">
+                                                <div class="card-body text-center">
+                                                    <h6 class="card-subtitle mb-2 text-muted">On-Time %</h6>
+                                                    <h3 class="card-title text-jet">87%</h3>
+                                                    <p class="card-text text-success small">
+                                                        <i class="bi bi-arrow-up"></i> 5% from avg.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card border-jet-primary">
+                                                <div class="card-body text-center">
+                                                    <h6 class="card-subtitle mb-2 text-muted">Passengers</h6>
+                                                    <h3 class="card-title text-jet">3,245</h3>
+                                                    <p class="card-text text-danger small">
+                                                        <i class="bi bi-arrow-down"></i> 8% from avg.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="card border-jet-primary">
+                                                <div class="card-body text-center">
+                                                    <h6 class="card-subtitle mb-2 text-muted">Load Factor</h6>
+                                                    <h3 class="card-title text-jet">78%</h3>
+                                                    <p class="card-text text-success small">
+                                                        <i class="bi bi-arrow-up"></i> 3% from avg.
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Daily Charts -->
+                                    <div class="row">
+                                        <div class="col-md-6 mb-4">
+                                            <div class="card h-100">
+                                                <div class="card-header bg-jet-light">
+                                                    <h6 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Flights by Hour</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <canvas id="dailyFlightsChart" height="250"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-4">
+                                            <div class="card h-100">
+                                                <div class="card-header bg-jet-light">
+                                                    <h6 class="mb-0"><i class="bi bi-pie-chart me-2"></i>Flight Status Distribution</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <canvas id="dailyStatusChart" height="250"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="card">
+                                                <div class="card-header bg-jet-light">
+                                                    <h6 class="mb-0"><i class="bi bi-table me-2"></i>Detailed Flight Log</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="table-responsive">
+                                                        <table class="table table-hover">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Flight</th>
+                                                                    <th>Route</th>
+                                                                    <th>Scheduled</th>
+                                                                    <th>Actual</th>
+                                                                    <th>Status</th>
+                                                                    <th>Passengers</th>
+                                                                    <th>Load %</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td>NJ 201</td>
+                                                                    <td>NBO-MBA</td>
+                                                                    <td>08:45</td>
+                                                                    <td>08:40</td>
+                                                                    <td><span class="badge bg-success">On Time</span></td>
+                                                                    <td>120</td>
+                                                                    <td>85%</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>NJ 305</td>
+                                                                    <td>DXB-NBO</td>
+                                                                    <td>10:15</td>
+                                                                    <td>10:25</td>
+                                                                    <td><span class="badge bg-warning text-dark">Delayed</span></td>
+                                                                    <td>210</td>
+                                                                    <td>75%</td>
+                                                                </tr>
+                                                                <!-- More rows would be here -->
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Weekly Report -->
+                                <div class="tab-pane fade" id="weekly">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h5 class="text-jet mb-0"><i class="bi bi-calendar-week me-2"></i>Weekly Operations Report</h5>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-jet dropdown-toggle" type="button" id="weeklyDropdown" data-bs-toggle="dropdown">
+                                                <i class="bi bi-calendar3 me-1"></i> Week 26, 2023
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#">Current Week</a></li>
+                                                <li><a class="dropdown-item" href="#">Previous Week</a></li>
+                                                <li><a class="dropdown-item" href="#">Week Before Last</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item" href="#">Select Week</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Weekly Charts -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-8">
+                                            <div class="card h-100">
+                                                <div class="card-header bg-jet-light">
+                                                    <h6 class="mb-0"><i class="bi bi-graph-up me-2"></i>Flights by Day</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <canvas id="weeklyFlightsChart" height="300"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="card h-100">
+                                                <div class="card-header bg-jet-light">
+                                                    <h6 class="mb-0"><i class="bi bi-percent me-2"></i>On-Time Performance</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="text-center mb-3">
+                                                        <div class="display-4 text-jet">89%</div>
+                                                        <small class="text-muted">+2% from previous week</small>
+                                                    </div>
+                                                    <canvas id="weeklyOTPChart" height="200"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="card h-100">
+                                                <div class="card-header bg-jet-light">
+                                                    <h6 class="mb-0"><i class="bi bi-people me-2"></i>Passenger Volume</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <canvas id="weeklyPassengersChart" height="250"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card h-100">
+                                                <div class="card-header bg-jet-light">
+                                                    <h6 class="mb-0"><i class="bi bi-bag-check me-2"></i>Load Factor</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <canvas id="weeklyLoadChart" height="250"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Monthly Report -->
+                                <div class="tab-pane fade" id="monthly">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h5 class="text-jet mb-0"><i class="bi bi-calendar-month me-2"></i>Monthly Operations Report</h5>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-jet dropdown-toggle" type="button" id="monthlyDropdown" data-bs-toggle="dropdown">
+                                                <i class="bi bi-calendar3 me-1"></i> June 2023
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#">Current Month</a></li>
+                                                <li><a class="dropdown-item" href="#">Previous Month</a></li>
+                                                <li><a class="dropdown-item" href="#">Month Before Last</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item" href="#">Select Month</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Monthly Charts -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <div class="card h-100">
+                                                <div class="card-header bg-jet-light">
+                                                    <h6 class="mb-0"><i class="bi bi-bar-chart-line me-2"></i>Monthly Flight Volume</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <canvas id="monthlyFlightsChart" height="300"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="card h-100">
+                                                <div class="card-header bg-jet-light">
+                                                    <h6 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Key Metrics Trend</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <canvas id="monthlyMetricsChart" height="300"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="card">
+                                                <div class="card-header bg-jet-light">
+                                                    <h6 class="mb-0"><i class="bi bi-table me-2"></i>Monthly Summary</h6>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="table-responsive">
+                                                        <table class="table table-hover">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Metric</th>
+                                                                    <th>This Month</th>
+                                                                    <th>Last Month</th>
+                                                                    <th>Change</th>
+                                                                    <th>YTD Avg</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td>Total Flights</td>
+                                                                    <td>1,245</td>
+                                                                    <td>1,187</td>
+                                                                    <td><span class="text-success">+58 (+4.9%)</span></td>
+                                                                    <td>1,203</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>On-Time %</td>
+                                                                    <td>87%</td>
+                                                                    <td>85%</td>
+                                                                    <td><span class="text-success">+2%</span></td>
+                                                                    <td>86%</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Passengers</td>
+                                                                    <td>98,456</td>
+                                                                    <td>94,321</td>
+                                                                    <td><span class="text-success">+4,135 (+4.4%)</span></td>
+                                                                    <td>95,678</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Load Factor</td>
+                                                                    <td>79%</td>
+                                                                    <td>77%</td>
+                                                                    <td><span class="text-success">+2%</span></td>
+                                                                    <td>78%</td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Custom Report -->
+                                <div class="tab-pane fade" id="custom">
+                                    <h5 class="text-jet mb-4"><i class="bi bi-calendar-range me-2"></i>Custom Report Generator</h5>
+                                    
+                                    <div class="card mb-4">
+                                        <div class="card-header bg-jet-light">
+                                            <h5 class="mb-0"><i class="bi bi-funnel me-2"></i>Report Parameters</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <form>
+                                                <div class="row mb-3">
+                                                    <div class="col-md-6">
+                                                        <label for="startDate" class="form-label">Start Date</label>
+                                                        <input type="date" class="form-control" id="startDate" value="2023-06-01">
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label for="endDate" class="form-label">End Date</label>
+                                                        <input type="date" class="form-control" id="endDate" value="2023-06-30">
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label class="form-label">Metrics to Include</label>
+                                                    <div class="row">
+                                                        <div class="col-md-3">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" id="flightsCheck" checked>
+                                                                <label class="form-check-label" for="flightsCheck">Flight Count</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" id="otpCheck" checked>
+                                                                <label class="form-check-label" for="otpCheck">On-Time %</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" id="paxCheck" checked>
+                                                                <label class="form-check-label" for="paxCheck">Passengers</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="checkbox" id="loadCheck" checked>
+                                                                <label class="form-check-label" for="loadCheck">Load Factor</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="reportType" class="form-label">Report Type</label>
+                                                    <select class="form-select" id="reportType">
+                                                        <option>Summary Dashboard</option>
+                                                        <option>Detailed Data Export</option>
+                                                        <option>Comparison Report</option>
+                                                    </select>
+                                                </div>
+                                                
+                                                <div class="mb-3">
+                                                    <label for="reportName" class="form-label">Report Name (Optional)</label>
+                                                    <input type="text" class="form-control" id="reportName" placeholder="My Custom Report">
+                                                </div>
+                                                
+                                                <button type="submit" class="btn btn-jet">
+                                                    <i class="bi bi-file-earmark-bar-graph me-1"></i> Generate Report
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="alert alert-info">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        Custom reports may take a few moments to generate depending on the date range and metrics selected.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-jet-light">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-clock-history me-2"></i>Report Schedule</h6>
+                            <ul class="list-unstyled">
+                                <li><strong>Daily:</strong> Generated at 23:59 EAT</li>
+                                <li><strong>Weekly:</strong> Generated Sunday at 23:59 EAT</li>
+                                <li><strong>Monthly:</strong> Generated last day of month at 23:59 EAT</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-download me-2"></i>Export Options</h6>
+                            <div class="d-flex">
+                                <button class="btn btn-sm btn-outline-jet me-2">
+                                    <i class="bi bi-filetype-pdf me-1"></i> PDF
+                                </button>
+                                <button class="btn btn-sm btn-outline-jet me-2">
+                                    <i class="bi bi-filetype-xlsx me-1"></i> Excel
+                                </button>
+                                <button class="btn btn-sm btn-outline-jet">
+                                    <i class="bi bi-filetype-csv me-1"></i> CSV
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Daily Flights by Hour Chart
+    const dailyFlightsCtx = document.getElementById('dailyFlightsChart').getContext('2d');
+    const dailyFlightsChart = new Chart(dailyFlightsCtx, {
+        type: 'bar',
+        data: {
+            labels: ['04:00', '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'],
+            datasets: [{
+                label: 'Departures',
+                data: [2, 5, 8, 6, 4, 7, 3, 5, 2, 0],
+                backgroundColor: 'rgba(25, 118, 210, 0.7)',
+                borderColor: 'rgba(25, 118, 210, 1)',
+                borderWidth: 1
+            }, {
+                label: 'Arrivals',
+                data: [1, 3, 6, 7, 5, 4, 6, 4, 3, 1],
+                backgroundColor: 'rgba(100, 181, 246, 0.7)',
+                borderColor: 'rgba(100, 181, 246, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Flight Operations by Hour'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Flights'
+                    }
+                }
+            }
+        }
+    });
+
+    // Daily Flight Status Chart
+    const dailyStatusCtx = document.getElementById('dailyStatusChart').getContext('2d');
+    const dailyStatusChart = new Chart(dailyStatusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['On Time', 'Delayed', 'Cancelled', 'Early'],
+            datasets: [{
+                data: [35, 5, 1, 1],
+                backgroundColor: [
+                    'rgba(40, 167, 69, 0.7)',
+                    'rgba(255, 193, 7, 0.7)',
+                    'rgba(220, 53, 69, 0.7)',
+                    'rgba(23, 162, 184, 0.7)'
+                ],
+                borderColor: [
+                    'rgba(40, 167, 69, 1)',
+                    'rgba(255, 193, 7, 1)',
+                    'rgba(220, 53, 69, 1)',
+                    'rgba(23, 162, 184, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right',
+                },
+                title: {
+                    display: true,
+                    text: 'Flight Status Distribution'
+                }
+            }
+        }
+    });
+
+    // Weekly Flights by Day Chart
+    const weeklyFlightsCtx = document.getElementById('weeklyFlightsChart').getContext('2d');
+    const weeklyFlightsChart = new Chart(weeklyFlightsCtx, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Flights',
+                data: [45, 52, 48, 55, 60, 65, 50],
+                backgroundColor: 'rgba(25, 118, 210, 0.2)',
+                borderColor: 'rgba(25, 118, 210, 1)',
+                borderWidth: 2,
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Weekly Flight Volume'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    title: {
+                        display: true,
+                        text: 'Number of Flights'
+                    }
+                }
+            }
+        }
+    });
+
+    // Weekly OTP Chart
+    const weeklyOTPCtx = document.getElementById('weeklyOTPChart').getContext('2d');
+    const weeklyOTPChart = new Chart(weeklyOTPCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'On-Time %',
+                data: [85, 88, 90, 87, 91, 89, 92],
+                backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                borderColor: 'rgba(40, 167, 69, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    min: 80,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Percentage'
+                    }
+                }
+            }
+        }
+    });
+
+    // Weekly Passengers Chart
+    const weeklyPassengersCtx = document.getElementById('weeklyPassengersChart').getContext('2d');
+    const weeklyPassengersChart = new Chart(weeklyPassengersCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Passengers',
+                data: [3200, 3500, 3400, 3800, 4200, 4500, 4000],
+                backgroundColor: 'rgba(111, 66, 193, 0.7)',
+                borderColor: 'rgba(111, 66, 193, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Weekly Passenger Volume'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    title: {
+                        display: true,
+                        text: 'Passengers'
+                    }
+                }
+            }
+        }
+    });
+
+    // Weekly Load Chart
+    const weeklyLoadCtx = document.getElementById('weeklyLoadChart').getContext('2d');
+    const weeklyLoadChart = new Chart(weeklyLoadCtx, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Load Factor %',
+                data: [75, 78, 76, 80, 82, 85, 81],
+                backgroundColor: 'rgba(253, 126, 20, 0.2)',
+                borderColor: 'rgba(253, 126, 20, 1)',
+                borderWidth: 2,
+                tension: 0.3,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Weekly Load Factor'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    min: 70,
+                    max: 90,
+                    title: {
+                        display: true,
+                        text: 'Percentage'
+                    }
+                }
+            }
+        }
+    });
+
+    // Monthly Flights Chart
+    const monthlyFlightsCtx = document.getElementById('monthlyFlightsChart').getContext('2d');
+    const monthlyFlightsChart = new Chart(monthlyFlightsCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Flights',
+                data: [1120, 1050, 1180, 1150, 1220, 1245],
+                backgroundColor: 'rgba(25, 118, 210, 0.7)',
+                borderColor: 'rgba(25, 118, 210, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Monthly Flight Volume'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    title: {
+                        display: true,
+                        text: 'Number of Flights'
+                    }
+                }
+            }
+        }
+    });
+
+    // Monthly Metrics Chart
+    const monthlyMetricsCtx = document.getElementById('monthlyMetricsChart').getContext('2d');
+    const monthlyMetricsChart = new Chart(monthlyMetricsCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'On-Time %',
+                data: [84, 85, 86, 85, 87, 87],
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                borderColor: 'rgba(40, 167, 69, 1)',
+                borderWidth: 2,
+                tension: 0.3,
+                yAxisID: 'y'
+            }, {
+                label: 'Load Factor %',
+                data: [75, 76, 77, 78, 78, 79],
+                backgroundColor: 'rgba(253, 126, 20, 0.1)',
+                borderColor: 'rgba(253, 126, 20, 1)',
+                borderWidth: 2,
+                tension: 0.3,
+                yAxisID: 'y1'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Monthly Performance Metrics'
+                }
+            },
+            scales: {
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    min: 80,
+                    max: 90,
+                    title: {
+                        display: true,
+                        text: 'On-Time %'
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    min: 70,
+                    max: 80,
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                    title: {
+                        display: true,
+                        text: 'Load Factor %'
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+<style>
+    :root {
+        --jet-primary: #1976D2; /* Primary blue */
+        --jet-secondary: #64B5F6; /* Light blue */
+        --jet-light: #E3F2FD; /* Very light blue */
+        --jet-dark: #0D47A1; /* Dark blue */
+    }
+    
+    .bg-jet-primary {
+        background-color: var(--jet-primary) !important;
+    }
+    
+    .bg-jet-secondary {
+        background-color: var(--jet-secondary) !important;
+    }
+    
+    .bg-jet-light {
+        background-color: var(--jet-light) !important;
+    }
+    
+    .bg-jet-dark {
+        background-color: var(--jet-dark) !important;
+    }
+    
+    .btn-jet {
+        background-color: var(--jet-primary);
+        color: white;
+        border-color: var(--jet-primary);
+    }
+    
+    .btn-jet:hover {
+        background-color: var(--jet-dark);
+        border-color: var(--jet-dark);
+    }
+    
+    .btn-outline-jet {
+        color: var(--jet-primary);
+        border-color: var(--jet-primary);
+    }
+    
+    .btn-outline-jet:hover {
+        background-color: var(--jet-primary);
+        color: white;
+    }
+    
+    .text-jet {
+        color: var(--jet-primary);
+    }
+    
+    .border-jet-primary {
+        border-color: var(--jet-primary) !important;
+    }
+    
+    .list-group-item.active {
+        background-color: var(--jet-primary);
+        border-color: var(--jet-primary);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: var(--jet-light);
+    }
+    
+    .badge.bg-primary {
+        background-color: var(--jet-primary) !important;
+    }
+    
+    .display-4 {
+        font-size: 2.5rem;
+        font-weight: 300;
+        line-height: 1.2;
+    }
+    
+    .card {
+        border-radius: 8px;
+    }
+    
+    .card-header {
+        border-radius: 8px 8px 0 0 !important;
+    }
+</style>
+
+{% endblock %}
