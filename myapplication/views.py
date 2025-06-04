@@ -3156,8 +3156,8 @@ def financial_dashboard(request):
         .count()
     )
 
-    # Dashboard JSON-friendly data
-    dashboard_data = {
+    # FIXED: Pass individual variables instead of nested in dashboard_data
+    context = {
         'monthly_revenue': list(monthly_revenue),
         'monthly_travel': list(monthly_travel),
         'top_aircraft': list(top_aircraft),
@@ -3166,10 +3166,6 @@ def financial_dashboard(request):
         'previous_revenue_total': previous_revenue,
         'previous_flights_total': previous_flights,
         'previous_routes_count': previous_routes,
-    }
-
-    context = {
-        'dashboard_data': dashboard_data,
     }
 
     return render(request, 'dashboard/financial_dashboard.html', context)
