@@ -268,7 +268,9 @@ class OwnerPayoutAdmin(admin.ModelAdmin):
     
     def booking_link(self, obj):
         if obj.booking:
-            url = reverse('admin:your_app_booking_change', args=[obj.booking.id])
+            # Replace 'your_app' with your actual app name
+            # Since your URL shows 'myapplication', use that:
+            url = reverse('admin:myapplication_booking_change', args=[obj.booking.id])
             return format_html('<a href="{}">Booking #{}</a>', url, obj.booking.id)
         return "No booking"
     booking_link.short_description = 'Related Booking'
