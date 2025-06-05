@@ -368,26 +368,38 @@
       {% endfor %}
     </div>
 
-    <!-- Pagination -->
-    {% if page_obj.has_other_pages %}
-    <div class="pagination">
-      <span class="step-links">
-        {% if page_obj.has_previous %}
-          <a href="?page=1{% if selected_category %}&category={{ selected_category }}{% endif %}">&laquo; first</a>
-          <a href="?page={{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}">previous</a>
-        {% endif %}
-
-        <span class="current">
-          Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-        </span>
-
-        {% if page_obj.has_next %}
-          <a href="?page={{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}">next</a>
-          <a href="?page={{ page_obj.paginator.num_pages }}{% if selected_category %}&category={{ selected_category }}{% endif %}">last &raquo;</a>
-        {% endif %}
-      </span>
-    </div>
+  <!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<div style="margin: 30px 0; text-align: center; font-size: 14px; font-family: 'Segoe UI', Roboto, sans-serif;">
+  <span style="display: inline-flex; align-items: center; gap: 8px;">
+    {% if page_obj.has_previous %}
+      <a href="?page=1{% if selected_category %}&category={{ selected_category }}{% endif %}" 
+         style="padding: 6px 10px; border: 1px solid #e0e0e0; border-radius: 4px; text-decoration: none; color: #2c3e50; transition: all 0.2s ease; background: #f8f9fa;">
+        &laquo;
+      </a>
+      <a href="?page={{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}" 
+         style="padding: 6px 10px; border: 1px solid #e0e0e0; border-radius: 4px; text-decoration: none; color: #2c3e50; transition: all 0.2s ease; background: #f8f9fa;">
+        &lsaquo;
+      </a>
     {% endif %}
+
+    <span style="padding: 6px 12px; color: #555;">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}" 
+         style="padding: 6px 10px; border: 1px solid #e0e0e0; border-radius: 4px; text-decoration: none; color: #2c3e50; transition: all 0.2s ease; background: #f8f9fa;">
+        &rsaquo;
+      </a>
+      <a href="?page={{ page_obj.paginator.num_pages }}{% if selected_category %}&category={{ selected_category }}{% endif %}" 
+         style="padding: 6px 10px; border: 1px solid #e0e0e0; border-radius: 4px; text-decoration: none; color: #2c3e50; transition: all 0.2s ease; background: #f8f9fa;">
+        &raquo;
+      </a>
+    {% endif %}
+  </span>
+</div>
+{% endif %}
   </div>
 </section>
 
