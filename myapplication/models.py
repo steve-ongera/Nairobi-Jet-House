@@ -26,12 +26,26 @@ class User(AbstractUser):
 
 class AircraftType(models.Model):
     """Different types of aircraft (jets, helicopters, etc.)"""
+    
+    CATEGORY_CHOICES = [
+        ('helicopter', 'Helicopter'),
+        ('chopper', 'Chopper'),
+        ('jet', 'Jet'),
+        ('propeller', 'Propeller Plane'),
+        ('glider', 'Glider'),
+        # Add more as needed
+    ]
+    
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     image = models.ImageField(upload_to='aircraft_types/', blank=True, null=True)
     passenger_capacity = models.PositiveIntegerField()
     range_nautical_miles = models.PositiveIntegerField(help_text="Maximum range in nautical miles")
     speed_knots = models.PositiveIntegerField(help_text="Cruising speed in knots")
+
+    # New Fields
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES, default='helicopter')
+    price_per_hour_usd = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
         return self.name
