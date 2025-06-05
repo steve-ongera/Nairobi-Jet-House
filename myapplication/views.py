@@ -400,18 +400,38 @@ def aircraft_leasing(request):
 def air_cargo(request):
     return render(request, 'air_cargo.html') 
 
+from django.core.paginator import Paginator
+from django.shortcuts import render
+from .models import AircraftType, Airport
+
 def private_jet_charter(request):
-    # Get all airports for the dropdown, ordered by name for better UX
+    # Get all airports for the dropdown
     airports = Airport.objects.all().order_by('name')
     
-    # Optional: Get aircraft types if you want to show them in the form later
-    aircraft_types = AircraftType.objects.all().order_by('name')
+    # Get selected category from request
+    selected_category = request.GET.get('category', '')
+    
+    # Filter aircraft by category if selected
+    if selected_category:
+        aircraft_list = AircraftType.objects.filter(category=selected_category).order_by('name')
+    else:
+        aircraft_list = AircraftType.objects.all().order_by('name')
+    
+    # Pagination
+    paginator = Paginator(aircraft_list, 6)  # Show 6 aircraft per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     
     context = {
         'airports': airports,
-        'aircraft_types': aircraft_types,
+        'aircraft_types': aircraft_list,  # Keeping this for backward compatibility
+        'page_obj': page_obj,
+        'selected_category': selected_category,
+        'category_choices': AircraftType.CATEGORY_CHOICES,
     }
-    return render(request, 'private_jet_charter.html', context) 
+    return render(request, 'private_jet_charter.html', context)
+
+
 
 from django.views.decorators.csrf import csrf_protect
 from django.shortcuts import render, redirect

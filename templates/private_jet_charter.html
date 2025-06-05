@@ -5,6 +5,198 @@
 {% block description %}Premium private jet charter services with bespoke flight solutions. Experience luxury air travel across Africa and worldwide with our fleet of executive aircraft.{% endblock %}
 
 {% block content %}
+<style>
+  /* Filter Styles */
+.category-filter {
+    margin: 20px 0 30px;
+    text-align: center;
+}
+
+.filter-form {
+    display: inline-block;
+    background: #f8f9fa;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.filter-form .form-group {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.filter-form label {
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.filter-form select {
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-form select:hover {
+    border-color: #aaa;
+}
+
+.filter-form select:focus {
+    outline: none;
+    border-color: #0066cc;
+    box-shadow: 0 0 0 2px rgba(0,102,204,0.2);
+}
+
+/* Pagination Styles */
+.pagination {
+    margin-top: 40px;
+    text-align: center;
+    padding: 20px 0;
+}
+
+.pagination .step-links {
+    display: inline-block;
+}
+
+.pagination a {
+    color: #0066cc;
+    text-decoration: none;
+    padding: 8px 16px;
+    margin: 0 4px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.pagination a:hover {
+    background-color: #0066cc;
+    color: white;
+    border-color: #0066cc;
+}
+
+.pagination .current {
+    padding: 8px 16px;
+    margin: 0 4px;
+    font-weight: bold;
+}
+
+.no-results {
+    text-align: center;
+    padding: 40px;
+    grid-column: 1 / -1;
+    color: #666;
+    font-size: 18px;
+}
+
+/* Fleet Grid Container */
+.fleet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+    width: 100%;
+}
+
+/* Fleet Card - Maintain aspect ratio */
+.fleet-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+    background: white;
+}
+
+/* Image container with fixed aspect ratio */
+.fleet-image {
+    position: relative;
+    width: 100%;
+    padding-top: 66.66%; /* 3:2 aspect ratio */
+    overflow: hidden;
+}
+
+.fleet-image img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.fleet-card:hover .fleet-image img {
+    transform: scale(1.05);
+}
+
+.fleet-specs {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    padding: 15px;
+    color: white;
+}
+
+.fleet-specs span {
+    display: block;
+    line-height: 1.3;
+}
+
+.fleet-specs span:first-child {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+/* Details section - flexible height */
+.fleet-details {
+    padding: 20px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.fleet-details h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.fleet-details ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    flex-grow: 1;
+}
+
+.fleet-details li {
+    margin-bottom: 8px;
+    color: #555;
+}
+
+/* Single result styling */
+.fleet-grid.single-result {
+    grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+}
+
+@media (max-width: 768px) {
+    .fleet-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .fleet-grid.single-result {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
 <nav aria-label="breadcrumb" class="breadcrumb-nav">
   <div class="container">
     <ol class="breadcrumb">
@@ -116,73 +308,86 @@
 </section>
 
 <!-- Fleet Section -->
-<section class="jet-fleet">
+<section class="jet-fleet" id="fleet-section">
   <div class="container">
     <div class="fleet-header">
       <h2 class="section-title">Premium Aircraft Fleet</h2>
       <p class="section-description">
-        Our meticulously maintained jets offer the perfect balance of performance, comfort, and style for every travel need.
+        Our meticulously maintained aircraft offer the perfect balance of performance, comfort, and style for every travel need.
       </p>
+      
+      <!-- Category Filter -->
+      <div class="category-filter">
+        <form method="get" action="." class="filter-form">
+          <div class="form-group">
+            <label for="category">Filter by Category:</label>
+            <select name="category" id="category" onchange="this.form.submit()">
+              <option value="">All Categories</option>
+              {% for value, label in category_choices %}
+                <option value="{{ value }}" {% if selected_category == value %}selected{% endif %}>
+                  {{ label }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        </form>
+      </div>
     </div>
 
     <div class="fleet-grid">
+      {% for aircraft in page_obj %}
       <div class="fleet-card">
         <div class="fleet-image">
-          <img src="{% static 'assets/images/hawker-800.jpg' %}" alt="Hawker 800XP">
+          {% if aircraft.image %}
+            <img src="{{ aircraft.image.url }}" alt="{{ aircraft.name }}">
+          {% else %}
+            <img src="{% static 'assets/images/default-aircraft.jpg' %}" alt="{{ aircraft.name }}">
+          {% endif %}
           <div class="fleet-specs">
-            <span>Hawker 800XP</span>
-            <span>Midsize Jet</span>
+            <span>{{ aircraft.name }}</span>
+            <span>{{ aircraft.get_category_display }}</span>
           </div>
         </div>
         <div class="fleet-details">
-          <h3>Hawker 800XP</h3>
+          <h3>{{ aircraft.name }}</h3>
           <ul>
-            <li><strong>Range:</strong> 4,200 km</li>
-            <li><strong>Passengers:</strong> 8</li>
-            <li><strong>Cabin:</strong> 1.73m height</li>
-            <li><strong>Special:</strong> Short runway capability</li>
+            <li><strong>Range:</strong> {{ aircraft.range_nautical_miles }} nautical miles</li>
+            <li><strong>Passengers:</strong> {{ aircraft.passenger_capacity }}</li>
+            <li><strong>Speed:</strong> {{ aircraft.speed_knots }} knots</li>
+            <li><strong>Price:</strong> ${{ aircraft.price_per_hour_usd }}/hour</li>
+            {% if aircraft.description %}
+            <li class="description"><strong>Description:</strong> {{ aircraft.description|truncatewords:15 }}</li>
+            {% endif %}
           </ul>
         </div>
       </div>
-
-      <div class="fleet-card">
-        <div class="fleet-image">
-          <img src="{% static 'assets/images/citation-xls.webp' %}" alt="Citation XLS">
-          <div class="fleet-specs">
-            <span>Citation XLS</span>
-            <span>Super Midsize</span>
-          </div>
-        </div>
-        <div class="fleet-details">
-          <h3>Citation XLS</h3>
-          <ul>
-            <li><strong>Range:</strong> 3,700 km</li>
-            <li><strong>Passengers:</strong> 9</li>
-            <li><strong>Cabin:</strong> 1.75m height</li>
-            <li><strong>Special:</strong> High-speed cruise</li>
-          </ul>
-        </div>
+      {% empty %}
+      <div class="no-results">
+        <p>No aircraft found in this category.</p>
       </div>
-
-      <div class="fleet-card">
-        <div class="fleet-image">
-          <img src="{% static 'assets/images/bombardier-global.jpg' %}" alt="Bombardier Global 6000">
-          <div class="fleet-specs">
-            <span>Global 6000</span>
-            <span>Large Cabin</span>
-          </div>
-        </div>
-        <div class="fleet-details">
-          <h3>Global 6000</h3>
-          <ul>
-            <li><strong>Range:</strong> 11,100 km</li>
-            <li><strong>Passengers:</strong> 16</li>
-            <li><strong>Cabin:</strong> 6.3m length</li>
-            <li><strong>Special:</strong> Intercontinental range</li>
-          </ul>
-        </div>
-      </div>
+      {% endfor %}
     </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+      <span class="step-links">
+        {% if page_obj.has_previous %}
+          <a href="?page=1{% if selected_category %}&category={{ selected_category }}{% endif %}">&laquo; first</a>
+          <a href="?page={{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}">previous</a>
+        {% endif %}
+
+        <span class="current">
+          Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}">next</a>
+          <a href="?page={{ page_obj.paginator.num_pages }}{% if selected_category %}&category={{ selected_category }}{% endif %}">last &raquo;</a>
+        {% endif %}
+      </span>
+    </div>
+    {% endif %}
   </div>
 </section>
 
@@ -1670,6 +1875,68 @@ input[type="radio"]:checked + .btn-option {
 }
 </style>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Store scroll position before form submission
+    const filterForm = document.querySelector('.filter-form');
+    let scrollPosition = 0;
+    
+    // Store current scroll position when filter changes
+    filterForm.addEventListener('change', function() {
+        scrollPosition = window.scrollY || document.documentElement.scrollTop;
+        sessionStorage.setItem('fleetScrollPosition', scrollPosition);
+    });
+    
+    // Restore scroll position after page reload
+    window.addEventListener('load', function() {
+        const savedPosition = sessionStorage.getItem('fleetScrollPosition');
+        if (savedPosition !== null) {
+            setTimeout(function() {
+                window.scrollTo({
+                    top: parseInt(savedPosition),
+                    behavior: 'instant'
+                });
+                sessionStorage.removeItem('fleetScrollPosition');
+            }, 50); // Small delay to ensure everything is loaded
+        }
+    });
+    
+    // Alternative AJAX approach (uncomment if you prefer this method)
+    /*
+    document.getElementById('category').addEventListener('change', function() {
+        const category = this.value;
+        const scrollPosition = window.scrollY || document.documentElement.scrollTop;
+        
+        // Get current query parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('category', category);
+        
+        // Update URL without reloading
+        history.pushState(null, '', '?' + urlParams.toString());
+        
+        // AJAX request to get filtered results
+        fetch(window.location.pathname + '?' + urlParams.toString())
+            .then(response => response.text())
+            .then(html => {
+                // Parse the response and update only the fleet-grid section
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newContent = doc.querySelector('.fleet-grid').innerHTML;
+                const newPagination = doc.querySelector('.pagination').innerHTML;
+                
+                document.querySelector('.fleet-grid').innerHTML = newContent;
+                document.querySelector('.pagination').innerHTML = newPagination;
+                
+                // Restore scroll position
+                window.scrollTo({
+                    top: scrollPosition,
+                    behavior: 'instant'
+                });
+            });
+    });
+    */
+});
+</script>
 
 
 
