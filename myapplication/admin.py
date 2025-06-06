@@ -47,7 +47,7 @@ class CustomUserAdmin(UserAdmin):
 @admin.register(AircraftType)
 class AircraftTypeAdmin(admin.ModelAdmin):
     """Aircraft Type Admin"""
-    list_display = ('name', 'passenger_capacity', 'range_nautical_miles', 'speed_knots', 'aircraft_count')
+    list_display = ('name', 'passenger_capacity', 'range_nautical_miles', 'speed_knots', 'aircraft_count' , 'price_per_hour_usd')
     list_filter = ('passenger_capacity',)
     search_fields = ('name', 'description')
     readonly_fields = ('aircraft_count',)
