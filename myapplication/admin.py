@@ -80,17 +80,25 @@ class AvailabilityInline(admin.TabularInline):
 @admin.register(Aircraft)
 class AircraftAdmin(admin.ModelAdmin):
     """Aircraft Admin"""
-    list_display = ('registration_number', 'model_name', 'owner', 'aircraft_type', 'base_airport', 'current_location', 'is_active', 'hourly_rate', 'booking_count')
+    list_display = (
+        'registration_number', 'model_name', 'owner', 'aircraft_type',
+        'base_airport_display', 'current_location_display', 'is_active',
+        'hourly_rate', 'booking_count'
+    )
     list_filter = ('aircraft_type', 'is_active', 'year_manufactured', 'owner__user_type')
     search_fields = ('registration_number', 'model_name', 'owner__username', 'base_airport', 'current_location')
-    readonly_fields = ('booking_count', 'total_flight_hours', 'last_tracked')
-    
+    readonly_fields = ('booking_count', 'total_flight_hours', 'last_tracked', 'base_airport_name', 'current_location_name')
+
     fieldsets = (
         ('Basic Information', {
             'fields': ('owner', 'aircraft_type', 'registration_number', 'model_name', 'year_manufactured')
         }),
         ('Location & Status', {
-            'fields': ('base_airport', 'current_location', 'is_active')
+            'fields': (
+                'base_airport', 'base_airport_name',
+                'current_location', 'current_location_name',
+                'is_active'
+            )
         }),
         ('Pricing & Features', {
             'fields': ('hourly_rate', 'minimum_hours', 'features')
@@ -100,18 +108,41 @@ class AircraftAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         })
     )
-    
+
     inlines = [AircraftImageInline, AvailabilityInline]
-    
+
+    def base_airport_display(self, obj):
+        return self._format_airport(obj.base_airport)
+    base_airport_display.short_description = 'Base Airport'
+
+    def current_location_display(self, obj):
+        return self._format_airport(obj.current_location)
+    current_location_display.short_description = 'Current Location'
+
+    def base_airport_name(self, obj):
+        return self._format_airport(obj.base_airport)
+    base_airport_name.short_description = "Base Airport Name"
+
+    def current_location_name(self, obj):
+        return self._format_airport(obj.current_location)
+    current_location_name.short_description = "Current Location Name"
+
+    def _format_airport(self, icao_code):
+        try:
+            airport = Airport.objects.get(icao_code=icao_code)
+            return f"{airport.name} ({airport.icao_code})"
+        except Airport.DoesNotExist:
+            return f"Unknown ({icao_code})"
+
     def booking_count(self, obj):
         return obj.bookings.count()
     booking_count.short_description = 'Total Bookings'
-    
+
     def total_flight_hours(self, obj):
         total = obj.bookings.aggregate(total_hours=Sum('flight_legs__flight_hours'))['total_hours']
         return f"{total or 0} hours"
     total_flight_hours.short_description = 'Total Flight Hours'
-    
+
     def last_tracked(self, obj):
         last_track = obj.tracking.first()
         if last_track:
