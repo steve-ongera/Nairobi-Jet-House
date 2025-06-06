@@ -320,7 +320,6 @@ class ClientSelectionForm(forms.Form):
 
 
 
-# forms.py
 from django import forms
 from .models import PricingRule
 
