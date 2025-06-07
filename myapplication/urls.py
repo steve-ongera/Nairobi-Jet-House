@@ -143,6 +143,8 @@ urlpatterns = [
 
     path('owner-payments/', views.owner_payments_list, name='owner_payments_list'),
     path('owner-payments/<int:payment_id>/detail/', views.owner_payment_detail_ajax, name='owner_payment_detail_ajax'),
+    path('tracking/', views.live_tracking, name='aircraft_tracking'),
+    
 ]
     
     

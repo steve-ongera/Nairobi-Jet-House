@@ -4180,3 +4180,96 @@ def owner_payment_detail_ajax(request, payment_id):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from .models import Aircraft, AircraftTracking
+import json
+from django.core.serializers import serialize
+from decimal import Decimal
+
+@login_required
+def live_tracking(request):
+    # Get all active aircraft 
+    aircrafts = Aircraft.objects.filter( is_active=True).select_related('aircraft_type')
+    
+    # Get the latest tracking data for each aircraft
+    aircraft_data = []
+    
+    for aircraft in aircrafts:
+        try:
+            # Get the latest tracking data
+            latest_tracking = AircraftTracking.objects.filter(aircraft=aircraft).latest('timestamp')
+            
+            # Safely convert coordinates to float
+            try:
+                latitude = float(latest_tracking.latitude) if latest_tracking.latitude else None
+                longitude = float(latest_tracking.longitude) if latest_tracking.longitude else None
+            except (ValueError, TypeError):
+                latitude = None
+                longitude = None
+            
+            # Only include aircraft with valid coordinates
+            if latitude is not None and longitude is not None and not (latitude == 0 and longitude == 0):
+                aircraft_info = {
+                    'id': aircraft.id,
+                    'registration': aircraft.registration_number,
+                    'model': aircraft.model_name,
+                    'type': aircraft.aircraft_type.name if aircraft.aircraft_type else 'Unknown',
+                    'current_location': aircraft.current_location or 'Unknown',
+                    'latitude': latitude,
+                    'longitude': longitude,
+                    'altitude': latest_tracking.altitude or 0,
+                    'heading': latest_tracking.heading or 0,
+                    'speed': latest_tracking.speed or 0,
+                    'timestamp': latest_tracking.timestamp.isoformat(),
+                    'status': 'In Flight' if (latest_tracking.altitude or 0) > 500 else 'On Ground'
+                }
+            else:
+                # Aircraft with no valid location data
+                aircraft_info = {
+                    'id': aircraft.id,
+                    'registration': aircraft.registration_number,
+                    'model': aircraft.model_name,
+                    'type': aircraft.aircraft_type.name if aircraft.aircraft_type else 'Unknown',
+                    'current_location': aircraft.base_airport or 'Unknown',
+                    'latitude': None,  # Don't include on map
+                    'longitude': None,  # Don't include on map
+                    'altitude': 0,
+                    'heading': 0,
+                    'speed': 0,
+                    'timestamp': timezone.now().isoformat(),
+                    'status': 'No Data'
+                }
+            
+            aircraft_data.append(aircraft_info)
+            
+        except AircraftTracking.DoesNotExist:
+            # If no tracking data exists at all
+            aircraft_data.append({
+                'id': aircraft.id,
+                'registration': aircraft.registration_number,
+                'model': aircraft.model_name,
+                'type': aircraft.aircraft_type.name if aircraft.aircraft_type else 'Unknown',
+                'current_location': aircraft.base_airport or 'Unknown',
+                'latitude': None,  # Don't include on map
+                'longitude': None,  # Don't include on map
+                'altitude': 0,
+                'heading': 0,
+                'speed': 0,
+                'timestamp': timezone.now().isoformat(),
+                'status': 'No Data'
+            })
+    
+    # Filter aircraft with valid coordinates for the map
+    map_aircraft_data = [aircraft for aircraft in aircraft_data if aircraft['latitude'] is not None and aircraft['longitude'] is not None]
+    
+    context = {
+        'aircraft_json': json.dumps(map_aircraft_data),  # Only aircraft with valid coordinates for map
+        'aircraft_list': aircrafts,
+        'tracking_data': aircraft_data,  # All aircraft for the table
+    }
+    
+    return render(request, 'aircraft/live_tracking.html', context)

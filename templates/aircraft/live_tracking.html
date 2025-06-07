@@ -1,0 +1,211 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Aircraft Live Tracking{% endblock %}
+{% block content %}
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<style>
+    #tracking-map {
+        height: 600px;
+        width: 100%;
+        margin-bottom: 20px;
+        border-radius: 8px;
+    }
+    .aircraft-icon {
+        background-color: #3498db;
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+        display: block;
+        border: 2px solid white;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    .in-flight {
+        background-color: #e74c3c;
+    }
+    .on-ground {
+        background-color: #2ecc71;
+    }
+    .no-data {
+        background-color: #95a5a6;
+    }
+    .status-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+        color: white;
+    }
+    .status-badge.in-flight {
+        background-color: #e74c3c;
+    }
+    .status-badge.on-ground {
+        background-color: #2ecc71;
+    }
+    .status-badge.no-data {
+        background-color: #95a5a6;
+    }
+    .table-responsive {
+        overflow-x: auto;
+    }
+    .map-info {
+        background-color: #f8f9fa;
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class="container-fluid">
+    <h1 class="mt-4">Aircraft Live Tracking</h1>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-map-marked-alt mr-1"></i>
+            Live Aircraft Positions
+        </div>
+        <div class="card-body">
+            <div class="map-info">
+                <small>
+                    <span class="aircraft-icon in-flight" style="display: inline-block; margin-right: 5px;"></span> In Flight
+                    <span class="aircraft-icon on-ground" style="display: inline-block; margin: 0 5px 0 15px;"></span> On Ground
+                    <span class="aircraft-icon no-data" style="display: inline-block; margin: 0 5px 0 15px;"></span> No Data
+                </small>
+            </div>
+            <div id="tracking-map"></div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-table mr-1"></i>
+            Aircraft Status
+        </div>
+        <div class="card-body">
+            {% if tracking_data %}
+            <div class="table-responsive">
+                <table class="table table-bordered" id="aircraftStatusTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Registration</th>
+                            <th>Model</th>
+                            <th>Type</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                            <th>Altitude (ft)</th>
+                            <th>Speed (kts)</th>
+                            <th>Heading</th>
+                            <th>Last Update</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for aircraft in tracking_data %}
+                        <tr>
+                            <td>{{ aircraft.registration }}</td>
+                            <td>{{ aircraft.model }}</td>
+                            <td>{{ aircraft.type }}</td>
+                            <td>{{ aircraft.current_location }}</td>
+                            <td>
+                                <span class="status-badge 
+                                    {% if aircraft.status == 'In Flight' %}in-flight
+                                    {% elif aircraft.status == 'On Ground' %}on-ground
+                                    {% else %}no-data{% endif %}">
+                                    {{ aircraft.status }}
+                                </span>
+                            </td>
+                            <td>{{ aircraft.altitude|default:"0" }}</td>
+                            <td>{{ aircraft.speed|default:"0" }}</td>
+                            <td>{{ aircraft.heading|default:"0" }}°</td>
+                            <td>{{ aircraft.timestamp|date:"Y-m-d H:i:s" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                No aircraft tracking data available. Make sure you have active aircraft with tracking data.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const aircraftData = JSON.parse('{{ aircraft_json|escapejs }}');
+        console.log('Aircraft data:', aircraftData); // Debug log
+        
+        // Initialize the map
+        const map = L.map('tracking-map').setView([0, 0], 2);
+        
+        // Add tile layer (OpenStreetMap)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 18
+        }).addTo(map);
+        
+        let bounds = [];
+        
+        // Add aircraft markers
+        aircraftData.forEach(aircraft => {
+            if (aircraft.latitude && aircraft.longitude) {
+                const statusClass = aircraft.status === 'In Flight' ? 'in-flight' : 
+                                  aircraft.status === 'On Ground' ? 'on-ground' : 'no-data';
+                
+                const icon = L.divIcon({
+                    className: 'aircraft-icon ' + statusClass,
+                    iconSize: [16, 16],
+                    iconAnchor: [8, 8]
+                });
+                
+                const marker = L.marker([aircraft.latitude, aircraft.longitude], {
+                    icon: icon
+                }).addTo(map);
+                
+                bounds.push([aircraft.latitude, aircraft.longitude]);
+                
+                const popupContent = `
+                    <div style="min-width: 200px;">
+                        <strong>${aircraft.registration}</strong><br>
+                        <strong>Model:</strong> ${aircraft.model}<br>
+                        <strong>Type:</strong> ${aircraft.type}<br>
+                        <strong>Status:</strong> <span class="status-badge ${statusClass}">${aircraft.status}</span><br>
+                        <strong>Location:</strong> ${aircraft.current_location}<br>
+                        <strong>Altitude:</strong> ${aircraft.altitude} ft<br>
+                        <strong>Speed:</strong> ${aircraft.speed} kts<br>
+                        <strong>Heading:</strong> ${aircraft.heading}°<br>
+                        <strong>Last Update:</strong> ${new Date(aircraft.timestamp).toLocaleString()}
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+            }
+        });
+        
+        // Fit map to show all markers
+        if (bounds.length > 0) {
+            map.fitBounds(bounds, { padding: [20, 20] });
+        } else {
+            console.log('No aircraft with valid coordinates found');
+            // Show a message on the map if no aircraft are found
+            const noDataDiv = L.divIcon({
+                className: 'no-aircraft-message',
+                html: '<div style="background: white; padding: 10px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">No aircraft with location data found</div>',
+                iconSize: [200, 40],
+                iconAnchor: [100, 20]
+            });
+            L.marker([0, 0], { icon: noDataDiv }).addTo(map);
+        }
+        
+        // Auto-refresh every 30 seconds
+        setTimeout(() => {
+            location.reload();
+        }, 30000);
+    });
+</script>
+
+{% endblock %}
