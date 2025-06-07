@@ -1389,7 +1389,7 @@ def admin_dashboard(request):
     # Aircraft locations
     active_flights = AircraftTracking.objects.select_related(
         'aircraft', 'aircraft__aircraft_type'
-    ).order_by('-timestamp')[:5]
+    ).order_by('-timestamp')[:2]
     
     # Payment method breakdown
     payment_methods = {

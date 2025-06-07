@@ -234,4 +234,4 @@ class Command(BaseCommand):
 
     def print_summary(self):
         """Print summary of generated data"""
-        total_tracking = A
+        #total_tracking = A
