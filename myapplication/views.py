@@ -2336,8 +2336,35 @@ def booking_detail(request, booking_id):
         }
     return JsonResponse(data)
 
-@require_http_methods(["POST"])
+@require_http_methods(["POST", "GET"])
 def update_booking_status(request, booking_id):
+    # Handle GET request to return current booking data (for form pre-population)
+    if request.method == "GET":
+        try:
+            booking = Booking.objects.get(id=booking_id)
+            data = {
+                'success': True,
+                'booking': {
+                    'id': booking.id,
+                    'status': booking.get_status_display(),
+                    'status_code': booking.status,
+                    'payment_status': booking.payment_status,
+                    'payment_status_display': booking.get_payment_status_display() if hasattr(booking, 'get_payment_status_display') else booking.payment_status,
+                }
+            }
+        except Booking.DoesNotExist:
+            data = {
+                'success': False,
+                'error': 'Booking not found'
+            }
+        except Exception as e:
+            data = {
+                'success': False,
+                'error': str(e)
+            }
+        return JsonResponse(data)
+    
+    # Handle POST request to update booking status
     try:
         booking = Booking.objects.get(id=booking_id)
         new_status = request.POST.get('status')
@@ -2345,16 +2372,38 @@ def update_booking_status(request, booking_id):
         if new_status not in dict(Booking.STATUS_CHOICES).keys():
             raise ValueError("Invalid status")
             
+        # Store old status for comparison
+        old_status = booking.status
         booking.status = new_status
+        
+        # Update payment status - handle both manual input and automatic logic
+        payment_status_input = request.POST.get('payment_status')
+        
+        if payment_status_input is not None:
+            # Manual payment status update from form
+            booking.payment_status = payment_status_input.lower() == 'true'
+        else:
+            # Automatic payment status based on booking status (if no manual input)
+            if new_status == 'confirmed':
+                booking.payment_status = False  # Not paid yet, just confirmed
+            elif new_status == 'completed':
+                booking.payment_status = True   # Assume payment completed
+            elif new_status == 'cancelled':
+                booking.payment_status = False  # No payment for cancelled booking
+            elif new_status == 'pending':
+                booking.payment_status = False  # Not paid while pending
+        
         booking.save()
         
         data = {
             'success': True,
-            'message': 'Booking status updated successfully',
+            'message': 'Booking and payment status updated successfully',
             'booking': {
                 'id': booking.id,
                 'status': booking.get_status_display(),
                 'status_code': booking.status,
+                'payment_status': booking.payment_status,
+                'payment_status_display': 'Paid' if booking.payment_status else 'Unpaid',
             }
         }
     except Booking.DoesNotExist:
@@ -2362,11 +2411,17 @@ def update_booking_status(request, booking_id):
             'success': False,
             'error': 'Booking not found'
         }
-    except Exception as e:
+    except ValueError as e:
         data = {
             'success': False,
             'error': str(e)
         }
+    except Exception as e:
+        data = {
+            'success': False,
+            'error': f'An error occurred: {str(e)}'
+        }
+    
     return JsonResponse(data)
 
 @require_http_methods(["POST"])

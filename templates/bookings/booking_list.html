@@ -326,16 +326,46 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="editBookingForm">
+                {% csrf_token %}
                 <div class="modal-body">
                     <input type="hidden" id="edit-booking-id" name="booking_id">
+                    
                     <div class="mb-3">
-                        <label for="booking-status-select" class="form-label">Status</label>
+                        <label for="booking-status-select" class="form-label">Booking Status</label>
                         <select class="form-select" id="booking-status-select" name="status" required>
                             {% for value, label in status_choices %}
                             <option value="{{ value }}">{{ label }}</option>
                             {% endfor %}
                         </select>
                     </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Payment Status</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="payment_status" id="payment-unpaid" value="false" checked>
+                            <label class="form-check-label" for="payment-unpaid">
+                                Unpaid
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="payment_status" id="payment-paid" value="true">
+                            <label class="form-check-label" for="payment-paid">
+                                Paid
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Alternative: If you want a checkbox instead of radio buttons -->
+                    <!-- 
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="payment-status-check" name="payment_status" value="true">
+                            <label class="form-check-label" for="payment-status-check">
+                                Payment Received
+                            </label>
+                        </div>
+                    </div>
+                    -->
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -500,15 +530,42 @@ $(document).ready(function() {
             dataType: 'json',
             success: function(response) {
                 if (response.success) {
-                    alert(response.message);
-                    // Refresh the page to see changes
-                    location.reload();
+                    // Show success message with both status updates
+                    let message = response.message;
+                    if (response.booking.payment_status) {
+                        message += `\nPayment status: ${response.booking.payment_status}`;
+                    }
+                    alert(message);
+                    
+                    // Update the row in the table without full page refresh
+                    const row = $(`[data-booking-id="${bookingId}"]`).closest('tr');
+                    
+                    // Update status badge
+                    const statusBadge = row.find('td:nth-child(6) .badge');
+                    statusBadge.text(response.booking.status);
+                    
+                    // Update payment status if displayed in table
+                    const paymentCell = row.find('.payment-status');
+                    if (paymentCell.length && response.booking.payment_status_display) {
+                        paymentCell.text(response.booking.payment_status_display);
+                    }
+                    
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editBookingModal'));
+                    modal.hide();
+                    
+                    // Optionally refresh the page to see all changes
+                    // location.reload();
                 } else {
                     alert(response.error || 'Failed to update booking status');
                 }
             },
             error: function(xhr, status, error) {
-                alert('Error updating booking status: ' + error);
+                let errorMessage = 'Error updating booking status: ' + error;
+                if (xhr.status === 405) {
+                    errorMessage = 'Method not allowed. Please check the URL configuration.';
+                }
+                alert(errorMessage);
             }
         });
     });
@@ -535,7 +592,7 @@ $(document).ready(function() {
             url: '/bookings/' + bookingId + '/delete/',
             type: 'POST',
             data: {
-                'csrfmiddlewaretoken': '{{ csrf_token }}'
+                'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
             },
             dataType: 'json',
             success: function(response) {
