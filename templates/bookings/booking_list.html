@@ -300,6 +300,30 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h6 class="card-title">Passengers</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm" id="passengers-table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Passport</th>
+                                        <th>Nationality</th>
+                                        <th>Date of Birth</th>
+                                        <th>Order Ref</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
                 
                 <div class="card">
                     <div class="card-header">
@@ -453,16 +477,22 @@ $(document).ready(function() {
                     $('#agent-commission').text('$' + booking.agent_commission);
                     $('#owner-earnings').text('$' + booking.owner_earnings);
                     
-                    // Update flight legs
+                    // Update flight legs to show full airport names
                     const legsTable = $('#flight-legs-table tbody');
                     legsTable.empty();
-                    
+
                     if (booking.flight_legs.length > 0) {
                         booking.flight_legs.forEach(function(leg) {
                             legsTable.append(`
                                 <tr>
-                                    <td>${leg.departure}</td>
-                                    <td>${leg.arrival}</td>
+                                    <td>
+                                        ${leg.departure_code}<br>
+                                        <small class="text-muted">${leg.departure_name}</small>
+                                    </td>
+                                    <td>
+                                        ${leg.arrival_code}<br>
+                                        <small class="text-muted">${leg.arrival_name}</small>
+                                    </td>
                                     <td>
                                         ${leg.departure_datetime}<br>
                                         to ${leg.arrival_datetime}
@@ -475,6 +505,26 @@ $(document).ready(function() {
                         });
                     } else {
                         legsTable.append('<tr><td colspan="6" class="text-center">No flight legs found</td></tr>');
+                    }
+
+                    // Update passengers table
+                    const passengersTable = $('#passengers-table tbody');
+                    passengersTable.empty();
+
+                    if (booking.passengers && booking.passengers.length > 0) {
+                        booking.passengers.forEach(function(passenger) {
+                            passengersTable.append(`
+                                <tr>
+                                    <td>${passenger.name}</td>
+                                    <td>${passenger.passport_number || 'N/A'}</td>
+                                    <td>${passenger.nationality || 'N/A'}</td>
+                                    <td>${passenger.date_of_birth || 'N/A'}</td>
+                                    <td>${passenger.order || 'N/A'}</td>
+                                </tr>
+                            `);
+                        });
+                    } else {
+                        passengersTable.append('<tr><td colspan="5" class="text-center">No passengers found</td></tr>');
                     }
                     
                     // Update special requests

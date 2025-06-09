@@ -2285,19 +2285,32 @@ def booking_detail(request, booking_id):
             Prefetch('flight_legs', queryset=FlightLeg.objects.select_related(
                 'departure_airport',
                 'arrival_airport'
-            ))
+            )),
+            Prefetch('passengers', queryset=Passenger.objects.all())
         ).get(id=booking_id)
         
         flight_legs = []
         for leg in booking.flight_legs.all():
             flight_legs.append({
-                'departure': leg.departure_airport.icao_code,
-                'arrival': leg.arrival_airport.icao_code,
+                'departure_code': leg.departure_airport.icao_code,
+                'departure_name': f"{leg.departure_airport.name} ({leg.departure_airport.city}, {leg.departure_airport.country})",
+                'arrival_code': leg.arrival_airport.icao_code,
+                'arrival_name': f"{leg.arrival_airport.name} ({leg.arrival_airport.city}, {leg.arrival_airport.country})",
                 'departure_datetime': leg.departure_datetime.strftime("%Y-%m-%d %H:%M"),
                 'arrival_datetime': leg.arrival_datetime.strftime("%Y-%m-%d %H:%M"),
                 'passenger_count': leg.passenger_count,
                 'flight_hours': str(leg.flight_hours),
                 'leg_price': str(leg.leg_price),
+            })
+        
+        passengers = []
+        for passenger in booking.passengers.all():
+            passengers.append({
+                'name': passenger.name,
+                'nationality': passenger.nationality,
+                'date_of_birth': passenger.date_of_birth.strftime("%Y-%m-%d") if passenger.date_of_birth else None,
+                'passport_number': passenger.passport_number,
+                'order': passenger.order,
             })
         
         data = {
@@ -2327,6 +2340,7 @@ def booking_detail(request, booking_id):
                 'owner_earnings': str(booking.owner_earnings),
                 'special_requests': booking.special_requests or 'None',
                 'flight_legs': flight_legs,
+                'passengers': passengers,
             }
         }
     except Booking.DoesNotExist:
