@@ -2395,17 +2395,27 @@ def update_booking_status(request, booking_id):
         
         booking.save()
         
-        data = {
-            'success': True,
-            'message': 'Booking and payment status updated successfully',
-            'booking': {
-                'id': booking.id,
-                'status': booking.get_status_display(),
-                'status_code': booking.status,
-                'payment_status': booking.payment_status,
-                'payment_status_display': 'Paid' if booking.payment_status else 'Unpaid',
+        # Check if this is an AJAX request
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            # For AJAX requests, return JSON with refresh flag
+            data = {
+                'success': True,
+                'message': 'Booking and payment status updated successfully',
+                'refresh': True,  # Flag to trigger refresh on frontend
+                'booking': {
+                    'id': booking.id,
+                    'status': booking.get_status_display(),
+                    'status_code': booking.status,
+                    'payment_status': booking.payment_status,
+                    'payment_status_display': 'Paid' if booking.payment_status else 'Unpaid',
+                }
             }
-        }
+            return JsonResponse(data)
+        else:
+            # For regular form submissions, redirect to refresh the page
+            from django.shortcuts import redirect
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+        
     except Booking.DoesNotExist:
         data = {
             'success': False,
@@ -2422,7 +2432,16 @@ def update_booking_status(request, booking_id):
             'error': f'An error occurred: {str(e)}'
         }
     
-    return JsonResponse(data)
+    # Return error response
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse(data)
+    else:
+        # For regular forms, you might want to redirect with error message
+        from django.contrib import messages
+        from django.shortcuts import redirect
+        messages.error(request, data.get('error', 'An error occurred'))
+        return redirect(request.META.get('HTTP_REFERER', '/'))
+    
 
 @require_http_methods(["POST"])
 def delete_booking(request, booking_id):

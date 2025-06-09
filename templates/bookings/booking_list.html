@@ -500,6 +500,7 @@ $(document).ready(function() {
         const bookingId = $(this).data('booking-id');
         const row = $(this).closest('tr');
         const currentStatus = row.find('td:nth-child(6) .badge').text().trim();
+        const currentPaymentStatus = row.find('.payment-status').text().trim(); // Assuming you have payment status in table
         
         $('#edit-booking-id').val(bookingId);
         
@@ -514,56 +515,78 @@ $(document).ready(function() {
             return statusMap[currentStatus] || 'pending';
         });
         
+        // Set current payment status
+        if (currentPaymentStatus === 'Paid' || currentPaymentStatus === 'True') {
+            $('#payment-paid').prop('checked', true);
+        } else {
+            $('#payment-unpaid').prop('checked', true);
+        }
+        
         const modal = new bootstrap.Modal(document.getElementById('editBookingModal'));
         modal.show();
     });
 
-    // Submit Edit Form
+    // Submit Edit Form - UPDATED WITH AUTO-REFRESH
     $('#editBookingForm').submit(function(e) {
         e.preventDefault();
         const bookingId = $('#edit-booking-id').val();
+        
+        // Get CSRF token
+        const csrfToken = $('[name=csrfmiddlewaretoken]').val() || 
+                         $('meta[name=csrf-token]').attr('content') || 
+                         document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+        
+        // Show loading state on submit button
+        const submitBtn = $(this).find('[type="submit"]');
+        const originalText = submitBtn.text();
+        submitBtn.prop('disabled', true).text('Updating...');
         
         $.ajax({
             url: '/bookings/' + bookingId + '/update/',
             type: 'POST',
             data: $(this).serialize(),
             dataType: 'json',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
             success: function(response) {
                 if (response.success) {
-                    // Show success message with both status updates
+                    // Show success message
                     let message = response.message;
-                    if (response.booking.payment_status) {
-                        message += `\nPayment status: ${response.booking.payment_status}`;
-                    }
-                    alert(message);
-                    
-                    // Update the row in the table without full page refresh
-                    const row = $(`[data-booking-id="${bookingId}"]`).closest('tr');
-                    
-                    // Update status badge
-                    const statusBadge = row.find('td:nth-child(6) .badge');
-                    statusBadge.text(response.booking.status);
-                    
-                    // Update payment status if displayed in table
-                    const paymentCell = row.find('.payment-status');
-                    if (paymentCell.length && response.booking.payment_status_display) {
-                        paymentCell.text(response.booking.payment_status_display);
+                    if (response.booking && response.booking.payment_status_display) {
+                        message += `\nPayment status: ${response.booking.payment_status_display}`;
                     }
                     
-                    // Close modal
+                    // Close modal first
                     const modal = bootstrap.Modal.getInstance(document.getElementById('editBookingModal'));
                     modal.hide();
                     
-                    // Optionally refresh the page to see all changes
-                    // location.reload();
+                    // Show success message
+                    alert(message);
+                    
+                    // Auto-refresh the page after successful update
+                    setTimeout(function() {
+                        location.reload();
+                    }, 500); // Small delay to ensure modal closes properly
+                    
                 } else {
+                    // Reset button state on error
+                    submitBtn.prop('disabled', false).text(originalText);
                     alert(response.error || 'Failed to update booking status');
                 }
             },
             error: function(xhr, status, error) {
+                // Reset button state on error
+                submitBtn.prop('disabled', false).text(originalText);
+                
                 let errorMessage = 'Error updating booking status: ' + error;
                 if (xhr.status === 405) {
                     errorMessage = 'Method not allowed. Please check the URL configuration.';
+                } else if (xhr.status === 403) {
+                    errorMessage = 'Permission denied. Please check your authentication.';
+                } else if (xhr.status === 404) {
+                    errorMessage = 'Booking not found.';
                 }
                 alert(errorMessage);
             }
@@ -583,35 +606,94 @@ $(document).ready(function() {
         modal.show();
     });
 
-    // Confirm Delete
+    // Confirm Delete - UPDATED WITH AUTO-REFRESH
     $('#confirm-booking-delete').click(function() {
         const bookingId = $(this).data('booking-id');
         const modal = bootstrap.Modal.getInstance(document.getElementById('deleteBookingModal'));
+        
+        // Get CSRF token
+        const csrfToken = $('[name=csrfmiddlewaretoken]').val() || 
+                         $('meta[name=csrf-token]').attr('content') || 
+                         document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+        
+        // Show loading state
+        const deleteBtn = $(this);
+        const originalText = deleteBtn.text();
+        deleteBtn.prop('disabled', true).text('Deleting...');
         
         $.ajax({
             url: '/bookings/' + bookingId + '/delete/',
             type: 'POST',
             data: {
-                'csrfmiddlewaretoken': $('[name=csrfmiddlewaretoken]').val()
+                'csrfmiddlewaretoken': csrfToken
             },
             dataType: 'json',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
             success: function(response) {
                 if (response.success) {
+                    // Close modal
+                    modal.hide();
+                    
+                    // Show success message
                     alert(response.message);
-                    // Refresh the page to see changes
-                    location.reload();
+                    
+                    // Auto-refresh the page after successful deletion
+                    setTimeout(function() {
+                        location.reload();
+                    }, 500);
+                    
                 } else {
+                    // Reset button state on error
+                    deleteBtn.prop('disabled', false).text(originalText);
                     alert(response.error || 'Failed to delete booking');
                 }
             },
             error: function(xhr, status, error) {
+                // Reset button state on error
+                deleteBtn.prop('disabled', false).text(originalText);
                 alert('Error deleting booking: ' + error);
-            },
-            complete: function() {
-                modal.hide();
             }
         });
     });
+
+    // Optional: Add a more elegant notification system instead of alerts
+    function showNotification(message, type = 'success') {
+        // Create notification element
+        const notification = $(`
+            <div class="alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed" 
+                 style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `);
+        
+        // Add to body
+        $('body').append(notification);
+        
+        // Auto-remove after 3 seconds
+        setTimeout(function() {
+            notification.alert('close');
+        }, 3000);
+    }
+
+    // Alternative success handler with elegant notifications (uncomment to use)
+    /*
+    function handleBookingUpdateSuccess(response) {
+        // Close any open modals
+        $('.modal').modal('hide');
+        
+        // Show elegant notification
+        showNotification(response.message, 'success');
+        
+        // Auto-refresh after showing notification
+        setTimeout(function() {
+            location.reload();
+        }, 1500);
+    }
+    */
 });
 </script>
 {% endblock %}
