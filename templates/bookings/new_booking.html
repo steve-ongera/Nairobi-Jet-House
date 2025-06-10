@@ -700,10 +700,10 @@ $(document).ready(function() {
         calculatePrice();
     });
 
-    // Auto-calculate flight hours when departure/arrival times change
-    $(document).on('change', 'input[name*="departure_datetime"], input[name*="arrival_datetime"]', function() {
+    // Auto-calculate arrival time when departure time or flight hours change
+    $(document).on('change', 'input[name*="departure_datetime"], input[name*="flight_hours"]', function() {
         var legContainer = $(this).closest('.flight-leg');
-        calculateFlightHours(legContainer);
+        calculateArrivalTime(legContainer);
     });
 
     // Form submission with client type handling
@@ -770,8 +770,10 @@ $(document).ready(function() {
                     </div>
                     <div class="form-col">
                         <div class="form-group">
-                            <label>Arrival Date & Time <span class="required-field">*</span></label>
-                            <input type="datetime-local" name="leg_${index}-arrival_datetime" class="form-control" required>
+                            <label>Arrival Date & Time <span class="auto-calculated">(Auto-calculated)</span></label>
+                            <input type="datetime-local" name="leg_${index}-arrival_datetime" class="form-control arrival-auto" readonly 
+                                   style="background-color: #f8f9fa; cursor: not-allowed;" 
+                                   title="This field is automatically calculated based on departure time and flight hours">
                         </div>
                     </div>
                 </div>
@@ -863,18 +865,41 @@ $(document).ready(function() {
         });
     }
 
-    function calculateFlightHours(legContainer) {
+    // NEW FUNCTION: Auto-calculate arrival time based on departure time + flight hours
+    function calculateArrivalTime(legContainer) {
         var departureInput = legContainer.find('input[name*="departure_datetime"]');
         var arrivalInput = legContainer.find('input[name*="arrival_datetime"]');
         var hoursInput = legContainer.find('input[name*="flight_hours"]');
         
-        var departureTime = new Date(departureInput.val());
-        var arrivalTime = new Date(arrivalInput.val());
+        var departureTime = departureInput.val();
+        var flightHours = parseFloat(hoursInput.val());
         
-        if (departureTime && arrivalTime && arrivalTime > departureTime) {
-            var diffInMs = arrivalTime - departureTime;
-            var diffInHours = diffInMs / (1000 * 60 * 60);
-            hoursInput.val(diffInHours.toFixed(1));
+        if (departureTime && flightHours && flightHours > 0) {
+            var departure = new Date(departureTime);
+            
+            // Add flight hours to departure time
+            var arrivalTime = new Date(departure.getTime() + (flightHours * 60 * 60 * 1000));
+            
+            // Format the date for datetime-local input (YYYY-MM-DDTHH:MM)
+            var year = arrivalTime.getFullYear();
+            var month = String(arrivalTime.getMonth() + 1).padStart(2, '0');
+            var day = String(arrivalTime.getDate()).padStart(2, '0');
+            var hours = String(arrivalTime.getHours()).padStart(2, '0');
+            var minutes = String(arrivalTime.getMinutes()).padStart(2, '0');
+            
+            var formattedDateTime = year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+            
+            // Set the calculated arrival time
+            arrivalInput.val(formattedDateTime);
+            
+            // Add visual feedback
+            arrivalInput.css('background-color', '#e8f5e8');
+            setTimeout(function() {
+                arrivalInput.css('background-color', '#f8f9fa');
+            }, 2000);
+        } else {
+            // Clear arrival time if inputs are invalid
+            arrivalInput.val('');
         }
     }
 
@@ -1030,9 +1055,221 @@ $(document).ready(function() {
         return legs;
     }
 });
+
+// Status filter functionality (keeping this separate)
+$(document).ready(function() {
+    $('#applyFilter').click(function() {
+        const status = $('#statusFilter').val();
+        if (status) {
+            window.location.href = `?status=${status}`;
+        } else {
+            window.location.href = '?';
+        }
+    });
+
+    // View/Edit/Delete booking modal functionality remains the same...
+    // (keeping existing booking management code as is)
+});
+
+// Flight Hours Auto-Calculation (Enhanced Version)
+document.addEventListener('DOMContentLoaded', function() {
+    // Function to calculate flight hours automatically
+    function calculateFlightHours(legIndex) {
+        const aircraftSelect = document.querySelector('select[name="aircraft"]');
+        const departureSelect = document.querySelector(`select[name="leg_${legIndex}-departure_airport"]`);
+        const arrivalSelect = document.querySelector(`select[name="leg_${legIndex}-arrival_airport"]`);
+        const flightHoursInput = document.querySelector(`input[name="leg_${legIndex}-flight_hours"]`);
+        
+        if (!aircraftSelect || !departureSelect || !arrivalSelect || !flightHoursInput) {
+            return;
+        }
+        
+        const aircraftId = aircraftSelect.value;
+        const departureAirportId = departureSelect.value;
+        const arrivalAirportId = arrivalSelect.value;
+        
+        if (aircraftId && departureAirportId && arrivalAirportId && departureAirportId !== arrivalAirportId) {
+            // Show loading state without changing the input value
+            flightHoursInput.style.backgroundColor = '#f0f0f0';
+            flightHoursInput.style.position = 'relative';
+            flightHoursInput.disabled = true;
+            
+            // Create or update loading indicator
+            let loadingIndicator = flightHoursInput.parentNode.querySelector('.loading-indicator');
+            if (!loadingIndicator) {
+                loadingIndicator = document.createElement('small');
+                loadingIndicator.className = 'loading-indicator';
+                loadingIndicator.style.cssText = 'color: #666; font-style: italic; margin-left: 5px;';
+                flightHoursInput.parentNode.appendChild(loadingIndicator);
+            }
+            loadingIndicator.textContent = 'Calculating...';
+            
+            fetch('/ajax/calculate-flight-hours/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    aircraft_id: aircraftId,
+                    departure_airport_id: departureAirportId,
+                    arrival_airport_id: arrivalAirportId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Remove loading indicator
+                const loadingIndicator = flightHoursInput.parentNode.querySelector('.loading-indicator');
+                if (loadingIndicator) {
+                    loadingIndicator.remove();
+                }
+                
+                if (data.error) {
+                    console.error('Error calculating flight hours:', data.error);
+                    flightHoursInput.value = '';
+                    flightHoursInput.style.backgroundColor = '#ffe6e6';
+                    
+                    // Show error message
+                    const errorMsg = document.createElement('small');
+                    errorMsg.textContent = 'Auto-calculation failed';
+                    errorMsg.style.color = 'red';
+                    errorMsg.className = 'error-message';
+                    flightHoursInput.parentNode.appendChild(errorMsg);
+                    setTimeout(() => errorMsg.remove(), 3000);
+                } else {
+                    flightHoursInput.value = data.flight_hours;
+                    flightHoursInput.style.backgroundColor = '#e6ffe6';
+                    
+                    // Show success message
+                    const successMsg = document.createElement('small');
+                    successMsg.textContent = 'Auto-calculated';
+                    successMsg.style.color = 'green';
+                    successMsg.className = 'success-message';
+                    flightHoursInput.parentNode.appendChild(successMsg);
+                    setTimeout(() => successMsg.remove(), 2000);
+                    
+                    // Trigger arrival time calculation after flight hours are set
+                    const legContainer = flightHoursInput.closest('.flight-leg');
+                    if (legContainer) {
+                        $(legContainer).trigger('flightHoursUpdated');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Network error:', error);
+                
+                // Remove loading indicator
+                const loadingIndicator = flightHoursInput.parentNode.querySelector('.loading-indicator');
+                if (loadingIndicator) {
+                    loadingIndicator.remove();
+                }
+                
+                flightHoursInput.value = '';
+                flightHoursInput.style.backgroundColor = '#ffe6e6';
+                
+                // Show error message
+                const errorMsg = document.createElement('small');
+                errorMsg.textContent = 'Network error occurred';
+                errorMsg.style.color = 'red';
+                errorMsg.className = 'error-message';
+                flightHoursInput.parentNode.appendChild(errorMsg);
+                setTimeout(() => errorMsg.remove(), 3000);
+            })
+            .finally(() => {
+                flightHoursInput.disabled = false;
+                
+                // Clean up any remaining indicators
+                const loadingIndicator = flightHoursInput.parentNode.querySelector('.loading-indicator');
+                if (loadingIndicator) {
+                    loadingIndicator.remove();
+                }
+                
+                // Reset background color after a delay
+                setTimeout(() => {
+                    flightHoursInput.style.backgroundColor = '';
+                }, 3000);
+            });
+        }
+    }
+    
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    function attachFlightLegListeners(legIndex) {
+        const aircraftSelect = document.querySelector('select[name="aircraft"]');
+        const departureSelect = document.querySelector(`select[name="leg_${legIndex}-departure_airport"]`);
+        const arrivalSelect = document.querySelector(`select[name="leg_${legIndex}-arrival_airport"]`);
+        
+        if (aircraftSelect) {
+            aircraftSelect.addEventListener('change', () => calculateFlightHours(legIndex));
+        }
+        
+        if (departureSelect) {
+            departureSelect.addEventListener('change', () => calculateFlightHours(legIndex));
+        }
+        
+        if (arrivalSelect) {
+            arrivalSelect.addEventListener('change', () => calculateFlightHours(legIndex));
+        }
+    }
+    
+    function initializeFlightHoursCalculation() {
+        const flightHoursInputs = document.querySelectorAll('input[name*="flight_hours"]');
+        flightHoursInputs.forEach(input => {
+            const match = input.name.match(/leg_(\d+)-flight_hours/);
+            if (match) {
+                const legIndex = parseInt(match[1]);
+                attachFlightLegListeners(legIndex);
+            }
+        });
+    }
+    
+    initializeFlightHoursCalculation();
+    
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList') {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType === 1) {
+                        const flightHoursInputs = node.querySelectorAll ? 
+                            node.querySelectorAll('input[name*="flight_hours"]') : [];
+                        
+                        flightHoursInputs.forEach(input => {
+                            const match = input.name.match(/leg_(\d+)-flight_hours/);
+                            if (match) {
+                                const legIndex = parseInt(match[1]);
+                                attachFlightLegListeners(legIndex);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    });
+    
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+    
+    window.calculateFlightHours = calculateFlightHours;
+    window.attachFlightLegListeners = attachFlightLegListeners;
+});
 </script>
 
-
+{% comment %}
 <script>
 $(document).ready(function() {
     // Status filter functionality
@@ -1221,4 +1458,209 @@ $(document).ready(function() {
     });
 });
 </script>
+<script>
+    // Flight Hours Auto-Calculation JavaScript
+// Add this to your existing JavaScript file or in a script tag
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Function to calculate flight hours automatically
+    function calculateFlightHours(legIndex) {
+        const aircraftSelect = document.querySelector('select[name="aircraft"]');
+        const departureSelect = document.querySelector(`select[name="leg_${legIndex}-departure_airport"]`);
+        const arrivalSelect = document.querySelector(`select[name="leg_${legIndex}-arrival_airport"]`);
+        const flightHoursInput = document.querySelector(`input[name="leg_${legIndex}-flight_hours"]`);
+        
+        if (!aircraftSelect || !departureSelect || !arrivalSelect || !flightHoursInput) {
+            return;
+        }
+        
+        const aircraftId = aircraftSelect.value;
+        const departureAirportId = departureSelect.value;
+        const arrivalAirportId = arrivalSelect.value;
+        
+        // Only calculate if all required fields are selected
+        if (aircraftId && departureAirportId && arrivalAirportId && departureAirportId !== arrivalAirportId) {
+            // Show loading indicator
+            flightHoursInput.style.backgroundColor = '#f0f0f0';
+            flightHoursInput.value = 'Calculating...';
+            flightHoursInput.disabled = true;
+            
+            // Make AJAX request to calculate flight hours
+            fetch('/ajax/calculate-flight-hours/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    aircraft_id: aircraftId,
+                    departure_airport_id: departureAirportId,
+                    arrival_airport_id: arrivalAirportId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Error calculating flight hours:', data.error);
+                    flightHoursInput.value = '';
+                    flightHoursInput.style.backgroundColor = '#ffe6e6';
+                    // Show error message briefly
+                    const errorMsg = document.createElement('small');
+                    errorMsg.textContent = 'Auto-calculation failed';
+                    errorMsg.style.color = 'red';
+                    flightHoursInput.parentNode.appendChild(errorMsg);
+                    setTimeout(() => errorMsg.remove(), 3000);
+                } else {
+                    flightHoursInput.value = data.flight_hours;
+                    flightHoursInput.style.backgroundColor = '#e6ffe6';
+                    
+                    // Show success message briefly
+                    const successMsg = document.createElement('small');
+                    successMsg.textContent = 'Auto-calculated';
+                    successMsg.style.color = 'green';
+                    flightHoursInput.parentNode.appendChild(successMsg);
+                    setTimeout(() => successMsg.remove(), 2000);
+                    
+                    // Trigger price calculation if available
+                    if (typeof calculatePrice === 'function') {
+                        calculatePrice();
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Network error:', error);
+                flightHoursInput.value = '';
+                flightHoursInput.style.backgroundColor = '#ffe6e6';
+            })
+            .finally(() => {
+                flightHoursInput.disabled = false;
+                setTimeout(() => {
+                    flightHoursInput.style.backgroundColor = '';
+                }, 3000);
+            });
+        }
+    }
+    
+    // Function to get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    
+    // Function to attach event listeners to flight leg fields
+    function attachFlightLegListeners(legIndex) {
+        const aircraftSelect = document.querySelector('select[name="aircraft"]');
+        const departureSelect = document.querySelector(`select[name="leg_${legIndex}-departure_airport"]`);
+        const arrivalSelect = document.querySelector(`select[name="leg_${legIndex}-arrival_airport"]`);
+        
+        if (aircraftSelect) {
+            aircraftSelect.addEventListener('change', () => calculateFlightHours(legIndex));
+        }
+        
+        if (departureSelect) {
+            departureSelect.addEventListener('change', () => calculateFlightHours(legIndex));
+        }
+        
+        if (arrivalSelect) {
+            arrivalSelect.addEventListener('change', () => calculateFlightHours(legIndex));
+        }
+    }
+    
+    // Initialize listeners for existing flight legs
+    function initializeFlightHoursCalculation() {
+        // Find all existing flight leg forms
+        const legForms = document.querySelectorAll('[id^="leg_"], [class*="leg-form"]');
+        legForms.forEach((form, index) => {
+            attachFlightLegListeners(index);
+        });
+        
+        // If no specific leg forms found, try to find by input names
+        const flightHoursInputs = document.querySelectorAll('input[name*="flight_hours"]');
+        flightHoursInputs.forEach(input => {
+            const match = input.name.match(/leg_(\d+)-flight_hours/);
+            if (match) {
+                const legIndex = parseInt(match[1]);
+                attachFlightLegListeners(legIndex);
+            }
+        });
+    }
+    
+    // Initialize on page load
+    initializeFlightHoursCalculation();
+    
+    // Re-initialize when new flight legs are added dynamically
+    // This handles cases where you might be adding flight legs via JavaScript
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList') {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType === 1) { // Element node
+                        const flightHoursInputs = node.querySelectorAll ? 
+                            node.querySelectorAll('input[name*="flight_hours"]') : [];
+                        
+                        flightHoursInputs.forEach(input => {
+                            const match = input.name.match(/leg_(\d+)-flight_hours/);
+                            if (match) {
+                                const legIndex = parseInt(match[1]);
+                                attachFlightLegListeners(legIndex);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    });
+    
+    // Start observing
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+    
+    // Enhanced flight hours input behavior
+    document.addEventListener('focus', function(e) {
+        if (e.target.name && e.target.name.includes('flight_hours')) {
+            // Allow manual override by clearing auto-calculated value on focus
+            if (e.target.style.backgroundColor === 'rgb(230, 255, 230)') {
+                e.target.style.backgroundColor = '';
+            }
+        }
+    }, true);
+    
+    // Debounced calculation for better performance
+    let calculationTimeout;
+    function debouncedCalculateFlightHours(legIndex) {
+        clearTimeout(calculationTimeout);
+        calculationTimeout = setTimeout(() => calculateFlightHours(legIndex), 500);
+    }
+    
+    // Export functions for external use if needed
+    window.calculateFlightHours = calculateFlightHours;
+    window.attachFlightLegListeners = attachFlightLegListeners;
+});
+
+// Additional utility function for manual calculation trigger
+function triggerFlightHoursCalculation() {
+    const flightHoursInputs = document.querySelectorAll('input[name*="flight_hours"]');
+    flightHoursInputs.forEach(input => {
+        const match = input.name.match(/leg_(\d+)-flight_hours/);
+        if (match) {
+            const legIndex = parseInt(match[1]);
+            calculateFlightHours(legIndex);
+        }
+    });
+}
+</script>
+{% endcomment %}
+
 {% endblock %}

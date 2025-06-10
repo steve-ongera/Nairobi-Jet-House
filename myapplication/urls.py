@@ -144,6 +144,11 @@ urlpatterns = [
     path('owner-payments/', views.owner_payments_list, name='owner_payments_list'),
     path('owner-payments/<int:payment_id>/detail/', views.owner_payment_detail_ajax, name='owner_payment_detail_ajax'),
     path('tracking/', views.live_tracking, name='aircraft_tracking'),
+
+    # AJAX endpoints
+    # path('ajax/check-availability/', views.ajax_check_availability, name='ajax_check_availability'),
+    # path('ajax/calculate-price/', views.ajax_calculate_price, name='ajax_calculate_price'),
+    path('ajax/calculate-flight-hours/', views.ajax_calculate_flight_hours, name='ajax_calculate_flight_hours'),  # New URL
     
 ]
     

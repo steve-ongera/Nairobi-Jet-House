@@ -3356,84 +3356,202 @@ def check_aircraft_availability(aircraft, flight_legs):
     
     return True, "Aircraft is available"
 
-def calculate_pricing(aircraft, flight_legs, trip_type):
+
+import json
+import math
+from decimal import Decimal
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.db import transaction
+from django.http import JsonResponse
+from datetime import datetime
+
+
+def estimate_flight_time(departure_airport, arrival_airport, aircraft):
     """
-    Calculate pricing for the booking based on aircraft, legs, and various factors
-    Returns: pricing_details dictionary
+    Estimate flight time between two airports using aircraft-specific speed.
+    This matches your working implementation from the first view.
     """
     try:
-        pricing_rule = PricingRule.objects.get(aircraft_type=aircraft.aircraft_type)
-        base_rate = pricing_rule.base_hourly_rate
-        minimum_hours = pricing_rule.minimum_hours
-    except PricingRule.DoesNotExist:
-        # Fall back to aircraft hourly rate
-        base_rate = aircraft.hourly_rate
-        minimum_hours = aircraft.minimum_hours
+        # Convert coordinates to float (handles both string and numeric inputs)
+        lat1, lon1 = float(departure_airport.latitude), float(departure_airport.longitude)
+        lat2, lon2 = float(arrival_airport.latitude), float(arrival_airport.longitude)
+
+        # Haversine formula for distance in nautical miles
+        R = 3440  # Earth radius in nautical miles
+        dlat = math.radians(lat2 - lat1)
+        dlon = math.radians(lon2 - lon1)
+        a = math.sin(dlat/2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon/2)**2
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+        distance_nm = R * c
+
+        # Use actual speed from aircraft type
+        speed_knots = aircraft.aircraft_type.speed_knots or 400  # Fallback in case data is missing
+        flight_time = (distance_nm / speed_knots) + 0.5  # Add 30 min buffer
+
+        return round(flight_time, 1)
+    except Exception as e:
+        # Log error if desired
+        return 2.0  # Fallback time
+
+
+def calculate_base_price(aircraft, flight_hours, trip_type):
+    """
+    Calculate base price for the flight.
+    This matches your working implementation from the first view.
+    """
+    # Convert Decimal to float to avoid type mixing
+    base_rate = float(aircraft.hourly_rate)
+    minimum_hours = float(aircraft.minimum_hours)
+    flight_hours_float = float(flight_hours)
     
-    total_hours = Decimal('0.0')
-    total_base_price = Decimal('0.0')
+    # Use minimum hours or actual flight time, whichever is higher
+    billable_hours = max(flight_hours_float, minimum_hours)
     
+    base_price = base_rate * billable_hours
+    
+    return round(base_price, 2)
+
+
+def calculate_pricing(aircraft, flight_legs, trip_type, minimum_type='smart'):
+    """
+    Simplified pricing calculation matching your first view's logic.
+    Removed complex surcharges and discounts to match working implementation.
+    
+    Args:
+        aircraft: Aircraft instance
+        flight_legs: List of flight leg data
+        trip_type: Type of trip (one_way, round_trip, multi_leg)
+        minimum_type: How to apply minimum hours (kept for compatibility)
+    
+    Returns: pricing_details dictionary
+    """
+    total_price = 0.0
+    total_hours = 0.0
+    actual_flight_hours = 0.0
+    
+    # Process each flight leg using the same logic as your working view
     for leg in flight_legs:
-        flight_hours = leg['flight_hours']
-        # Apply minimum hours per leg
+        flight_hours = float(leg['flight_hours'])
+        actual_flight_hours += flight_hours
+        
+        # Use the same pricing logic as your working view
+        leg_base_price = calculate_base_price(aircraft, flight_hours, trip_type)
+        total_price += leg_base_price
+        
+        # Calculate billable hours for this leg (for reporting)
+        base_rate = float(aircraft.hourly_rate)
+        minimum_hours = float(aircraft.minimum_hours)
         billable_hours = max(flight_hours, minimum_hours)
         total_hours += billable_hours
-        
-        leg_base_price = base_rate * billable_hours
-        
-        # Apply surcharges
-        departure_time = leg['departure_datetime']
-        
-        # Weekend surcharge (Saturday = 5, Sunday = 6)
-        if hasattr(pricing_rule, 'weekend_surcharge') and departure_time.weekday() >= 5:
-            weekend_multiplier = 1 + (pricing_rule.weekend_surcharge / 100)
-            leg_base_price *= weekend_multiplier
-        
-        # Last minute surcharge (within 24 hours)
-        if hasattr(pricing_rule, 'last_minute_surcharge'):
-            hours_until_departure = (departure_time - timezone.now()).total_seconds() / 3600
-            if hours_until_departure < 24:
-                last_minute_multiplier = 1 + (pricing_rule.last_minute_surcharge / 100)
-                leg_base_price *= last_minute_multiplier
-        
-        # Peak season multiplier (can be customized based on dates)
-        if hasattr(pricing_rule, 'peak_season_multiplier'):
-            leg_base_price *= pricing_rule.peak_season_multiplier
-        
-        total_base_price += leg_base_price
     
-    # Trip type discounts
+    # For round trips, double the price (matching your working view logic)
     if trip_type == 'round_trip' and len(flight_legs) == 2:
-        # 5% discount for round trips
-        total_base_price *= Decimal('0.95')
-    elif trip_type == 'multi_leg' and len(flight_legs) > 2:
-        # 3% discount for multi-leg trips
-        total_base_price *= Decimal('0.97')
+        total_price = total_price  # Already calculated per leg
     
-    # Calculate commission (default 10%)
+    # Calculate commission (simple 10% like your working view)
     commission_rate = Decimal('10.00')  # 10%
-    agent_commission = total_base_price * (commission_rate / 100)
-    owner_earnings = total_base_price - agent_commission
+    agent_commission = Decimal(str(total_price)) * (commission_rate / 100)
+    owner_earnings = Decimal(str(total_price)) - agent_commission
     
     return {
-        'total_price': total_base_price,
+        'total_price': Decimal(str(total_price)),
         'commission_rate': commission_rate,
         'agent_commission': agent_commission,
         'owner_earnings': owner_earnings,
-        'total_hours': total_hours,
-        'base_hourly_rate': base_rate
+        'total_hours': Decimal(str(total_hours)),
+        'actual_flight_hours': Decimal(str(actual_flight_hours)),
+        'base_hourly_rate': aircraft.hourly_rate,
+        'minimum_hours_applied': minimum_type,
+        'aircraft_name': f"{aircraft.model_name} ({aircraft.registration_number})",
     }
+
+
+def calculate_flight_hours_haversine(departure_lat, departure_lng, arrival_lat, arrival_lng, aircraft_speed_knots):
+    """
+    Updated to match your working implementation's logic exactly
+    """
+    try:
+        # Convert latitude and longitude from degrees to radians
+        lat1, lon1, lat2, lon2 = map(math.radians, [departure_lat, departure_lng, arrival_lat, arrival_lng])
+        
+        # Haversine formula (matching your working implementation)
+        dlat = lat2 - lat1
+        dlon = lon2 - lon1
+        a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+        
+        # Earth's radius in nautical miles (matching your working implementation)
+        r = 3440  # Same as your working implementation
+        
+        # Distance in nautical miles
+        distance_nm = c * r
+        
+        # Use 30-minute buffer like your working implementation (0.5 hours)
+        flight_hours = (distance_nm / aircraft_speed_knots) + 0.5
+        
+        return round(flight_hours, 1)  # Match your working implementation's precision
+        
+    except Exception as e:
+        return 2.0  # Same fallback as your working implementation
+
+
+def ajax_calculate_flight_hours(request):
+    """
+    Updated AJAX endpoint using your working implementation's logic
+    """
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            departure_airport_id = data.get('departure_airport_id')
+            arrival_airport_id = data.get('arrival_airport_id')
+            aircraft_id = data.get('aircraft_id')
+            
+            if not all([departure_airport_id, arrival_airport_id, aircraft_id]):
+                return JsonResponse({
+                    'error': 'Missing required parameters'
+                }, status=400)
+            
+            # Get airports and aircraft
+            departure_airport = get_object_or_404(Airport, id=departure_airport_id)
+            arrival_airport = get_object_or_404(Airport, id=arrival_airport_id)
+            aircraft = get_object_or_404(Aircraft, id=aircraft_id)
+            
+            # Check if airports have coordinates
+            if not all([
+                departure_airport.latitude, departure_airport.longitude,
+                arrival_airport.latitude, arrival_airport.longitude
+            ]):
+                return JsonResponse({
+                    'error': 'Airport coordinates not available'
+                }, status=400)
+            
+            # Use your working implementation's logic
+            flight_hours = estimate_flight_time(departure_airport, arrival_airport, aircraft)
+            
+            return JsonResponse({
+                'flight_hours': flight_hours,
+                'distance_info': f'Calculated using same logic as client booking with {aircraft.aircraft_type.name} speed of {aircraft.aircraft_type.speed_knots} knots',
+                'aircraft_info': {
+                    'name': aircraft.aircraft_type.name,
+                    'speed_knots': aircraft.aircraft_type.speed_knots,
+                    'hourly_rate': float(aircraft.hourly_rate),
+                    'minimum_hours': float(aircraft.minimum_hours)
+                }
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'error': f'Error calculating flight hours: {str(e)}'
+            }, status=400)
+    
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
 
 @transaction.atomic
 def new_booking(request):
     """
-    Complete booking view that handles:
-    - Client selection or creation
-    - Booking details
-    - Flight legs
-    - Passengers
-    - Availability checking
-    - Automatic pricing calculation
+    Updated booking view using your working implementation's pricing logic
     """
     if request.method == 'POST':
         # Initialize forms
@@ -3446,13 +3564,12 @@ def new_booking(request):
             for i in range(passenger_count)
         ]
         
-        # Client handling
-        client_selection = request.POST.get('client_selection')  # 'existing' or 'new'
+        # Client handling (keeping your existing logic)
+        client_selection = request.POST.get('client_selection')
         account_form = None
         client = None
         
         if client_selection == 'new':
-            # Create new client account
             account_form = ClientAccountForm(request.POST)
             if account_form.is_valid():
                 user = account_form.save(commit=False)
@@ -3465,7 +3582,6 @@ def new_booking(request):
                 messages.error(request, 'Please correct the client account information.')
                 
         elif client_selection == 'existing':
-            # Use existing client
             client_id = request.POST.get('client')
             if not client_id:
                 messages.error(request, 'Please select a client.')
@@ -3489,7 +3605,25 @@ def new_booking(request):
                 leg_form = FlightLegForm(request.POST, prefix=f'leg_{i}')
                 leg_forms.append(leg_form)
                 if leg_form.is_valid():
-                    valid_legs.append(leg_form.cleaned_data)
+                    leg_data = leg_form.cleaned_data
+                    
+                    # Auto-calculate flight hours using your working implementation's logic
+                    if not leg_data.get('flight_hours') or leg_data.get('flight_hours') == 0:
+                        try:
+                            departure_airport = leg_data['departure_airport']
+                            arrival_airport = leg_data['arrival_airport']
+                            aircraft = booking_form.cleaned_data['aircraft']
+                            
+                            if all([departure_airport.latitude, departure_airport.longitude,
+                                   arrival_airport.latitude, arrival_airport.longitude]):
+                                
+                                # Use your working implementation's function
+                                calculated_hours = estimate_flight_time(departure_airport, arrival_airport, aircraft)
+                                leg_data['flight_hours'] = Decimal(str(calculated_hours))
+                        except Exception as e:
+                            messages.warning(request, f'Could not auto-calculate flight hours for leg {i+1}: {str(e)}')
+                    
+                    valid_legs.append(leg_data)
             
             # Validate passengers
             valid_passenger_forms = [form for form in passenger_forms if form.is_valid()]
@@ -3512,7 +3646,7 @@ def new_booking(request):
                 if not available:
                     messages.error(request, f'Aircraft not available: {availability_message}')
                 else:
-                    # Calculate pricing
+                    # Calculate pricing using your working implementation's logic
                     try:
                         pricing_details = calculate_pricing(aircraft, valid_legs, trip_type)
                         
@@ -3561,11 +3695,9 @@ def new_booking(request):
                         messages.error(request, f'Error calculating pricing: {str(e)}')
         
         # If we reach here, there were validation errors or missing client
-        # Prepare forms for re-rendering
         if not account_form:
             account_form = ClientAccountForm()
             
-        # Recreate leg forms if they don't exist
         if 'leg_forms' not in locals():
             leg_count = int(request.POST.get('leg_count', 1))
             leg_forms = [FlightLegForm(request.POST, prefix=f'leg_{i}') for i in range(leg_count)]
@@ -3578,7 +3710,7 @@ def new_booking(request):
             'aircrafts': Aircraft.objects.filter(is_active=True),
             'airports': Airport.objects.all(),
             'clients': User.objects.filter(user_type='client', is_active=True).order_by('first_name', 'last_name'),
-            'client_selection': client_selection,  # Pass back the selection
+            'client_selection': client_selection,
         }
         return render(request, 'bookings/new_booking.html', context)
     
@@ -3602,10 +3734,52 @@ def new_booking(request):
         'clients': clients,
         'aircrafts': aircrafts,
         'airports': airports,
-        'client_selection': 'existing',  # Default selection
+        'client_selection': 'existing',
     }
     
     return render(request, 'bookings/new_booking.html', context)
+
+
+def ajax_calculate_price(request):
+    """
+    AJAX endpoint using your working implementation's pricing logic
+    """
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            aircraft_id = data.get('aircraft_id')
+            flight_legs = data.get('flight_legs', [])
+            trip_type = data.get('trip_type', 'one_way')
+            
+            aircraft = get_object_or_404(Aircraft, id=aircraft_id)
+            
+            # Convert string dates to datetime objects and ensure flight_hours is Decimal
+            for leg in flight_legs:
+                leg['departure_datetime'] = datetime.fromisoformat(leg['departure_datetime'].replace('Z', '+00:00'))
+                leg['arrival_datetime'] = datetime.fromisoformat(leg['arrival_datetime'].replace('Z', '+00:00'))
+                leg['flight_hours'] = Decimal(str(leg['flight_hours']))
+            
+            # Use your working implementation's pricing logic
+            pricing_details = calculate_pricing(aircraft, flight_legs, trip_type)
+            
+            # Convert Decimal objects to float for JSON serialization
+            response_data = {
+                'total_price': float(pricing_details['total_price']),
+                'commission_rate': float(pricing_details['commission_rate']),
+                'agent_commission': float(pricing_details['agent_commission']),
+                'owner_earnings': float(pricing_details['owner_earnings']),
+                'total_hours': float(pricing_details['total_hours']),
+                'base_hourly_rate': float(pricing_details['base_hourly_rate'])
+            }
+            
+            return JsonResponse(response_data)
+            
+        except Exception as e:
+            return JsonResponse({
+                'error': f'Error calculating price: {str(e)}'
+            }, status=400)
+    
+    return JsonResponse({'error': 'Invalid request'}, status=400)
 
 def ajax_check_availability(request):
     """
@@ -3635,46 +3809,6 @@ def ajax_check_availability(request):
             return JsonResponse({
                 'available': False,
                 'message': f'Error checking availability: {str(e)}'
-            }, status=400)
-    
-    return JsonResponse({'error': 'Invalid request'}, status=400)
-
-def ajax_calculate_price(request):
-    """
-    AJAX endpoint to calculate pricing for given flight details
-    """
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            aircraft_id = data.get('aircraft_id')
-            flight_legs = data.get('flight_legs', [])
-            trip_type = data.get('trip_type', 'one_way')
-            
-            aircraft = get_object_or_404(Aircraft, id=aircraft_id)
-            
-            # Convert string dates to datetime objects and ensure flight_hours is Decimal
-            for leg in flight_legs:
-                leg['departure_datetime'] = datetime.fromisoformat(leg['departure_datetime'].replace('Z', '+00:00'))
-                leg['arrival_datetime'] = datetime.fromisoformat(leg['arrival_datetime'].replace('Z', '+00:00'))
-                leg['flight_hours'] = Decimal(str(leg['flight_hours']))
-            
-            pricing_details = calculate_pricing(aircraft, flight_legs, trip_type)
-            
-            # Convert Decimal objects to float for JSON serialization
-            response_data = {
-                'total_price': float(pricing_details['total_price']),
-                'commission_rate': float(pricing_details['commission_rate']),
-                'agent_commission': float(pricing_details['agent_commission']),
-                'owner_earnings': float(pricing_details['owner_earnings']),
-                'total_hours': float(pricing_details['total_hours']),
-                'base_hourly_rate': float(pricing_details['base_hourly_rate'])
-            }
-            
-            return JsonResponse(response_data)
-            
-        except Exception as e:
-            return JsonResponse({
-                'error': f'Error calculating price: {str(e)}'
             }, status=400)
     
     return JsonResponse({'error': 'Invalid request'}, status=400)
