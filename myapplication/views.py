@@ -1637,12 +1637,25 @@ def aircraft_list(request):
 
 @require_http_methods(["GET"])
 def aircraft_detail_ajax(request, aircraft_id):
-    """Get aircraft details via AJAX"""
+    """Get aircraft details via AJAX with full airport information"""
     try:
         aircraft = get_object_or_404(
             Aircraft.objects.select_related('owner', 'aircraft_type'),
             id=aircraft_id
         )
+        
+        # Get airport details if they exist
+        def get_airport_display(icao_code):
+            if not icao_code:
+                return None
+            try:
+                airport = Airport.objects.get(icao_code=icao_code)
+                return f"{airport.name} ({airport.icao_code})"
+            except Airport.DoesNotExist:
+                return icao_code  # Return just the ICAO code if airport not found
+        
+        base_airport_display = get_airport_display(aircraft.base_airport)
+        current_location_display = get_airport_display(aircraft.current_location)
         
         data = {
             'id': aircraft.id,
@@ -1650,7 +1663,9 @@ def aircraft_detail_ajax(request, aircraft_id):
             'model_name': aircraft.model_name,
             'year_manufactured': aircraft.year_manufactured,
             'base_airport': aircraft.base_airport,
+            'base_airport_display': base_airport_display,
             'current_location': aircraft.current_location,
+            'current_location_display': current_location_display,
             'is_active': aircraft.is_active,
             'features': aircraft.features,
             'hourly_rate': str(aircraft.hourly_rate),

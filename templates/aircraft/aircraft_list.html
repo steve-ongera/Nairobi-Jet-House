@@ -355,11 +355,14 @@ $(document).ready(function() {
                                        
                     $('#aircraft-registration').text(aircraft.registration_number);
                     $('#aircraft-model').text(aircraft.model_name);
-                    $('#aircraft-type').text(aircraft.aircraft_type ? aircraft.aircraft_type.name : 'N/A');
-                    $('#aircraft-owner').text(aircraft.owner ? (aircraft.owner.get_full_name || aircraft.owner.username) : 'N/A');
+                    $('#aircraft-type').text(aircraft.aircraft_type_name || 'N/A');
+                    $('#aircraft-owner').text(aircraft.owner_name || 'N/A');
                     $('#aircraft-year').text(aircraft.year_manufactured || 'N/A');
-                    $('#aircraft-base').text(aircraft.base_airport || 'N/A');
-                    $('#aircraft-location').text(aircraft.current_location || 'N/A');
+                    
+                    // Use the display versions of airport info
+                    $('#aircraft-base').text(aircraft.base_airport_display || 'N/A');
+                    $('#aircraft-location').text(aircraft.current_location_display || 'N/A');
+                    
                     $('#aircraft-status').html(aircraft.is_active ? 
                         '<span class="badge bg-success">Active</span>' : 
                         '<span class="badge bg-danger">Inactive</span>');
