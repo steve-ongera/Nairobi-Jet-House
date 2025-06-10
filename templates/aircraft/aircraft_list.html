@@ -352,19 +352,20 @@ $(document).ready(function() {
                     const aircraft = response.data;
                     
                     // Update modal content
+                                       
                     $('#aircraft-registration').text(aircraft.registration_number);
                     $('#aircraft-model').text(aircraft.model_name);
-                    $('#aircraft-type').text(aircraft.aircraft_type.name);
-                    $('#aircraft-owner').text(aircraft.owner.get_full_name || aircraft.owner.username);
-                    $('#aircraft-year').text(aircraft.year_manufactured);
-                    $('#aircraft-base').text(aircraft.base_airport || '-');
-                    $('#aircraft-location').text(aircraft.current_location || '-');
+                    $('#aircraft-type').text(aircraft.aircraft_type ? aircraft.aircraft_type.name : 'N/A');
+                    $('#aircraft-owner').text(aircraft.owner ? (aircraft.owner.get_full_name || aircraft.owner.username) : 'N/A');
+                    $('#aircraft-year').text(aircraft.year_manufactured || 'N/A');
+                    $('#aircraft-base').text(aircraft.base_airport || 'N/A');
+                    $('#aircraft-location').text(aircraft.current_location || 'N/A');
                     $('#aircraft-status').html(aircraft.is_active ? 
                         '<span class="badge bg-success">Active</span>' : 
                         '<span class="badge bg-danger">Inactive</span>');
-                    $('#aircraft-rate').text('$' + aircraft.hourly_rate);
-                    $('#aircraft-min-hours').text(aircraft.minimum_hours);
-                    $('#aircraft-features').text(aircraft.features || '-');
+                    $('#aircraft-rate').text(aircraft.hourly_rate ? '$' + aircraft.hourly_rate : 'N/A');
+                    $('#aircraft-min-hours').text(aircraft.minimum_hours || 'N/A');
+                    $('#aircraft-features').text(aircraft.features || 'N/A');
                     
                     // Update modal title
                     $('#viewAircraftModalLabel').text(`Aircraft: ${aircraft.registration_number}`);
