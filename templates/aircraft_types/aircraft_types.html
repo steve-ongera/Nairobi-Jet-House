@@ -434,45 +434,60 @@ function displayAircraftTypes(aircraftList) {
         return;
     }
     
-    grid.innerHTML = aircraftList.map(aircraft => `
-        <div class="col-lg-4 col-md-6 col-sm-12">
-            <div class="aircraft-card" onclick="viewDetails(${aircraft.id})">
-                <img src="${aircraft.image || '/static/img/default-aircraft.png'}" 
-                     alt="${aircraft.name}" class="aircraft-image">
-                <div class="aircraft-info">
-                    <div class="aircraft-title">${aircraft.name}</div>
-                    <div class="text-muted small">
-                        ${aircraft.description ? aircraft.description.substring(0, 100) + '...' : 'No description available'}
+    // Clear existing content
+    grid.innerHTML = '';
+    
+    // Create aircraft cards with proper Bootstrap columns
+    aircraftList.forEach(aircraft => {
+        const cardHTML = `
+            <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-4">
+                <div class="aircraft-card h-100" onclick="viewDetails(${aircraft.id})">
+                    <div class="aircraft-image-container">
+                        <img src="${aircraft.image || '/static/img/default-aircraft.png'}" 
+                             alt="${aircraft.name}" class="aircraft-image">
                     </div>
-                    <div class="aircraft-specs">
-                        <div class="spec-item">
-                            <div class="spec-value">${aircraft.passenger_capacity}</div>
-                            <div>Passengers</div>
+                    <div class="aircraft-info">
+                        <div class="aircraft-title">${aircraft.name}</div>
+                        <div class="aircraft-description text-muted small">
+                            ${aircraft.description ? aircraft.description.substring(0, 100) + '...' : 'No description available'}
                         </div>
-                        <div class="spec-item">
-                            <div class="spec-value">${aircraft.range_nautical_miles.toLocaleString()}</div>
-                            <div>NM Range</div>
-                        </div>
-                        <div class="spec-item">
-                            <div class="spec-value">${aircraft.speed_knots}</div>
-                            <div>Knots</div>
+                        <div class="aircraft-specs">
+                            <div class="spec-item">
+                                <div class="spec-value">${aircraft.passenger_capacity}</div>
+                                <div class="spec-label">Passengers</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-value">${aircraft.range_nautical_miles.toLocaleString()}</div>
+                                <div class="spec-label">NM Range</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-value">${aircraft.speed_knots}</div>
+                                <div class="spec-label">Knots</div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="action-buttons">
-                    <button class="btn btn-outline-primary btn-sm" onclick="event.stopPropagation(); viewDetails(${aircraft.id})">
-                        <i class="fas fa-eye me-1"></i>View
-                    </button>
-                    <button class="btn btn-outline-warning btn-sm" onclick="event.stopPropagation(); editAircraft(${aircraft.id})">
-                        <i class="fas fa-edit me-1"></i>Edit
-                    </button>
-                    <button class="btn btn-outline-danger btn-sm" onclick="event.stopPropagation(); deleteAircraft(${aircraft.id})">
-                        <i class="fas fa-trash me-1"></i>Delete
-                    </button>
+                    <div class="action-buttons">
+                        <button class="btn btn-outline-primary btn-sm" onclick="event.stopPropagation(); viewDetails(${aircraft.id})" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-outline-warning btn-sm" onclick="event.stopPropagation(); editAircraft(${aircraft.id})" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="event.stopPropagation(); deleteAircraft(${aircraft.id})" title="Delete">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-    `).join('');
+        `;
+        
+        // Create a temporary container to parse the HTML
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = cardHTML;
+        
+        // Append the first child (the column div) to the grid
+        grid.appendChild(tempDiv.firstElementChild);
+    });
 }
 
 // View aircraft details

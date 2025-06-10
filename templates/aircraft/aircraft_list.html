@@ -1,34 +1,45 @@
 {% extends 'base/base.html' %}
 {% load static %}
 
-{% block title %}Aircraft Management{% endblock %}
-
 {% block content %}
+<div class="message-container" id="system-messages">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+        <i class="bi {% if message.tags == 'success' %}bi-check-circle{% else %}bi-exclamation-triangle{% endif %} me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+
 <div class="pagetitle">
-    <h1>Aircraft Management</h1>
+    <h1><i class="bi bi-airplane me-2"></i>Aircraft Management</h1>
     <nav>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}"><i class="bi bi-house-door"></i> Home</a></li>
             <li class="breadcrumb-item active">Aircraft</li>
         </ol>
     </nav>
-</div>
+</div><!-- End Page Title -->
 
 <section class="section">
     <div class="row">
         <div class="col-lg-12">
-            <div class="card">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-jet-primary text-white">
+                    <h5 class="card-title mb-0"><i class="bi bi-list-ul me-2"></i>Aircraft List</h5>
+                </div>
+                
                 <div class="card-body">
-                    <h5 class="card-title">Aircraft List</h5>
-                    
                     <!-- Search and Filter -->
-                    <form method="GET" class="row mb-3">
+                    <form method="GET" class="row mb-4">
                         <div class="col-md-6">
                             <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
                                 <input type="text" name="search" class="form-control" 
                                        placeholder="Search by registration, model, or owner..." 
                                        value="{{ search }}">
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit" class="btn btn-jet">
                                     <i class="bi bi-search"></i>
                                 </button>
                             </div>
@@ -41,11 +52,11 @@
                             </select>
                         </div>
                         <div class="col-md-3 text-end">
-                            <a href="{% url 'aircraft_list' %}" class="btn btn-secondary">
-                                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                            <a href="{% url 'aircraft_list' %}" class="btn btn-outline-jet">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
                             </a>
-                            <button class="btn btn-success" id="addAircraftBtn">
-                                <i class="bi bi-plus-lg"></i> Add Aircraft
+                            <button class="btn btn-jet" id="addAircraftBtn">
+                                <i class="bi bi-plus-lg me-1"></i> Add Aircraft
                             </button>
                         </div>
                     </form>
@@ -53,7 +64,7 @@
                     <!-- Aircraft Table -->
                     <div class="table-responsive">
                         <table class="table table-hover datatable">
-                            <thead>
+                            <thead class="bg-jet-light">
                                 <tr>
                                     <th>Registration</th>
                                     <th>Model</th>
@@ -80,17 +91,17 @@
                                     </td>
                                     <td>${{ aircraft.hourly_rate }}</td>
                                     <td>
-                                        <button class="btn btn-sm btn-primary view-aircraft" 
+                                        <button class="btn btn-sm btn-outline-jet view-aircraft" 
                                                 data-aircraft-id="{{ aircraft.id }}"
                                                 title="View Details">
                                             <i class="bi bi-eye"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-warning edit-aircraft" 
+                                        <button class="btn btn-sm btn-outline-warning edit-aircraft" 
                                                 data-aircraft-id="{{ aircraft.id }}"
                                                 title="Edit Aircraft">
                                             <i class="bi bi-pencil"></i>
                                         </button>
-                                        <button class="btn btn-sm btn-danger delete-aircraft" 
+                                        <button class="btn btn-sm btn-outline-danger delete-aircraft" 
                                                 data-aircraft-id="{{ aircraft.id }}"
                                                 title="Delete Aircraft">
                                             <i class="bi bi-trash"></i>
@@ -99,7 +110,10 @@
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="8" class="text-center">No aircraft found</td>
+                                    <td colspan="8" class="text-center py-4">
+                                        <i class="bi bi-airplane text-muted" style="font-size: 2rem;"></i>
+                                        <p class="text-muted mt-2">No aircraft found</p>
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -109,7 +123,7 @@
                     <!-- Pagination -->
                     {% if aircrafts.has_other_pages %}
                     <nav aria-label="Page navigation">
-                        <ul class="pagination justify-content-center">
+                        <ul class="pagination justify-content-center mt-3">
                             {% if aircrafts.has_previous %}
                             <li class="page-item">
                                 <a class="page-link" href="?page=1{% if search %}&search={{ search }}{% endif %}{% if is_active %}&is_active={{ is_active }}{% endif %}" aria-label="First">
@@ -147,75 +161,85 @@
                     </nav>
                     {% endif %}
                 </div>
+                
+                <div class="card-footer bg-jet-light">
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Showing {{ aircrafts.start_index }} to {{ aircrafts.end_index }} of {{ aircrafts.paginator.count }} aircraft
+                    </small>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
 <!-- View Aircraft Modal -->
-<div class="modal fade" id="viewAircraftModal" tabindex="-1" aria-labelledby="viewAircraftModalLabel" aria-hidden="true">
+<div class="modal fade" id="viewAircraftModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="viewAircraftModalLabel">Aircraft Details</h5>
+            <div class="modal-header bg-jet-primary text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-airplane me-2"></i>
+                    <span id="viewAircraftModalLabel">Aircraft Details</span>
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Registration Number:</label>
-                            <p id="aircraft-registration" class="form-control-static">-</p>
+                        <div class="detail-row">
+                            <span class="detail-label">Registration Number:</span>
+                            <span class="detail-value" id="aircraft-registration">-</span>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Model Name:</label>
-                            <p id="aircraft-model" class="form-control-static">-</p>
+                        <div class="detail-row">
+                            <span class="detail-label">Model Name:</span>
+                            <span class="detail-value" id="aircraft-model">-</span>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Aircraft Type:</label>
-                            <p id="aircraft-type" class="form-control-static">-</p>
+                        <div class="detail-row">
+                            <span class="detail-label">Aircraft Type:</span>
+                            <span class="detail-value" id="aircraft-type">-</span>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Owner:</label>
-                            <p id="aircraft-owner" class="form-control-static">-</p>
+                        <div class="detail-row">
+                            <span class="detail-label">Owner:</span>
+                            <span class="detail-value" id="aircraft-owner">-</span>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Year Manufactured:</label>
-                            <p id="aircraft-year" class="form-control-static">-</p>
+                        <div class="detail-row">
+                            <span class="detail-label">Year Manufactured:</span>
+                            <span class="detail-value" id="aircraft-year">-</span>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Base Airport:</label>
-                            <p id="aircraft-base" class="form-control-static">-</p>
+                        <div class="detail-row">
+                            <span class="detail-label">Base Airport:</span>
+                            <span class="detail-value" id="aircraft-base">-</span>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Current Location:</label>
-                            <p id="aircraft-location" class="form-control-static">-</p>
+                        <div class="detail-row">
+                            <span class="detail-label">Current Location:</span>
+                            <span class="detail-value" id="aircraft-location">-</span>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Status:</label>
-                            <p id="aircraft-status" class="form-control-static">-</p>
+                        <div class="detail-row">
+                            <span class="detail-label">Status:</span>
+                            <span class="detail-value" id="aircraft-status">-</span>
                         </div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Hourly Rate:</label>
-                            <p id="aircraft-rate" class="form-control-static">-</p>
+                        <div class="detail-row">
+                            <span class="detail-label">Hourly Rate:</span>
+                            <span class="detail-value" id="aircraft-rate">-</span>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Minimum Hours:</label>
-                            <p id="aircraft-min-hours" class="form-control-static">-</p>
+                        <div class="detail-row">
+                            <span class="detail-label">Minimum Hours:</span>
+                            <span class="detail-value" id="aircraft-min-hours">-</span>
                         </div>
                     </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label fw-bold">Features:</label>
-                    <div id="aircraft-features" class="p-3 bg-light rounded">-</div>
+                <div class="detail-row">
+                    <span class="detail-label">Features:</span>
+                    <div id="aircraft-features" class="p-3 bg-light rounded mt-2">-</div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -226,11 +250,14 @@
 </div>
 
 <!-- Edit Aircraft Modal -->
-<div class="modal fade" id="editAircraftModal" tabindex="-1" aria-labelledby="editAircraftModalLabel" aria-hidden="true">
+<div class="modal fade" id="editAircraftModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editAircraftModalLabel">Edit Aircraft</h5>
+            <div class="modal-header bg-jet-primary text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-pencil me-2"></i>
+                    <span id="editAircraftModalLabel">Edit Aircraft</span>
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="editAircraftForm">
@@ -302,7 +329,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="submit" class="btn btn-jet">Save Changes</button>
                 </div>
             </form>
         </div>
@@ -310,11 +337,14 @@
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteAircraftModal" tabindex="-1" aria-labelledby="deleteAircraftModalLabel" aria-hidden="true">
+<div class="modal fade" id="deleteAircraftModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="deleteAircraftModalLabel">Confirm Deletion</h5>
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Confirm Deletion
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -324,11 +354,45 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirm-aircraft-delete">Delete</button>
+                <button type="button" class="btn btn-danger" id="confirm-aircraft-delete">
+                    <i class="bi bi-trash me-1"></i> Delete
+                </button>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .detail-row {
+        border-bottom: 1px solid #eee;
+        padding: 10px 0;
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+    
+    .detail-label {
+        font-weight: bold;
+        color: #495057;
+    }
+    
+    .detail-value {
+        color: #6c757d;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: var(--jet-light);
+    }
+    
+    .datatable th {
+        background-color: var(--jet-light);
+        font-weight: 600;
+    }
+</style>
+
 
 <!-- Add Aircraft Modal (similar to edit but with empty fields) -->
 
