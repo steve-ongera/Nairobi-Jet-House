@@ -79,7 +79,8 @@ def find_aircraft(request):
         aircraft_with_details = []
         for aircraft in available_aircraft:
             # Estimate flight time (simplified calculation)
-            estimated_flight_hours = estimate_flight_time(departure_airport, arrival_airport)
+            estimated_flight_hours = estimate_flight_time(departure_airport, arrival_airport, aircraft)
+
             
             # Calculate base price
             base_price = calculate_base_price(aircraft, estimated_flight_hours, trip_type)
@@ -190,33 +191,35 @@ def is_aircraft_available(aircraft, start_date, end_date, return_datetime=None):
     return True
 
 
-def estimate_flight_time(departure_airport, arrival_airport):
+def estimate_flight_time(departure_airport, arrival_airport, aircraft):
     """
-    Estimate flight time between two airports
-    This is a simplified calculation - in reality you'd use great circle distance
+    Estimate flight time between two airports using aircraft-specific speed.
+    Adds buffer time for taxiing, etc.
     """
-    # Simple calculation based on coordinates (very rough estimate)
     try:
         import math
-        
+
         lat1, lon1 = float(departure_airport.latitude), float(departure_airport.longitude)
         lat2, lon2 = float(arrival_airport.latitude), float(arrival_airport.longitude)
-        
-        # Haversine formula for distance
+
+        # Haversine formula for distance in nautical miles
         R = 3440  # Earth radius in nautical miles
         dlat = math.radians(lat2 - lat1)
         dlon = math.radians(lon2 - lon1)
         a = math.sin(dlat/2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon/2)**2
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
-        distance = R * c
-        
-        # Assume average speed of 400 knots for jets, add 30 minutes for taxi/approach
-        flight_time = (distance / 400) + 0.5
-        
+        distance_nm = R * c
+
+        # Use actual speed from aircraft type
+        speed_knots = aircraft.aircraft_type.speed_knots or 400  # Fallback in case data is missing
+        flight_time = (distance_nm / speed_knots) + 0.5  # Add 30 min buffer
+
         return round(flight_time, 1)
-    except:
-        # Fallback: assume 2 hours for any flight
-        return 2.0
+    except Exception as e:
+        # Log error if desired
+        return 2.0  # Fallback time
+
+
 
 
 def calculate_base_price(aircraft, flight_hours, trip_type):
