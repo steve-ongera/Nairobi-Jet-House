@@ -315,8 +315,8 @@
 </style>
 
 
-
 <script>
+// Global variables
 let aircraftTypes = [];
 let currentEditId = null;
 
@@ -345,6 +345,162 @@ document.addEventListener('DOMContentLoaded', function() {
     {% endif %}
 });
 
+// Utility functions - Define these first
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showLoading(show) {
+    document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
+    document.getElementById('aircraftGrid').style.display = show ? 'none' : 'block';
+}
+
+function showAlert(message, type) {
+    const alertContainer = document.getElementById('alertContainer');
+    const alertId = 'alert-' + Date.now();
+    
+    alertContainer.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" id="${alertId}">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        const alert = document.getElementById(alertId);
+        if (alert) {
+            bootstrap.Alert.getOrCreateInstance(alert).close();
+        }
+    }, 5000);
+}
+
+// Handle form submission - FIXED VERSION
+function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('submitBtn');
+    const submitText = document.getElementById('submitText');
+    const submitSpinner = document.getElementById('submitSpinner');
+    
+    submitBtn.disabled = true;
+    submitText.style.display = 'none';
+    submitSpinner.style.display = 'inline-block';
+    
+    const formData = new FormData(e.target);
+    
+    // Debug: Log form data
+    console.log('Form submission details:');
+    console.log('Current Edit ID:', currentEditId);
+    console.log('Form data entries:');
+    for (let pair of formData.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+    }
+    
+    const url = currentEditId ? `/api/aircraft-types/${currentEditId}/` : '/api/aircraft-types/';
+    const method = currentEditId ? 'PUT' : 'POST';
+    
+    console.log('Request URL:', url);
+    console.log('Request Method:', method);
+    
+    fetch(url, {
+        method: method,
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        
+        // Check if response is ok
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        return response.json();
+    })
+    .then(data => {
+        console.log('Server response:', data); // Debug log
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        // Update the local array directly with the returned data
+        if (currentEditId) {
+            // Update existing aircraft in local array
+            const index = aircraftTypes.findIndex(a => a.id === currentEditId);
+            if (index !== -1) {
+                aircraftTypes[index] = { ...data }; // Use spread operator to ensure reactivity
+                console.log('Updated local aircraft data:', aircraftTypes[index]);
+            }
+        } else {
+            // Add new aircraft to local array
+            aircraftTypes.push(data);
+        }
+        
+        // Update the display immediately
+        filterAndDisplay();
+        
+        bootstrap.Modal.getInstance(document.getElementById('formModal')).hide();
+        showAlert(`Aircraft type ${currentEditId ? 'updated' : 'created'} successfully!`, 'success');
+        
+        // Optional: Reload from server after delay as backup
+        setTimeout(() => {
+            loadAircraftTypes();
+        }, 2000);
+    })
+    .catch(error => {
+        console.error('Error saving aircraft type:', error);
+        showAlert(`Error saving aircraft type: ${error.message}`, 'danger');
+    })
+    .finally(() => {
+        submitBtn.disabled = false;
+        submitText.style.display = 'inline';
+        submitSpinner.style.display = 'none';
+    });
+}
+
+// Confirm delete function
+function confirmDelete(id) {
+    console.log('Deleting aircraft with ID:', id); // Debug log
+    
+    fetch(`/api/aircraft-types/${id}/`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => {
+        console.log('Delete response status:', response.status);
+        
+        if (response.ok) {
+            bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+            showAlert('Aircraft type deleted successfully!', 'success');
+            loadAircraftTypes();
+        } else {
+            throw new Error('Failed to delete aircraft type');
+        }
+    })
+    .catch(error => {
+        console.error('Error deleting aircraft type:', error);
+        showAlert('Error deleting aircraft type. Please try again.', 'danger');
+    });
+}
+
+// Setup event listeners - Now that handleFormSubmit is defined
 function setupEventListeners() {
     // Search functionality
     document.getElementById('searchInput').addEventListener('input', filterAndDisplay);
@@ -354,8 +510,14 @@ function setupEventListeners() {
     // Form submission
     document.getElementById('aircraftForm').addEventListener('submit', handleFormSubmit);
     
-    // Delete confirmation
-    document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
+    // Delete confirmation - Fix this line
+    document.getElementById('confirmDeleteBtn').addEventListener('click', function() {
+        // The actual delete ID will be set when deleteAircraft is called
+        const deleteId = this.getAttribute('data-delete-id');
+        if (deleteId) {
+            confirmDelete(parseInt(deleteId));
+        }
+    });
 }
 
 // Load all aircraft types
@@ -365,6 +527,7 @@ function loadAircraftTypes() {
     fetch('/api/aircraft-types/')
         .then(response => response.json())
         .then(data => {
+            console.log('Loaded aircraft types:', data); // Debug log
             aircraftTypes = data;
             filterAndDisplay();
             showLoading(false);
@@ -553,7 +716,12 @@ function showAddForm() {
 // Edit aircraft
 function editAircraft(id) {
     const aircraft = aircraftTypes.find(a => a.id === id);
-    if (!aircraft) return;
+    if (!aircraft) {
+        console.error('Aircraft not found with ID:', id);
+        return;
+    }
+    
+    console.log('Editing aircraft:', aircraft); // Debug log
     
     currentEditId = id;
     document.getElementById('formTitle').textContent = 'Edit Aircraft Type';
@@ -577,122 +745,48 @@ function editAircraft(id) {
     new bootstrap.Modal(document.getElementById('formModal')).show();
 }
 
-// Handle form submission
-function handleFormSubmit(e) {
-    e.preventDefault();
-    
-    const submitBtn = document.getElementById('submitBtn');
-    const submitText = document.getElementById('submitText');
-    const submitSpinner = document.getElementById('submitSpinner');
-    
-    submitBtn.disabled = true;
-    submitText.style.display = 'none';
-    submitSpinner.style.display = 'inline-block';
-    
-    const formData = new FormData(e.target);
-    const url = currentEditId ? `/api/aircraft-types/${currentEditId}/` : '/api/aircraft-types/';
-    const method = currentEditId ? 'PUT' : 'POST';
-    
-    fetch(url, {
-        method: method,
-        body: formData,
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken')
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            throw new Error(data.error);
-        }
-        
-        bootstrap.Modal.getInstance(document.getElementById('formModal')).hide();
-        showAlert(`Aircraft type ${currentEditId ? 'updated' : 'created'} successfully!`, 'success');
-        loadAircraftTypes();
-    })
-    .catch(error => {
-        console.error('Error saving aircraft type:', error);
-        showAlert('Error saving aircraft type. Please try again.', 'danger');
-    })
-    .finally(() => {
-        submitBtn.disabled = false;
-        submitText.style.display = 'inline';
-        submitSpinner.style.display = 'none';
-    });
-}
-
 // Delete aircraft
 function deleteAircraft(id) {
     const aircraft = aircraftTypes.find(a => a.id === id);
     if (!aircraft) return;
     
     document.getElementById('deleteItemName').textContent = aircraft.name;
-    document.getElementById('confirmDeleteBtn').onclick = () => confirmDelete(id);
+    
+    // Store the ID to delete in the button's data attribute
+    document.getElementById('confirmDeleteBtn').setAttribute('data-delete-id', id);
+    
     new bootstrap.Modal(document.getElementById('deleteModal')).show();
 }
 
-// Confirm delete
-function confirmDelete(id) {
-    fetch(`/api/aircraft-types/${id}/`, {
-        method: 'DELETE',
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken')
-        }
-    })
-    .then(response => {
-        if (response.ok) {
-            bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
-            showAlert('Aircraft type deleted successfully!', 'success');
-            loadAircraftTypes();
-        } else {
-            throw new Error('Failed to delete aircraft type');
-        }
-    })
-    .catch(error => {
-        console.error('Error deleting aircraft type:', error);
-        showAlert('Error deleting aircraft type. Please try again.', 'danger');
-    });
+// Debug function to check server endpoint manually
+function debugServerEndpoint(id) {
+    console.log('Testing server endpoint...');
+    fetch(`/api/aircraft-types/${id}/`)
+        .then(response => response.json())
+        .then(data => {
+            console.log('Current server data for ID', id, ':', data);
+        })
+        .catch(error => {
+            console.error('Error fetching server data:', error);
+        });
 }
 
-// Utility functions
-function showLoading(show) {
-    document.getElementById('loadingSpinner').style.display = show ? 'block' : 'none';
-    document.getElementById('aircraftGrid').style.display = show ? 'none' : 'block';
-}
-
-function showAlert(message, type) {
-    const alertContainer = document.getElementById('alertContainer');
-    const alertId = 'alert-' + Date.now();
-    
-    alertContainer.innerHTML = `
-        <div class="alert alert-${type} alert-dismissible fade show" id="${alertId}">
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    `;
-    
-    // Auto-dismiss after 5 seconds
-    setTimeout(() => {
-        const alert = document.getElementById(alertId);
-        if (alert) {
-            bootstrap.Alert.getOrCreateInstance(alert).close();
-        }
-    }, 5000);
-}
-
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+// Refresh a single aircraft from server
+function refreshSingleAircraft(id) {
+    return fetch(`/api/aircraft-types/${id}/`)
+        .then(response => response.json())
+        .then(data => {
+            const index = aircraftTypes.findIndex(a => a.id === id);
+            if (index !== -1) {
+                aircraftTypes[index] = data;
+                filterAndDisplay();
+                console.log('Refreshed single aircraft:', data);
             }
-        }
-    }
-    return cookieValue;
+            return data;
+        })
+        .catch(error => {
+            console.error('Error refreshing aircraft:', error);
+        });
 }
 </script>
 {% endblock %}

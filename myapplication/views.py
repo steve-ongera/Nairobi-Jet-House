@@ -1981,6 +1981,15 @@ def aircraft_type_api_create(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
+import os
+import json
+from django.shortcuts import get_object_or_404
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+from django.http import QueryDict
+from django.core.files.uploadhandler import MemoryFileUploadHandler, TemporaryFileUploadHandler
+
 @csrf_exempt
 @require_http_methods(["PUT", "POST"])
 def aircraft_type_api_update(request, pk):
@@ -1988,27 +1997,47 @@ def aircraft_type_api_update(request, pk):
     try:
         aircraft = get_object_or_404(AircraftType, pk=pk)
         
-        # Get data from request
+        # Handle different request methods and content types
+        data = {}
+        files = {}
+        
         if request.method == 'PUT':
-            # For PUT requests, we need to parse the request body
-            import json
-            try:
-                data = json.loads(request.body)
-                files = {}
-            except:
-                # If JSON parsing fails, try to get from POST data
-                data = request.POST
-                files = request.FILES
+            # For PUT requests with multipart data, we need to manually parse
+            if request.content_type and 'multipart/form-data' in request.content_type:
+                # Parse the multipart data manually for PUT requests
+                from django.http.multipartparser import MultiPartParser
+                from django.http import QueryDict
+                
+                # Create a copy of META for the parser
+                META = request.META.copy()
+                META['REQUEST_METHOD'] = 'POST'  # Trick the parser
+                
+                # Parse the multipart data
+                parser = MultiPartParser(META, request, request.upload_handlers, request.encoding)
+                data, files = parser.parse()
+                
+            else:
+                # Handle JSON data for PUT requests
+                try:
+                    data = json.loads(request.body)
+                except json.JSONDecodeError:
+                    return JsonResponse({'error': 'Invalid JSON data'}, status=400)
         else:
+            # POST request - use normal Django handling
             data = request.POST
             files = request.FILES
+        
+        print(f"Received data: {data}")  # Debug log
+        print(f"Received files: {files}")  # Debug log
         
         # Update fields if provided
         if 'name' in data:
             aircraft.name = data['name']
+            print(f"Updated name to: {aircraft.name}")  # Debug log
         
         if 'description' in data:
             aircraft.description = data['description']
+            print(f"Updated description to: {aircraft.description}")  # Debug log
         
         if 'passenger_capacity' in data:
             try:
@@ -2016,6 +2045,7 @@ def aircraft_type_api_update(request, pk):
                 if capacity <= 0:
                     return JsonResponse({'error': 'Passenger capacity must be positive'}, status=400)
                 aircraft.passenger_capacity = capacity
+                print(f"Updated capacity to: {aircraft.passenger_capacity}")  # Debug log
             except ValueError:
                 return JsonResponse({'error': 'Invalid passenger capacity'}, status=400)
         
@@ -2025,6 +2055,7 @@ def aircraft_type_api_update(request, pk):
                 if range_nm <= 0:
                     return JsonResponse({'error': 'Range must be positive'}, status=400)
                 aircraft.range_nautical_miles = range_nm
+                print(f"Updated range to: {aircraft.range_nautical_miles}")  # Debug log
             except ValueError:
                 return JsonResponse({'error': 'Invalid range value'}, status=400)
         
@@ -2034,11 +2065,13 @@ def aircraft_type_api_update(request, pk):
                 if speed <= 0:
                     return JsonResponse({'error': 'Speed must be positive'}, status=400)
                 aircraft.speed_knots = speed
+                print(f"Updated speed to: {aircraft.speed_knots}")  # Debug log
             except ValueError:
                 return JsonResponse({'error': 'Invalid speed value'}, status=400)
         
         # Handle image update
         if 'image' in files:
+            print(f"Processing image upload: {files['image']}")  # Debug log
             # Delete old image if exists
             if aircraft.image:
                 old_image_path = aircraft.image.path
@@ -2047,7 +2080,9 @@ def aircraft_type_api_update(request, pk):
             
             aircraft.image = files['image']
         
+        # Save the aircraft
         aircraft.save()
+        print(f"Aircraft saved successfully with ID: {aircraft.id}")  # Debug log
         
         return JsonResponse({
             'id': aircraft.id,
@@ -2061,9 +2096,11 @@ def aircraft_type_api_update(request, pk):
         })
     
     except Exception as e:
+        print(f"Error in aircraft_type_api_update: {str(e)}")  # Debug log
+        import traceback
+        traceback.print_exc()  # Print full traceback for debugging
         return JsonResponse({'error': str(e)}, status=500)
-
-
+    
 @csrf_exempt
 @require_http_methods(["DELETE"])
 def aircraft_type_api_delete(request, pk):
