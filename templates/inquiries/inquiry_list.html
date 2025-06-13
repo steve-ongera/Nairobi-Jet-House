@@ -4,125 +4,236 @@
 {% block title %}Flight Inquiries Management{% endblock %}
 
 {% block content %}
+<div class="message-container" id="system-messages">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+        <i class="bi {% if message.tags == 'success' %}bi-check-circle{% else %}bi-exclamation-triangle{% endif %} me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+
 <div class="pagetitle">
-    <h1>Flight Inquiries</h1>
+    <h1><i class="bi bi-question-circle me-2"></i>Flight Inquiries</h1>
     <nav>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}"><i class="bi bi-house-door"></i> Home</a></li>
             <li class="breadcrumb-item active">Inquiries</li>
         </ol>
     </nav>
-</div>
+</div><!-- End Page Title -->
 
 <section class="section">
     <div class="row">
         <div class="col-lg-12">
-            <div class="card">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-jet-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0"><i class="bi bi-headset me-2"></i>Flight Inquiry Management</h5>
+                        <div>
+                            <button class="btn btn-sm btn-outline-light">
+                                <i class="bi bi-plus-circle me-1"></i> New Inquiry
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="card-body">
-                    <h5 class="card-title">Inquiry List</h5>
-                    
-                    <!-- Filter Buttons -->
-                    <div class="btn-group mb-3" role="group">
-                        <a href="?" class="btn btn-outline-primary">All</a>
-                        <a href="?processed=true" class="btn btn-outline-success">Processed</a>
-                        <a href="?processed=false" class="btn btn-outline-warning">Pending</a>
-                    </div>
-                    
-                    <!-- Inquiries Table -->
-                    <div class="table-responsive">
-                        <table class="table table-hover datatable">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Client</th>
-                                    <th>Aircraft Type</th>
-                                    <th>Route</th>
-                                    <th>Passengers</th>
-                                    <th>Travel Date</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for inquiry in page_obj %}
-                                <tr>
-                                    <td>{{ inquiry.submitted_at|date:"M d, Y H:i" }}</td>
-                                    <td>
-                                        {{ inquiry.full_name }}<br>
-                                        <small class="text-muted">{{ inquiry.email }}</small>
-                                    </td>
-                                    <td>{{ inquiry.aircraft_type.name|default:"-" }}</td>
-                                    <td>
-                                        {{ inquiry.departure }} → {{ inquiry.destination }}
-                                    </td>
-                                    <td>{{ inquiry.passengers }}</td>
-                                    <td>{{ inquiry.travel_date|date:"M d, Y" }}</td>
-                                    <td>
-                                        <span class="badge bg-{% if inquiry.is_processed %}success{% else %}warning{% endif %}">
-                                            {% if inquiry.is_processed %}Processed{% else %}Pending{% endif %}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-primary view-inquiry" 
-                                                data-inquiry-id="{{ inquiry.id }}"
-                                                title="View Details">
-                                            <i class="bi bi-eye"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-warning edit-inquiry" 
-                                                data-inquiry-id="{{ inquiry.id }}"
-                                                title="Mark as Processed">
-                                            <i class="bi bi-check-circle"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-danger delete-inquiry" 
-                                                data-inquiry-id="{{ inquiry.id }}"
-                                                title="Delete Inquiry">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <!-- Pagination -->
-                    <nav aria-label="Page navigation">
-                        <ul class="pagination justify-content-center">
-                            {% if page_obj.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page=1" aria-label="First">
-                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                    <!-- Inquiry Filter Navigation -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="list-group">
+                                <a href="#all-inquiries" class="list-group-item list-group-item-action active" data-bs-toggle="tab">
+                                    <i class="bi bi-list-check me-2"></i> All Inquiries
                                 </a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
+                                <a href="#processed" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                                    <i class="bi bi-check-circle me-2"></i> Processed
                                 </a>
-                            </li>
-                            {% endif %}
+                                <a href="#pending" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                                    <i class="bi bi-hourglass me-2"></i> Pending
+                                </a>
+                                <a href="#urgent" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                                    <i class="bi bi-exclamation-triangle me-2"></i> Urgent
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Inquiry Content -->
+                        <div class="col-md-9">
+                            <div class="tab-content">
+                                <!-- All Inquiries Tab -->
+                                <div class="tab-pane fade show active" id="all-inquiries">
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h5 class="text-jet mb-0"><i class="bi bi-list-check me-2"></i>All Flight Inquiries</h5>
+                                        <div>
+                                            <span class="badge bg-success me-2">Total: {{ page_obj.paginator.count }}</span>
+                                            <div class="input-group input-group-sm" style="width: 250px;">
+                                                <input type="text" class="form-control" placeholder="Search inquiries...">
+                                                <button class="btn btn-outline-jet" type="button">
+                                                    <i class="bi bi-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-hover datatable align-middle">
+                                            <thead class="bg-jet-light">
+                                                <tr>
+                                                    <th>Inquiry</th>
+                                                    <th>Client</th>
+                                                    <th>Flight Details</th>
+                                                    <th>Travel Date</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for inquiry in page_obj %}
+                                                <tr>
+                                                    <td>
+                                                        <strong>#{{ inquiry.id }}</strong><br>
+                                                        <small class="text-muted">{{ inquiry.submitted_at|date:"M d, Y H:i" }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>{{ inquiry.full_name }}</strong><br>
+                                                        <small class="text-muted">{{ inquiry.email }}</small>
+                                                        {% if inquiry.phone %}<small class="text-muted d-block">{{ inquiry.phone }}</small>{% endif %}
+                                                    </td>
+                                                    <td>
+                                                        <strong>{{ inquiry.aircraft_type.name|default:"Any" }}</strong><br>
+                                                        <small class="text-muted">{{ inquiry.departure }} → {{ inquiry.destination }}</small>
+                                                        <small class="text-muted d-block">{{ inquiry.passengers }} passengers</small>
+                                                    </td>
+                                                    <td>
+                                                        {{ inquiry.travel_date|date:"M d, Y" }}<br>
+                                                        <small class="text-muted">
+                                                            {% if inquiry.return_date %}
+                                                            Return: {{ inquiry.return_date|date:"M d, Y" }}
+                                                            {% else %}
+                                                            One way
+                                                            {% endif %}
+                                                        </small>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-{% if inquiry.is_processed %}success{% else %}warning text-dark{% endif %}">
+                                                            <i class="bi {% if inquiry.is_processed %}bi-check-circle{% else %}bi-hourglass{% endif %} me-1"></i>
+                                                            {% if inquiry.is_processed %}Processed{% else %}Pending{% endif %}
+                                                        </span>
+                                                        {% if inquiry.is_urgent %}
+                                                        <span class="badge bg-danger mt-1">
+                                                            <i class="bi bi-exclamation-triangle me-1"></i> Urgent
+                                                        </span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <button class="btn btn-outline-primary view-inquiry" 
+                                                                    data-inquiry-id="{{ inquiry.id }}"
+                                                                    title="View Details">
+                                                                <i class="bi bi-eye"></i>
+                                                            </button>
+                                                            <button class="btn btn-outline-success mark-processed"
+                                                                    data-inquiry-id="{{ inquiry.id }}"
+                                                                    title="Mark as Processed">
+                                                                <i class="bi bi-check-circle"></i>
+                                                            </button>
+                                                            <button class="btn btn-outline-danger delete-inquiry"
+                                                                    data-inquiry-id="{{ inquiry.id }}"
+                                                                    title="Delete Inquiry">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <!-- Pagination -->
+                                    <nav aria-label="Page navigation" class="mt-4">
+                                        <ul class="pagination justify-content-center">
+                                            {% if page_obj.has_previous %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page=1" aria-label="First">
+                                                    <span aria-hidden="true">&laquo;&laquo;</span>
+                                                </a>
+                                            </li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                                    <span aria-hidden="true">&laquo;</span>
+                                                </a>
+                                            </li>
+                                            {% endif %}
+                                            
+                                            {% for num in page_obj.paginator.page_range %}
+                                                {% if page_obj.number == num %}
+                                                <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
+                                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                                                {% endif %}
+                                            {% endfor %}
                             
-                            {% for num in page_obj.paginator.page_range %}
-                                {% if page_obj.number == num %}
-                                <li class="page-item active"><a class="page-link" href="#">{{ num }}</a></li>
-                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                                <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
-                                {% endif %}
-                            {% endfor %}
-                            
-                            {% if page_obj.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
-                                    <span aria-hidden="true">&raquo;&raquo;</span>
-                                </a>
-                            </li>
-                            {% endif %}
-                        </ul>
-                    </nav>
+                                            {% if page_obj.has_next %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                                                    <span aria-hidden="true">&raquo;</span>
+                                                </a>
+                                            </li>
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+                                                    <span aria-hidden="true">&raquo;&raquo;</span>
+                                                </a>
+                                            </li>
+                                            {% endif %}
+                                        </ul>
+                                    </nav>
+                                </div>
+                                
+                                <!-- Other Tabs (content would be similar to All Inquiries tab) -->
+                                <div class="tab-pane fade" id="processed">
+                                    <!-- Processed inquiries content -->
+                                </div>
+                                
+                                <div class="tab-pane fade" id="pending">
+                                    <!-- Pending inquiries content -->
+                                </div>
+                                
+                                <div class="tab-pane fade" id="urgent">
+                                    <!-- Urgent inquiries content -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-jet-light">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-info-circle me-2"></i>Inquiry Services</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-telephone me-2"></i> Support: +254 700 123 789</li>
+                                <li><i class="bi bi-envelope me-2"></i> Email: inquiries@example.com</li>
+                                <li><i class="bi bi-clock me-2"></i> Response Time: 24 hours</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-lightning me-2"></i>Quick Actions</h6>
+                            <div class="d-flex">
+                                <button class="btn btn-sm btn-outline-jet me-2">
+                                    <i class="bi bi-download me-1"></i> Export
+                                </button>
+                                <button class="btn btn-sm btn-outline-jet me-2">
+                                    <i class="bi bi-funnel me-1"></i> Advanced Filter
+                                </button>
+                                <button class="btn btn-sm btn-outline-jet">
+                                    <i class="bi bi-printer me-1"></i> Print
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
