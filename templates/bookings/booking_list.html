@@ -32,9 +32,12 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="card-title mb-0"><i class="bi bi-calendar2-check me-2"></i>Flight Bookings</h5>
                         <div>
-                            <button class="btn btn-sm btn-outline-light">
-                                <i class="bi bi-plus-circle me-1"></i> New Booking
-                            </button>
+                            <a href="{% url 'new_booking' %}">
+                                <button class="btn btn-sm btn-outline-light">
+                                    <i class="bi bi-plus-circle me-1"></i> New Booking
+                                </button>
+                            </a>
+
                         </div>
                     </div>
                 </div>
@@ -94,7 +97,7 @@
                                                 {% for booking in page_obj %}
                                                 <tr>
                                                     <td>
-                                                        <strong>#{{ booking.booking_order_id }}</strong><br>
+                                                       <a href="{% url 'booking_detail2' booking.id %}"><strong>#{{ booking.booking_order_id }}</strong></a><br>
                                                         <small class="text-muted">{{ booking.created_at|date:"M d, Y" }}</small>
                                                     </td>
                                                     <td>
@@ -218,8 +221,8 @@
                         <div class="col-md-6">
                             <h6><i class="bi bi-info-circle me-2"></i>Booking Services</h6>
                             <ul class="list-unstyled">
-                                <li><i class="bi bi-telephone me-2"></i> Support: +254 700 123 789</li>
-                                <li><i class="bi bi-envelope me-2"></i> Email: bookings@example.com</li>
+                                <li><i class="bi bi-telephone me-2"></i> Support: +254 757 790 687</li>
+                                <li><i class="bi bi-envelope me-2"></i> Email: info@nairobijethouse.com</li>
                                 <li><i class="bi bi-cash-stack me-2"></i> Revenue: ${{ total_revenue|default:"0" }}</li>
                             </ul>
                         </div>

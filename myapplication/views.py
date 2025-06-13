@@ -2320,7 +2320,7 @@ def booking_list(request):
         bookings = bookings.filter(status=status_filter)
     
     # Pagination
-    paginator = Paginator(bookings, 10)
+    paginator = Paginator(bookings, 5)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
@@ -2406,7 +2406,20 @@ def booking_detail(request, booking_id):
     return JsonResponse(data)
 
 def booking_detail2(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id)
+    booking = get_object_or_404(
+        Booking.objects.select_related(
+            'client',
+            'aircraft',
+            'aircraft__aircraft_type'
+        ).prefetch_related(
+            Prefetch('flight_legs', queryset=FlightLeg.objects.select_related(
+                'departure_airport',
+                'arrival_airport'
+            )),
+            Prefetch('passengers', queryset=Passenger.objects.all())
+        ),
+        id=booking_id
+    )
     
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         # Return JSON response for AJAX requests
@@ -2423,7 +2436,7 @@ def booking_detail2(request, booking_id):
                 "aircraft": {
                     "model": booking.aircraft.model_name,
                     "registration": booking.aircraft.registration_number,
-                    "type": booking.aircraft.type
+                    "type": booking.aircraft.aircraft_type.name  # Fixed this line
                 },
                 "trip_type": booking.get_trip_type_display(),
                 "status": booking.get_status_display(),
@@ -2452,17 +2465,63 @@ def booking_detail2(request, booking_id):
                     "nationality": passenger.nationality,
                     "date_of_birth": passenger.date_of_birth.strftime("%Y-%m-%d") if passenger.date_of_birth else "",
                     "passport_number": passenger.passport_number or "",
-                    "order": passenger.order_number or ""
+                    "order": passenger.order or ""  # Fixed this line
                 } for passenger in booking.passengers.all()]
             }
         }
         return JsonResponse(data)
     
+    # Prepare flight legs data for template
+    flight_legs = []
+    for leg in booking.flight_legs.all():
+        flight_legs.append({
+            'departure_code': leg.departure_airport.icao_code,
+            'departure_name': f"{leg.departure_airport.name} ({leg.departure_airport.city}, {leg.departure_airport.country})",
+            'arrival_code': leg.arrival_airport.icao_code,
+            'arrival_name': f"{leg.arrival_airport.name} ({leg.arrival_airport.city}, {leg.arrival_airport.country})",
+            'departure_datetime': leg.departure_datetime.strftime("%Y-%m-%d %H:%M"),
+            'arrival_datetime': leg.arrival_datetime.strftime("%Y-%m-%d %H:%M"),
+            'passenger_count': leg.passenger_count,
+            'flight_hours': str(leg.flight_hours),
+            'leg_price': str(leg.leg_price),
+        })
+    
+    # Prepare passengers data for template
+    passengers = []
+    for passenger in booking.passengers.all():
+        passengers.append({
+            'name': passenger.name,
+            'nationality': passenger.nationality,
+            'date_of_birth': passenger.date_of_birth.strftime("%Y-%m-%d") if passenger.date_of_birth else None,
+            'passport_number': passenger.passport_number,
+            'order': passenger.order,
+        })
+    
+    # Prepare booking data for template
+    booking_data = {
+        'id': booking.id,
+        'booking_order_id': booking.booking_order_id,
+        'client': booking.client,
+        'aircraft': booking.aircraft,
+        'trip_type': booking.get_trip_type_display(),
+        'status': booking.get_status_display(),
+        'status_code': booking.status,
+        'created_at': booking.created_at.strftime("%Y-%m-%d %H:%M"),
+        'updated_at': booking.updated_at.strftime("%Y-%m-%d %H:%M"),
+        'total_price': str(booking.total_price),
+        'payment_status': 'Paid' if booking.payment_status else 'Pending',
+        'commission_rate': str(booking.commission_rate),
+        'agent_commission': str(booking.agent_commission),
+        'owner_earnings': str(booking.owner_earnings),
+        'special_requests': booking.special_requests or 'None',
+        'flight_legs': flight_legs,
+        'passengers': passengers,
+    }
+    
     # Regular HTML response
     return render(request, 'bookings/booking_detail.html', {
-        'booking': booking
+        'booking': booking_data
     })
-
 
 @require_http_methods(["POST", "GET"])
 def update_booking_status(request, booking_id):

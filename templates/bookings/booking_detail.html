@@ -103,7 +103,7 @@
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold text-jet">Aircraft:</label>
                                             <p class="form-control-static">
-                                                {{ booking.aircraft.model }} ({{ booking.aircraft.registration }})
+                                                {{ booking.aircraft.model_name }} ({{ booking.aircraft.registration_number }})
                                             </p>
                                         </div>
                                         <div class="col-md-6">
@@ -113,54 +113,56 @@
                                     </div>
                                     
                                     <h6 class="text-jet mb-3">Flight Itinerary</h6>
-                                        {% for leg in booking.flight_legs.all %}
-                                        <div class="flight-leg mb-4 {% if not forloop.last %}border-bottom pb-4{% endif %}">
-                                            <div class="d-flex justify-content-between mb-2">
-                                                <h6 class="text-jet mb-0">Leg {{ forloop.counter }}</h6>
-                                                <span class="badge bg-light text-dark">
-                                                    ${{ leg.leg_price }}
-                                                </span>
+                                    {% for leg in booking.flight_legs %}
+                                    <div class="flight-leg mb-4 {% if not forloop.last %}border-bottom pb-4{% endif %}">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <h6 class="text-jet mb-0">Leg {{ forloop.counter }}</h6>
+                                            <span class="badge bg-light text-dark">
+                                                ${{ leg.leg_price }}
+                                            </span>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold text-jet">Departure:</label>
+                                                <p class="form-control-static">
+                                                    {{ leg.departure_code }} - {{ leg.departure_name }}<br>
+                                                    <small class="text-muted">
+                                                        {{ leg.departure_datetime }}
+                                                    </small>
+                                                </p>
                                             </div>
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <label class="form-label fw-bold text-jet">Departure:</label>
-                                                    <p class="form-control-static">
-                                                        {{ leg.departure_code }} - {{ leg.departure_name }}<br>
-                                                        <small class="text-muted">
-                                                            {{ leg.departure_datetime }}
-                                                        </small>
-                                                    </p>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label class="form-label fw-bold text-jet">Arrival:</label>
-                                                    <p class="form-control-static">
-                                                        {{ leg.arrival_code }} - {{ leg.arrival_name }}<br>
-                                                        <small class="text-muted">
-                                                            {{ leg.arrival_datetime }}
-                                                        </small>
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <div class="row mt-2">
-                                                <div class="col-md-4">
-                                                    <label class="form-label fw-bold text-jet">Duration:</label>
-                                                    <p class="form-control-static">
-                                                        {{ leg.flight_hours }} hours
-                                                    </p>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label class="form-label fw-bold text-jet">Passengers:</label>
-                                                    <p class="form-control-static">
-                                                        {{ leg.passenger_count }}
-                                                    </p>
-                                                </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-bold text-jet">Arrival:</label>
+                                                <p class="form-control-static">
+                                                    {{ leg.arrival_code }} - {{ leg.arrival_name }}<br>
+                                                    <small class="text-muted">
+                                                        {{ leg.arrival_datetime }}
+                                                    </small>
+                                                </p>
                                             </div>
                                         </div>
-                                        {% empty %}
-                                        <div class="text-muted">
-                                            <p>No flight legs found for this booking.</p>
+                                        <div class="row mt-2">
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-bold text-jet">Duration:</label>
+                                                <p class="form-control-static">
+                                                    {{ leg.flight_hours }} hours
+                                                </p>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label fw-bold text-jet">Passengers:</label>
+                                                <p class="form-control-static">
+                                                    {{ leg.passenger_count }}
+                                                </p>
+                                            </div>
                                         </div>
-                                        {% endfor %}
+                                    </div>
+                                    {% empty %}
+                                    <div class="text-muted">
+                                        <p>No flight legs found for this booking.</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
                             
                             <!-- Passengers -->
                             <div class="card">
@@ -180,19 +182,19 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {% for passenger in booking.passengers.all %}
-                                                    <tr>
-                                                        <td>{{ passenger.name }}</td>
-                                                        <td>{{ passenger.nationality|title }}</td>
-                                                        <td>{{ passenger.date_of_birth }}</td>
-                                                        <td>{{ passenger.passport_number }}</td>
-                                                        <td>{{ passenger.order }}</td>
-                                                    </tr>
-                                                    {% empty %}
-                                                    <tr>
-                                                        <td colspan="5" class="text-muted text-center">No passengers found for this booking.</td>
-                                                    </tr>
-                                                    {% endfor %}
+                                                {% for passenger in booking.passengers %}
+                                                <tr>
+                                                    <td>{{ passenger.name }}</td>
+                                                    <td>{{ passenger.nationality|title }}</td>
+                                                    <td>{{ passenger.date_of_birth|default:"N/A" }}</td>
+                                                    <td>{{ passenger.passport_number|default:"N/A" }}</td>
+                                                    <td>{{ passenger.order|default:"N/A" }}</td>
+                                                </tr>
+                                                {% empty %}
+                                                <tr>
+                                                    <td colspan="5" class="text-muted text-center">No passengers found for this booking.</td>
+                                                </tr>
+                                                {% endfor %}
                                             </tbody>
                                         </table>
                                     </div>
