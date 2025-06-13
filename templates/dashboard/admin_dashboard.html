@@ -13,16 +13,27 @@
     {% endfor %}
 </div>
 
-<div class="pagetitle">
-    <h1>Dashboard</h1>
+<div class="pagetitle" style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+    <h1 style=" color: #2c3e50; text-transform: uppercase; letter-spacing: 0.5px;">
+        <i class="bi bi-speedometer2 me-2" style="color: #3498db;"></i>ADMIN DASHBOARD
+    </h1>
     <nav>
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="#">Home</a></li>
-            <li class="breadcrumb-item active">Dashboard</li>
-            <li class="breadcrumb-item">{{ request.user.username }}</li>
+        <ol class="breadcrumb" style="font-weight: 600; font-size: 15px; background-color: transparent; padding-left: 0;">
+            <li class="breadcrumb-item">
+                <a href="{% url 'admin_dashboard' %}" style="color: #3498db; text-decoration: none;">
+                    <i class="bi bi-house-door-fill" style="color: #3498db;"></i> <span style="color: #3498db;">HOME</span>
+                </a>
+            </li>
+            <li class="breadcrumb-item active" style="color: #2c3e50;">
+                <i class="bi bi-layout-text-window-reverse" style="color: #e74c3c;"></i> <span style="color: #2c3e50;">DASHBOARD</span>
+            </li>
+            <li class="breadcrumb-item text-muted" style="color: #7f8c8d;">
+                <i class="bi bi-person-circle" style="color: #7f8c8d;"></i> <span style="font-weight: 600;">{{ request.user.username|upper }}</span>
+            </li>
         </ol>
     </nav>
 </div><!-- End Page Title -->
+
 
 <section class="section dashboard">
     <div class="row">
@@ -170,7 +181,7 @@
                                 <tbody>
                                     {% for booking in recent_bookings %}
                                     <tr>
-                                        <td><a href="#">#{{ booking.booking_order_id }}</a></td>
+                                        <td><a href="{% url 'booking_detail2' booking.id %}">#{{ booking.booking_order_id }}</a></td>
                                         <td>{{ booking.client.get_full_name }}</td>
                                         <td>{{ booking.aircraft.model_name }}</td>
                                         <td>{{ booking.flight_legs.first.departure_datetime|date:"M d, Y H:i" }}</td>
