@@ -1,171 +1,72 @@
-{% extends 'base/base.html' %}
+{% extends "base/base.html" %}
+{% load static %}
 
 {% block title %}New Booking{% endblock %}
 
 {% block content %}
-<style>
-    .form-section {
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        padding: 20px;
-        margin-bottom: 20px;
-    }
-    
-    .form-section h4 {
-        color: #495057;
-        border-bottom: 2px solid #007bff;
-        padding-bottom: 10px;
-        margin-bottom: 20px;
-    }
-    
-    .flight-leg {
-        border: 1px solid #ced4da;
-        border-radius: 5px;
-        padding: 15px;
-        margin-bottom: 15px;
-        background: white;
-    }
-    
-    .passenger-form {
-        border: 1px solid #ced4da;
-        border-radius: 5px;
-        padding: 15px;
-        margin-bottom: 15px;
-        background: white;
-    }
-    
-    .availability-status {
-        padding: 10px;
-        border-radius: 5px;
-        margin: 10px 0;
-        display: none;
-    }
-    
-    .availability-available {
-        background-color: #d4edda;
-        border: 1px solid #c3e6cb;
-        color: #155724;
-    }
-    
-    .availability-unavailable {
-        background-color: #f8d7da;
-        border: 1px solid #f5c6cb;
-        color: #721c24;
-    }
-    
-    .pricing-info {
-        background: #e9ecef;
-        border: 1px solid #ced4da;
-        border-radius: 5px;
-        padding: 15px;
-        margin: 15px 0;
-    }
-    
-    .btn-add {
-        background-color: #28a745;
-        border-color: #28a745;
-    }
-    
-    .btn-remove {
-        background-color: #dc3545;
-        border-color: #dc3545;
-    }
-    
-    .loading {
-        opacity: 0.6;
-        pointer-events: none;
-    }
-    
-    .spinner {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border: 3px solid rgba(0,0,0,.1);
-        border-radius: 50%;
-        border-top-color: #007bff;
-        animation: spin 1s ease-in-out infinite;
-    }
-    
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-    
-    .client-toggle {
-        margin-bottom: 20px;
-    }
-    
-    .client-selection {
-        display: block;
-    }
-    
-    .client-creation {
-        display: none;
-    }
-    
-    .form-row {
-        display: flex;
-        flex-wrap: wrap;
-        margin: 0 -5px;
-    }
-    
-    .form-col {
-        flex: 1;
-        padding: 0 5px;
-        min-width: 200px;
-    }
-    
-    .required-field {
-        color: #dc3545;
-    }
-</style>
+<div class="message-container" id="system-messages">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+        <i class="bi {% if message.tags == 'success' %}bi-check-circle{% else %}bi-exclamation-triangle{% endif %} me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
 
+<div class="pagetitle">
+    <h1><i class="bi bi-journal-plus me-2"></i>New Booking</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}"><i class="bi bi-house-door"></i> Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'booking_list' %}">Bookings</a></li>
+            <li class="breadcrumb-item active">New</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
 
-<div class="container-fluid">
+<section class="section">
     <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-plane"></i> New Booking
-                    </h3>
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-jet-primary text-white">
+                    <h5 class="card-title mb-0"><i class="bi bi-calendar2-plus me-2"></i>Create New Flight Booking</h5>
                 </div>
+                
                 <div class="card-body">
                     <form method="post" id="booking-form">
                         {% csrf_token %}
                         
-                        <!-- Client Selection/Creation Section -->
                         <!-- Client Information Section -->
                         <div class="card mb-4">
-                            <div class="card-header">
-                                <h5>Client Information</h5>
+                            <div class="card-header bg-jet-light">
+                                <h5 class="mb-0"><i class="bi bi-person-badge me-2"></i>Client Information</h5>
                             </div>
                             <div class="card-body">
-                                <!-- Client Selection Radio Buttons -->
-                                <div class="mb-3">
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="client_selection" id="existing_client" 
-                                            value="existing" {% if client_selection == 'existing' or not client_selection %}checked{% endif %}>
-                                        <label class="form-check-label" for="existing_client">
-                                            Select Existing Client
+                                <!-- Client Selection Toggle -->
+                                <div class="mb-4">
+                                    <div class="btn-group w-100" role="group">
+                                        <input type="radio" class="btn-check" name="client_selection" id="existing_client" 
+                                            value="existing" autocomplete="off" {% if client_selection == 'existing' or not client_selection %}checked{% endif %}>
+                                        <label class="btn btn-outline-jet" for="existing_client">
+                                            <i class="bi bi-person-lines-fill me-1"></i> Existing Client
                                         </label>
-                                    </div>
-                                    <div class="form-check form-check-inline">
-                                        <input class="form-check-input" type="radio" name="client_selection" id="new_client" 
-                                            value="new" {% if client_selection == 'new' %}checked{% endif %}>
-                                        <label class="form-check-label" for="new_client">
-                                            Create New Client
+                                        
+                                        <input type="radio" class="btn-check" name="client_selection" id="new_client" 
+                                            value="new" autocomplete="off" {% if client_selection == 'new' %}checked{% endif %}>
+                                        <label class="btn btn-outline-jet" for="new_client">
+                                            <i class="bi bi-person-plus me-1"></i> New Client
                                         </label>
                                     </div>
                                 </div>
 
                                 <!-- Existing Client Selection -->
                                 <div id="existing-client-section" class="mb-3">
-                                    <label for="id_client" class="form-label">Select Client *</label>
+                                    <label for="id_client" class="form-label fw-bold">Select Client <span class="text-danger">*</span></label>
                                     <select name="client" id="id_client" class="form-select" required>
                                         <option value="">Choose a client...</option>
                                         {% for client in clients %}
-                                            <option value="{{ client.id }}">
+                                            <option value="{{ client.id }}" {% if client.id == selected_client_id %}selected{% endif %}>
                                                 {{ client.get_full_name|default:client.username }} ({{ client.email }})
                                             </option>
                                         {% endfor %}
@@ -177,19 +78,19 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="{{ account_form.first_name.id_for_label }}" class="form-label">First Name *</label>
+                                                <label for="{{ account_form.first_name.id_for_label }}" class="form-label fw-bold">First Name <span class="text-danger">*</span></label>
                                                 {{ account_form.first_name }}
                                                 {% if account_form.first_name.errors %}
-                                                    <div class="text-danger">{{ account_form.first_name.errors }}</div>
+                                                    <div class="text-danger small">{{ account_form.first_name.errors }}</div>
                                                 {% endif %}
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="{{ account_form.last_name.id_for_label }}" class="form-label">Last Name *</label>
+                                                <label for="{{ account_form.last_name.id_for_label }}" class="form-label fw-bold">Last Name <span class="text-danger">*</span></label>
                                                 {{ account_form.last_name }}
                                                 {% if account_form.last_name.errors %}
-                                                    <div class="text-danger">{{ account_form.last_name.errors }}</div>
+                                                    <div class="text-danger small">{{ account_form.last_name.errors }}</div>
                                                 {% endif %}
                                             </div>
                                         </div>
@@ -198,27 +99,27 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="{{ account_form.email.id_for_label }}" class="form-label">Email *</label>
+                                                <label for="{{ account_form.email.id_for_label }}" class="form-label fw-bold">Email <span class="text-danger">*</span></label>
                                                 {{ account_form.email }}
                                                 {% if account_form.email.errors %}
-                                                    <div class="text-danger">{{ account_form.email.errors }}</div>
+                                                    <div class="text-danger small">{{ account_form.email.errors }}</div>
                                                 {% endif %}
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="{{ account_form.phone_number.id_for_label }}" class="form-label">Phone</label>
+                                                <label for="{{ account_form.phone_number.id_for_label }}" class="form-label fw-bold">Phone</label>
                                                 {{ account_form.phone_number }}
                                                 {% if account_form.phone_number.errors %}
-                                                    <div class="text-danger">{{ account_form.phone_number.errors }}</div>
+                                                    <div class="text-danger small">{{ account_form.phone_number.errors }}</div>
                                                 {% endif %}
                                             </div>
                                         </div>
                                     </div>
 
                                     <!-- Additional fields for new client -->
-                                    <div class="row">
-                                        <div class="col-md-6">
+                                     <div class="row">
+                                        <div class="col-md-4">
                                             <div class="mb-3">
                                                 <label for="{{ account_form.username.id_for_label }}" class="form-label">Username *</label>
                                                 {{ account_form.username }}
@@ -227,7 +128,7 @@
                                                 {% endif %}
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-md-4">
                                             <div class="mb-3">
                                                 <label for="{{ account_form.password1.id_for_label }}" class="form-label">Password *</label>
                                                 {{ account_form.password1 }}
@@ -236,10 +137,7 @@
                                                 {% endif %}
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div class="row">
-                                        <div class="col-md-6">
+                                        <div class="col-md-4">
                                             <div class="mb-3">
                                                 <label for="{{ account_form.password2.id_for_label }}" class="form-label">Confirm Password *</label>
                                                 {{ account_form.password2 }}
@@ -248,23 +146,27 @@
                                                 {% endif %}
                                             </div>
                                         </div>
+                                    </div>
+
+                                    <div class="row">
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="{{ account_form.company_name.id_for_label }}" class="form-label">Company Name</label>
+                                                <label for="{{ account_form.company_name.id_for_label }}" class="form-label fw-bold">Company Name</label>
                                                 {{ account_form.company_name }}
-                                                {% if account_form.company_name.errors %}
-                                                    <div class="text-danger">{{ account_form.company_name.errors }}</div>
-                                                {% endif %}
                                             </div>
                                         </div>
+                                        <!--
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="{{ account_form.tax_id.id_for_label }}" class="form-label fw-bold">Tax ID</label>
+                                                {{ account_form.tax_id }}
+                                            </div>
+                                        </div>-->
                                     </div>
 
                                     <div class="mb-3">
-                                        <label for="{{ account_form.address.id_for_label }}" class="form-label">Address</label>
+                                        <label for="{{ account_form.address.id_for_label }}" class="form-label fw-bold">Address</label>
                                         {{ account_form.address }}
-                                        {% if account_form.address.errors %}
-                                            <div class="text-danger">{{ account_form.address.errors }}</div>
-                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -312,172 +214,283 @@
                         </script>
 
                         <!-- Booking Details Section -->
-                        <div class="form-section">
-                            <h4><i class="fas fa-calendar"></i> Booking Details</h4>
-                            
-                            <div class="form-row">
-                                <div class="form-col">
-                                    <div class="form-group">
-                                        <label for="{{ booking_form.aircraft.id_for_label }}">Aircraft <span class="required-field">*</span></label>
-                                        {{ booking_form.aircraft }}
-                                    </div>
-                                </div>
-                                <div class="form-col">
-                                    <div class="form-group">
-                                        <label for="{{ booking_form.trip_type.id_for_label }}">Trip Type <span class="required-field">*</span></label>
-                                        {{ booking_form.trip_type }}
-                                    </div>
-                                </div>
+                        <div class="card mb-4">
+                            <div class="card-header bg-jet-light">
+                                <h5 class="mb-0"><i class="bi bi-calendar2-event me-2"></i>Booking Details</h5>
                             </div>
-                            
-                            <div class="form-row">
-                                <div class="form-col">
-                                    <div class="form-group">
-                                        <label for="passenger_count">Number of Passengers <span class="required-field">*</span></label>
-                                        <input type="number" class="form-control" id="passenger_count" name="passenger_count" value="1" min="1" max="20">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="{{ booking_form.aircraft.id_for_label }}" class="form-label fw-bold">Aircraft <span class="text-danger">*</span></label>
+                                            {{ booking_form.aircraft }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="{{ booking_form.trip_type.id_for_label }}" class="form-label fw-bold">Trip Type <span class="text-danger">*</span></label>
+                                            {{ booking_form.trip_type }}
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="form-col">
-                                    <div class="form-group">
-                                        <label for="leg_count">Number of Flight Legs <span class="required-field">*</span></label>
-                                        <input type="number" class="form-control" id="leg_count" name="leg_count" value="1" min="1" max="10">
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="passenger_count" class="form-label fw-bold">Passengers <span class="text-danger">*</span></label>
+                                            <input type="number" class="form-control" id="passenger_count" name="passenger_count" value="1" min="1" max="20">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="leg_count" class="form-label fw-bold">Flight Legs <span class="text-danger">*</span></label>
+                                            <input type="number" class="form-control" id="leg_count" name="leg_count" value="1" min="1" max="10">
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="{{ booking_form.special_requests.id_for_label }}">Special Requests</label>
-                                {{ booking_form.special_requests }}
+                                
+                                <div class="mb-3">
+                                    <label for="{{ booking_form.special_requests.id_for_label }}" class="form-label fw-bold">Special Requests</label>
+                                    {{ booking_form.special_requests }}
+                                </div>
                             </div>
                         </div>
 
                         <!-- Flight Legs Section -->
-                        <div class="form-section">
-                            <h4><i class="fas fa-route"></i> Flight Legs</h4>
-                            <div id="flight-legs-container">
-                                {% for leg_form in leg_forms %}
-                                <div class="flight-leg" data-leg-index="0">
-                                    <h5>Flight Leg #1</h5>
-                                    <div class="form-row">
-                                        <div class="form-col">
-                                            <div class="form-group">
-                                                <label>Departure Airport <span class="required-field">*</span></label>
-                                                {{ leg_form.departure_airport }}
-                                            </div>
-                                        </div>
-                                        <div class="form-col">
-                                            <div class="form-group">
-                                                <label>Arrival Airport <span class="required-field">*</span></label>
-                                                {{ leg_form.arrival_airport }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-col">
-                                            <div class="form-group">
-                                                <label>Departure Date & Time <span class="required-field">*</span></label>
-                                                {{ leg_form.departure_datetime }}
-                                            </div>
-                                        </div>
-                                        <div class="form-col">
-                                            <div class="form-group">
-                                                <label>Arrival Date & Time <span class="required-field">*</span></label>
-                                                {{ leg_form.arrival_datetime }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="form-row">
-                                        <div class="form-col">
-                                            <div class="form-group">
-                                                <label>Flight Hours <span class="required-field">*</span></label>
-                                                {{ leg_form.flight_hours }}
-                                            </div>
-                                        </div>
-                                        <div class="form-col">
-                                            <button type="button" class="btn btn-remove btn-sm remove-leg" style="margin-top: 32px;">
-                                                <i class="fas fa-trash"></i> Remove Leg
+                        <div class="card mb-4">
+                            <div class="card-header bg-jet-light d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0"><i class="bi bi-route me-2"></i>Flight Legs</h5>
+                                <button type="button" class="btn btn-sm btn-jet" id="add-leg">
+                                    <i class="bi bi-plus-circle me-1"></i> Add Leg
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="flight-legs-container">
+                                    {% for leg_form in leg_forms %}
+                                    <div class="card mb-3 flight-leg" data-leg-index="0">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-0">Flight Leg #1</h6>
+                                            <button type="button" class="btn btn-sm btn-outline-danger remove-leg">
+                                                <i class="bi bi-trash"></i> Remove
                                             </button>
                                         </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Departure Airport <span class="text-danger">*</span></label>
+                                                        {{ leg_form.departure_airport }}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Arrival Airport <span class="text-danger">*</span></label>
+                                                        {{ leg_form.arrival_airport }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Departure Date & Time <span class="text-danger">*</span></label>
+                                                        {{ leg_form.departure_datetime }}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Arrival Date & Time <span class="text-danger">*</span></label>
+                                                        {{ leg_form.arrival_datetime }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Flight Hours <span class="text-danger">*</span></label>
+                                                        {{ leg_form.flight_hours }}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Distance (nm)</label>
+                                                        {{ leg_form.distance_nm }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
+                                    {% endfor %}
                                 </div>
-                                {% endfor %}
                             </div>
-                            <button type="button" class="btn btn-add btn-sm" id="add-leg">
-                                <i class="fas fa-plus"></i> Add Flight Leg
-                            </button>
-                        </div>
-
-                        <!-- Availability Check Section -->
-                        <div class="form-section">
-                            <h4><i class="fas fa-check-circle"></i> Availability & Pricing</h4>
-                            <button type="button" class="btn btn-info" id="check-availability">
-                                <i class="fas fa-search"></i> Check Availability
-                            </button>
-                            <button type="button" class="btn btn-success" id="calculate-price">
-                                <i class="fas fa-calculator"></i> Calculate Price
-                            </button>
-                            
-                            <div class="availability-status" id="availability-status"></div>
-                            <div class="pricing-info" id="pricing-info" style="display: none;"></div>
                         </div>
 
                         <!-- Passengers Section -->
-                        <div class="form-section">
-                            <h4><i class="fas fa-users"></i> Passengers</h4>
-                            <div id="passengers-container">
-                                {% for passenger_form in passenger_forms %}
-                                <div class="passenger-form" data-passenger-index="0">
-                                    <h5>Passenger #1</h5>
-                                    <div class="form-row">
-                                        <div class="form-col">
-                                            <div class="form-group">
-                                                <label>Full Name <span class="required-field">*</span></label>
-                                                {{ passenger_form.name }}
-                                            </div>
+                        <div class="card mb-4">
+                            <div class="card-header bg-jet-light">
+                                <h5 class="mb-0"><i class="bi bi-people-fill me-2"></i>Passengers</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="passengers-container">
+                                    {% for passenger_form in passenger_forms %}
+                                    <div class="card mb-3 passenger-form" data-passenger-index="0">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Passenger #1</h6>
                                         </div>
-                                        <div class="form-col">
-                                            <div class="form-group">
-                                                <label>Nationality</label>
-                                                {{ passenger_form.nationality }}
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Full Name <span class="text-danger">*</span></label>
+                                                        {{ passenger_form.name }}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Nationality</label>
+                                                        {{ passenger_form.nationality }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Date of Birth</label>
+                                                        {{ passenger_form.date_of_birth }}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold">Passport Number</label>
+                                                        {{ passenger_form.passport_number }}
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="form-row">
-                                        <div class="form-col">
-                                            <div class="form-group">
-                                                <label>Date of Birth</label>
-                                                {{ passenger_form.date_of_birth }}
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pricing & Availability Section -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-jet-light">
+                                <h5 class="mb-0"><i class="bi bi-cash-coin me-2"></i>Pricing & Availability</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex gap-2 mb-3">
+                                    <button type="button" class="btn btn-outline-jet" id="check-availability">
+                                        <i class="bi bi-search me-1"></i> Check Availability
+                                    </button>
+                                    <button type="button" class="btn btn-jet" id="calculate-price">
+                                        <i class="bi bi-calculator me-1"></i> Calculate Price
+                                    </button>
+                                </div>
+                                
+                                <div class="alert alert-info" id="availability-status" style="display: none;">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <span id="availability-message">Availability not checked yet</span>
+                                </div>
+                                
+                                <div class="card bg-light" id="pricing-info" style="display: none;">
+                                    <div class="card-body">
+                                        <h6 class="card-title"><i class="bi bi-receipt me-2"></i>Price Estimate</h6>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <p class="mb-1"><strong>Base Price:</strong> <span id="base-price">$0.00</span></p>
+                                                <p class="mb-1"><strong>Taxes & Fees:</strong> <span id="taxes">$0.00</span></p>
                                             </div>
-                                        </div>
-                                        <div class="form-col">
-                                            <div class="form-group">
-                                                <label>Passport Number</label>
-                                                {{ passenger_form.passport_number }}
+                                            <div class="col-md-6">
+                                                <p class="mb-1"><strong>Discounts:</strong> <span id="discounts">$0.00</span></p>
+                                                <h5 class="mt-2"><strong>Total Price:</strong> <span id="total-price" class="text-success">$0.00</span></h5>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                {% endfor %}
                             </div>
                         </div>
 
                         <!-- Submit Section -->
-                        <div class="form-section">
-                            <div class="form-group">
-                                <button type="submit" class="btn btn-primary btn-lg">
-                                    <i class="fas fa-save"></i> Create Booking
-                                </button>
-                                <a href="{% url 'booking_list' %}" class="btn btn-secondary btn-lg">
-                                    <i class="fas fa-times"></i> Cancel
-                                </a>
-                            </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-jet btn-lg px-4">
+                                <i class="bi bi-save me-2"></i> Create Booking
+                            </button>
+                            <a href="{% url 'booking_list' %}" class="btn btn-outline-secondary btn-lg px-4">
+                                <i class="bi bi-x-circle me-2"></i> Cancel
+                            </a>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
+
+<style>
+    :root {
+        --jet-primary: #1976D2;
+        --jet-secondary: #64B5F6;
+        --jet-light: #E3F2FD;
+        --jet-dark: #0D47A1;
+    }
+    
+    .bg-jet-primary {
+        background-color: var(--jet-primary) !important;
+    }
+    
+    .bg-jet-light {
+        background-color: var(--jet-light) !important;
+    }
+    
+    .btn-jet {
+        background-color: var(--jet-primary);
+        color: white;
+        border-color: var(--jet-primary);
+    }
+    
+    .btn-jet:hover {
+        background-color: var(--jet-dark);
+        border-color: var(--jet-dark);
+        color: white;
+    }
+    
+    .btn-outline-jet {
+        color: var(--jet-primary);
+        border-color: var(--jet-primary);
+    }
+    
+    .btn-outline-jet:hover {
+        background-color: var(--jet-primary);
+        color: white;
+    }
+    
+    .flight-leg {
+        border-left: 3px solid var(--jet-primary);
+    }
+    
+    .passenger-form {
+        border-left: 3px solid #28a745;
+    }
+    
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+    
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(0,0,0,.1);
+        border-radius: 50%;
+        border-top-color: var(--jet-primary);
+        animation: spin 1s ease-in-out infinite;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+</style>
 
 
 <!-- View Booking Modal -->

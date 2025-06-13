@@ -70,6 +70,7 @@ urlpatterns = [
     # Booking list view - displays paginated list of bookings with optional status filter
     path('bookings/', views.booking_list, name='booking_list'),
     path('bookings/<int:booking_id>/detail/', views.booking_detail, name='booking_detail'),
+    path('admin-bookings/<int:booking_id>/detail/', views.booking_detail2, name='booking_detail2'),
     path('bookings/<int:booking_id>/update/', views.update_booking_status, name='update_booking_status'),
     path('bookings/<int:booking_id>/delete/', views.delete_booking, name='delete_booking'),
 

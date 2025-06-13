@@ -1,0 +1,301 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Booking Details - {{ booking.booking_order_id }}{% endblock %}
+
+{% block content %}
+<div class="message-container" id="system-messages">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+        <i class="bi {% if message.tags == 'success' %}bi-check-circle{% else %}bi-exclamation-triangle{% endif %} me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="pagetitle">
+    <h1><i class="bi bi-journal-check me-2"></i>Booking Details</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}"><i class="bi bi-house-door"></i> Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'booking_list' %}">Bookings</a></li>
+            <li class="breadcrumb-item active">{{ booking.booking_order_id }}</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-jet-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-ticket-detailed me-2"></i>Booking #{{ booking.booking_order_id }}
+                        </h5>
+                        <span class="badge bg-{% if booking.status_code == 'confirmed' %}success{% elif booking.status_code == 'pending' %}warning{% else %}secondary{% endif %}">
+                            {{ booking.status }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Client Information -->
+                        <div class="col-md-4">
+                            <div class="card mb-4">
+                                <div class="card-header bg-jet-light">
+                                    <h6 class="mb-0"><i class="bi bi-person-lines-fill me-2"></i>Client Information</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold text-jet">Name:</label>
+                                        <p class="form-control-static">{{ booking.client.first_name }} {{ booking.client.last_name }}</p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold text-jet">Email:</label>
+                                        <p class="form-control-static">{{ booking.client.email }}</p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold text-jet">Phone:</label>
+                                        <p class="form-control-static">{{ booking.client.phone_number }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Payment Information -->
+                            <div class="card">
+                                <div class="card-header bg-jet-light">
+                                    <h6 class="mb-0"><i class="bi bi-credit-card me-2"></i>Payment Details</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold text-jet">Status:</label>
+                                        <span class="badge bg-{% if booking.payment_status == 'Paid' %}success{% else %}warning{% endif %}">
+                                            {{ booking.payment_status }}
+                                        </span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold text-jet">Total Price:</label>
+                                        <p class="form-control-static">${{ booking.total_price }}</p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold text-jet">Commission ({{ booking.commission_rate }}%):</label>
+                                        <p class="form-control-static">${{ booking.agent_commission }}</p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label fw-bold text-jet">Owner Earnings:</label>
+                                        <p class="form-control-static">${{ booking.owner_earnings }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Flight Information -->
+                        <div class="col-md-8">
+                            <div class="card mb-4">
+                                <div class="card-header bg-jet-light">
+                                    <h6 class="mb-0"><i class="bi bi-airplane me-2"></i>Flight Details</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold text-jet">Aircraft:</label>
+                                            <p class="form-control-static">
+                                                {{ booking.aircraft.model }} ({{ booking.aircraft.registration }})
+                                            </p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold text-jet">Trip Type:</label>
+                                            <p class="form-control-static">{{ booking.trip_type }}</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <h6 class="text-jet mb-3">Flight Itinerary</h6>
+                                        {% for leg in booking.flight_legs.all %}
+                                        <div class="flight-leg mb-4 {% if not forloop.last %}border-bottom pb-4{% endif %}">
+                                            <div class="d-flex justify-content-between mb-2">
+                                                <h6 class="text-jet mb-0">Leg {{ forloop.counter }}</h6>
+                                                <span class="badge bg-light text-dark">
+                                                    ${{ leg.leg_price }}
+                                                </span>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-bold text-jet">Departure:</label>
+                                                    <p class="form-control-static">
+                                                        {{ leg.departure_code }} - {{ leg.departure_name }}<br>
+                                                        <small class="text-muted">
+                                                            {{ leg.departure_datetime }}
+                                                        </small>
+                                                    </p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-bold text-jet">Arrival:</label>
+                                                    <p class="form-control-static">
+                                                        {{ leg.arrival_code }} - {{ leg.arrival_name }}<br>
+                                                        <small class="text-muted">
+                                                            {{ leg.arrival_datetime }}
+                                                        </small>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-md-4">
+                                                    <label class="form-label fw-bold text-jet">Duration:</label>
+                                                    <p class="form-control-static">
+                                                        {{ leg.flight_hours }} hours
+                                                    </p>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="form-label fw-bold text-jet">Passengers:</label>
+                                                    <p class="form-control-static">
+                                                        {{ leg.passenger_count }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% empty %}
+                                        <div class="text-muted">
+                                            <p>No flight legs found for this booking.</p>
+                                        </div>
+                                        {% endfor %}
+                            
+                            <!-- Passengers -->
+                            <div class="card">
+                                <div class="card-header bg-jet-light">
+                                    <h6 class="mb-0"><i class="bi bi-people-fill me-2"></i>Passengers</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead class="bg-jet-light">
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Nationality</th>
+                                                    <th>Date of Birth</th>
+                                                    <th>Passport</th>
+                                                    <th>Order</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for passenger in booking.passengers.all %}
+                                                    <tr>
+                                                        <td>{{ passenger.name }}</td>
+                                                        <td>{{ passenger.nationality|title }}</td>
+                                                        <td>{{ passenger.date_of_birth }}</td>
+                                                        <td>{{ passenger.passport_number }}</td>
+                                                        <td>{{ passenger.order }}</td>
+                                                    </tr>
+                                                    {% empty %}
+                                                    <tr>
+                                                        <td colspan="5" class="text-muted text-center">No passengers found for this booking.</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Special Requests -->
+                    <div class="card mt-4">
+                        <div class="card-header bg-jet-light">
+                            <h6 class="mb-0"><i class="bi bi-chat-square-text me-2"></i>Special Requests</h6>
+                        </div>
+                        <div class="card-body">
+                            <p>{{ booking.special_requests }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-footer bg-jet-light">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-info-circle me-2"></i>Booking Information</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-calendar me-2"></i> Created: {{ booking.created_at }}</li>
+                                <li><i class="bi bi-arrow-repeat me-2"></i> Last Updated: {{ booking.updated_at }}</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-lightning me-2"></i>Quick Actions</h6>
+                            <div class="d-flex">
+                                <button class="btn btn-sm btn-outline-jet me-2">
+                                    <i class="bi bi-printer me-1"></i> Print Itinerary
+                                </button>
+                                <button class="btn btn-sm btn-outline-jet me-2">
+                                    <i class="bi bi-envelope me-1"></i> Email Client
+                                </button>
+                                <button class="btn btn-sm btn-outline-jet">
+                                    <i class="bi bi-pencil me-1"></i> Edit Booking
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    :root {
+        --jet-primary: #1976D2;
+        --jet-secondary: #64B5F6;
+        --jet-light: #E3F2FD;
+        --jet-dark: #0D47A1;
+    }
+    
+    .bg-jet-primary {
+        background-color: var(--jet-primary) !important;
+    }
+    
+    .bg-jet-light {
+        background-color: var(--jet-light) !important;
+    }
+    
+    .text-jet {
+        color: var(--jet-primary);
+    }
+    
+    .btn-jet {
+        background-color: var(--jet-primary);
+        color: white;
+        border-color: var(--jet-primary);
+    }
+    
+    .btn-jet:hover {
+        background-color: var(--jet-dark);
+        border-color: var(--jet-dark);
+        color: white;
+    }
+    
+    .btn-outline-jet {
+        color: var(--jet-primary);
+        border-color: var(--jet-primary);
+    }
+    
+    .btn-outline-jet:hover {
+        background-color: var(--jet-primary);
+        color: white;
+    }
+    
+    .flight-leg {
+        padding-bottom: 1rem;
+    }
+    
+    .form-control-static {
+        padding-top: calc(0.375rem + 1px);
+        padding-bottom: calc(0.375rem + 1px);
+        margin-bottom: 0;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: var(--jet-light);
+    }
+</style>
+{% endblock %}
