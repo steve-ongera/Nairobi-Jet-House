@@ -177,17 +177,220 @@
                                     </nav>
                                 </div>
                                 
-                                <!-- Other Tabs (content would be similar to All Clients tab) -->
+                                <!-- Verified Clients Tab -->
                                 <div class="tab-pane fade" id="verified">
-                                    <!-- Verified clients content -->
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h5 class="text-jet mb-0"><i class="bi bi-patch-check me-2"></i>Verified Clients</h5>
+                                        <div>
+                                            <span class="badge bg-success me-2">Total: {{ verified_count }}</span>
+                                            <div class="input-group input-group-sm" style="width: 250px;">
+                                                <input type="text" class="form-control" placeholder="Search verified clients...">
+                                                <button class="btn btn-outline-jet" type="button">
+                                                    <i class="bi bi-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-hover datatable">
+                                            <thead class="bg-jet-light">
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Client</th>
+                                                    <th>Contact</th>
+                                                    <th>Company</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for client in verified_clients %}
+                                                <tr>
+                                                    <td><strong>#{{ client.id }}</strong></td>
+                                                    <td>
+                                                        <strong>{{ client.get_full_name }}</strong><br>
+                                                        <small class="text-muted">Member since {{ client.date_joined|date:"M Y" }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>{{ client.email }}</strong><br>
+                                                        <small class="text-muted">{{ client.phone_number|default:"No phone" }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>{{ client.company_name|default:"-" }}</strong><br>
+                                                        <small class="text-muted">{{ client.tax_id|default:"" }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-success">
+                                                            <i class="bi bi-check-circle me-1"></i> Verified
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <button class="btn btn-outline-primary view-client" 
+                                                                    data-client-id="{{ client.id }}"
+                                                                    title="View Details">
+                                                                <i class="bi bi-eye"></i>
+                                                            </button>
+                                                            <button class="btn btn-outline-secondary"
+                                                                    title="Edit">
+                                                                <i class="bi bi-pencil"></i>
+                                                            </button>
+                                                            <button class="btn btn-outline-danger"
+                                                                    title="Delete">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                                 
+                                <!-- Pending Clients Tab -->
                                 <div class="tab-pane fade" id="pending">
-                                    <!-- Pending clients content -->
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h5 class="text-jet mb-0"><i class="bi bi-hourglass me-2"></i>Pending Clients</h5>
+                                        <div>
+                                            <span class="badge bg-success me-2">Total: {{ pending_count }}</span>
+                                            <div class="input-group input-group-sm" style="width: 250px;">
+                                                <input type="text" class="form-control" placeholder="Search pending clients...">
+                                                <button class="btn btn-outline-jet" type="button">
+                                                    <i class="bi bi-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-hover datatable">
+                                            <thead class="bg-jet-light">
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Client</th>
+                                                    <th>Contact</th>
+                                                    <th>Company</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for client in pending_clients %}
+                                                <tr>
+                                                    <td><strong>#{{ client.id }}</strong></td>
+                                                    <td>
+                                                        <strong>{{ client.get_full_name }}</strong><br>
+                                                        <small class="text-muted">Member since {{ client.date_joined|date:"M Y" }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>{{ client.email }}</strong><br>
+                                                        <small class="text-muted">{{ client.phone_number|default:"No phone" }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>{{ client.company_name|default:"-" }}</strong><br>
+                                                        <small class="text-muted">{{ client.tax_id|default:"" }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-warning text-dark">
+                                                            <i class="bi bi-clock me-1"></i> Pending
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <button class="btn btn-outline-primary view-client" 
+                                                                    data-client-id="{{ client.id }}"
+                                                                    title="View Details">
+                                                                <i class="bi bi-eye"></i>
+                                                            </button>
+                                                            <button class="btn btn-outline-secondary"
+                                                                    title="Edit">
+                                                                <i class="bi bi-pencil"></i>
+                                                            </button>
+                                                            <button class="btn btn-outline-danger"
+                                                                    title="Delete">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                                 
+                                <!-- Inactive Clients Tab -->
                                 <div class="tab-pane fade" id="inactive">
-                                    <!-- Inactive clients content -->
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h5 class="text-jet mb-0"><i class="bi bi-person-x me-2"></i>Inactive Clients</h5>
+                                        <div>
+                                            <span class="badge bg-success me-2">Total: {{ inactive_count }}</span>
+                                            <div class="input-group input-group-sm" style="width: 250px;">
+                                                <input type="text" class="form-control" placeholder="Search inactive clients...">
+                                                <button class="btn btn-outline-jet" type="button">
+                                                    <i class="bi bi-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-hover datatable">
+                                            <thead class="bg-jet-light">
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Client</th>
+                                                    <th>Contact</th>
+                                                    <th>Company</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for client in inactive_clients %}
+                                                <tr>
+                                                    <td><strong>#{{ client.id }}</strong></td>
+                                                    <td>
+                                                        <strong>{{ client.get_full_name }}</strong><br>
+                                                        <small class="text-muted">Member since {{ client.date_joined|date:"M Y" }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>{{ client.email }}</strong><br>
+                                                        <small class="text-muted">{{ client.phone_number|default:"No phone" }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>{{ client.company_name|default:"-" }}</strong><br>
+                                                        <small class="text-muted">{{ client.tax_id|default:"" }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-secondary">
+                                                            <i class="bi bi-person-x me-1"></i> Inactive
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <button class="btn btn-outline-primary view-client" 
+                                                                    data-client-id="{{ client.id }}"
+                                                                    title="View Details">
+                                                                <i class="bi bi-eye"></i>
+                                                            </button>
+                                                            <button class="btn btn-outline-secondary"
+                                                                    title="Edit">
+                                                                <i class="bi bi-pencil"></i>
+                                                            </button>
+                                                            <button class="btn btn-outline-danger"
+                                                                    title="Delete">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -1474,6 +1474,12 @@ def client_list(request):
     
     context = {
         'page_obj': page_obj,
+        'verified_clients': clients.filter(verified=True, is_active=True),
+        'pending_clients': clients.filter(verified=False, is_active=True),
+        'inactive_clients': clients.filter(is_active=False),
+        'verified_count': clients.filter(verified=True, is_active=True).count(),
+        'pending_count': clients.filter(verified=False, is_active=True).count(),
+        'inactive_count': clients.filter(is_active=False).count(),
     }
     return render(request, 'clients/clients.html', context)
 
