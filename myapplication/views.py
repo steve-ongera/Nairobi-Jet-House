@@ -2327,6 +2327,12 @@ def booking_list(request):
     context = {
         'page_obj': page_obj,
         'status_choices': Booking.STATUS_CHOICES,
+        'confirmed_bookings': bookings.filter(status='confirmed'),
+        'pending_bookings': bookings.filter(status='pending'),
+        'cancelled_bookings': bookings.filter(status='cancelled'),
+        'confirmed_count': bookings.filter(status='confirmed').count(),
+        'pending_count': bookings.filter(status='pending').count(),
+        'cancelled_count': bookings.filter(status='cancelled').count(),
     }
     return render(request, 'bookings/booking_list.html', context)
 

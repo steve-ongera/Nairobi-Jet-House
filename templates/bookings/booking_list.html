@@ -199,17 +199,275 @@
                                     </nav>
                                 </div>
                                 
-                                <!-- Other Tabs (content would be similar to All Bookings tab) -->
+                                <!-- Other Tabs (filtered content) -->
                                 <div class="tab-pane fade" id="confirmed">
-                                    <!-- Confirmed bookings content -->
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h5 class="text-jet mb-0"><i class="bi bi-check-circle me-2"></i>Confirmed Bookings</h5>
+                                        <div>
+                                            <span class="badge bg-success me-2">Total: {{ confirmed_count }}</span>
+                                            <div class="input-group input-group-sm" style="width: 250px;">
+                                                <input type="text" class="form-control" placeholder="Search confirmed bookings...">
+                                                <button class="btn btn-outline-jet" type="button">
+                                                    <i class="bi bi-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-hover datatable align-middle">
+                                            <thead class="bg-jet-light">
+                                                <tr>
+                                                    <th>Booking</th>
+                                                    <th>Client</th>
+                                                    <th>Flight Details</th>
+                                                    <th>Trip Type</th>
+                                                    <th>Status</th>
+                                                    <th>Payment</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for booking in confirmed_bookings %}
+                                                <tr>
+                                                    <td>
+                                                    <a href="{% url 'booking_detail2' booking.id %}"><strong>#{{ booking.booking_order_id }}</strong></a><br>
+                                                        <small class="text-muted">{{ booking.created_at|date:"M d, Y" }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>{{ booking.client.get_full_name }}</strong><br>
+                                                        <small class="text-muted">{{ booking.client.company_name|default:"" }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>{{ booking.aircraft.model_name }}</strong><br>
+                                                        <small class="text-muted">
+                                                            {% with first_leg=booking.flight_legs.first %}
+                                                            {{ first_leg.departure_airport.icao_code }} → 
+                                                            {{ first_leg.arrival_airport.icao_code }} | 
+                                                            {{ first_leg.departure_datetime|date:"M d, H:i" }}
+                                                            {% endwith %}
+                                                        </small>
+                                                    </td>
+                                                    <td>{{ booking.get_trip_type_display }}</td>
+                                                    <td>
+                                                        <span class="badge bg-success">
+                                                            <i class="bi bi-check-circle me-1"></i>
+                                                            {{ booking.get_status_display }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-{{ booking.payment_status|yesno:'success,warning' }}">
+                                                            <i class="bi 
+                                                            {% if booking.payment_status %}bi-credit-card
+                                                            {% else %}bi-clock{% endif %} me-1"></i>
+                                                            {% if booking.payment_status %}Paid{% else %}Pending{% endif %}
+                                                        </span><br>
+                                                        <small class="text-muted">${{ booking.total_price }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <button class="btn btn-outline-primary view-booking" 
+                                                                    data-booking-id="{{ booking.id }}"
+                                                                    title="View Details">
+                                                                <i class="bi bi-eye"></i>
+                                                            </button>
+                                                            <button class="btn btn-outline-secondary edit-booking"
+                                                                    title="Edit Status"
+                                                                    data-booking-id="{{ booking.id }}">
+                                                                <i class="bi bi-pencil"></i>
+                                                            </button>
+                                                            <button class="btn btn-outline-danger delete-booking"
+                                                                    title="Delete Booking"
+                                                                    data-booking-id="{{ booking.id }}">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                                
+
                                 <div class="tab-pane fade" id="pending">
-                                    <!-- Pending bookings content -->
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h5 class="text-jet mb-0"><i class="bi bi-hourglass me-2"></i>Pending Bookings</h5>
+                                        <div>
+                                            <span class="badge bg-success me-2">Total: {{ pending_count }}</span>
+                                            <div class="input-group input-group-sm" style="width: 250px;">
+                                                <input type="text" class="form-control" placeholder="Search pending bookings...">
+                                                <button class="btn btn-outline-jet" type="button">
+                                                    <i class="bi bi-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-hover datatable align-middle">
+                                            <thead class="bg-jet-light">
+                                                <tr>
+                                                    <th>Booking</th>
+                                                    <th>Client</th>
+                                                    <th>Flight Details</th>
+                                                    <th>Trip Type</th>
+                                                    <th>Status</th>
+                                                    <th>Payment</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for booking in pending_bookings %}
+                                                <tr>
+                                                    <td>
+                                                    <a href="{% url 'booking_detail2' booking.id %}"><strong>#{{ booking.booking_order_id }}</strong></a><br>
+                                                        <small class="text-muted">{{ booking.created_at|date:"M d, Y" }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>{{ booking.client.get_full_name }}</strong><br>
+                                                        <small class="text-muted">{{ booking.client.company_name|default:"" }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>{{ booking.aircraft.model_name }}</strong><br>
+                                                        <small class="text-muted">
+                                                            {% with first_leg=booking.flight_legs.first %}
+                                                            {{ first_leg.departure_airport.icao_code }} → 
+                                                            {{ first_leg.arrival_airport.icao_code }} | 
+                                                            {{ first_leg.departure_datetime|date:"M d, H:i" }}
+                                                            {% endwith %}
+                                                        </small>
+                                                    </td>
+                                                    <td>{{ booking.get_trip_type_display }}</td>
+                                                    <td>
+                                                        <span class="badge bg-warning">
+                                                            <i class="bi bi-hourglass me-1"></i>
+                                                            {{ booking.get_status_display }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-{{ booking.payment_status|yesno:'success,warning' }}">
+                                                            <i class="bi 
+                                                            {% if booking.payment_status %}bi-credit-card
+                                                            {% else %}bi-clock{% endif %} me-1"></i>
+                                                            {% if booking.payment_status %}Paid{% else %}Pending{% endif %}
+                                                        </span><br>
+                                                        <small class="text-muted">${{ booking.total_price }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <button class="btn btn-outline-primary view-booking" 
+                                                                    data-booking-id="{{ booking.id }}"
+                                                                    title="View Details">
+                                                                <i class="bi bi-eye"></i>
+                                                            </button>
+                                                            <button class="btn btn-outline-secondary edit-booking"
+                                                                    title="Edit Status"
+                                                                    data-booking-id="{{ booking.id }}">
+                                                                <i class="bi bi-pencil"></i>
+                                                            </button>
+                                                            <button class="btn btn-outline-danger delete-booking"
+                                                                    title="Delete Booking"
+                                                                    data-booking-id="{{ booking.id }}">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                                
+
                                 <div class="tab-pane fade" id="cancelled">
-                                    <!-- Cancelled bookings content -->
+                                    <div class="d-flex justify-content-between align-items-center mb-4">
+                                        <h5 class="text-jet mb-0"><i class="bi bi-x-circle me-2"></i>Cancelled Bookings</h5>
+                                        <div>
+                                            <span class="badge bg-success me-2">Total: {{ cancelled_count }}</span>
+                                            <div class="input-group input-group-sm" style="width: 250px;">
+                                                <input type="text" class="form-control" placeholder="Search cancelled bookings...">
+                                                <button class="btn btn-outline-jet" type="button">
+                                                    <i class="bi bi-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-hover datatable align-middle">
+                                            <thead class="bg-jet-light">
+                                                <tr>
+                                                    <th>Booking</th>
+                                                    <th>Client</th>
+                                                    <th>Flight Details</th>
+                                                    <th>Trip Type</th>
+                                                    <th>Status</th>
+                                                    <th>Payment</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for booking in cancelled_bookings %}
+                                                <tr>
+                                                    <td>
+                                                    <a href="{% url 'booking_detail2' booking.id %}"><strong>#{{ booking.booking_order_id }}</strong></a><br>
+                                                        <small class="text-muted">{{ booking.created_at|date:"M d, Y" }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>{{ booking.client.get_full_name }}</strong><br>
+                                                        <small class="text-muted">{{ booking.client.company_name|default:"" }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <strong>{{ booking.aircraft.model_name }}</strong><br>
+                                                        <small class="text-muted">
+                                                            {% with first_leg=booking.flight_legs.first %}
+                                                            {{ first_leg.departure_airport.icao_code }} → 
+                                                            {{ first_leg.arrival_airport.icao_code }} | 
+                                                            {{ first_leg.departure_datetime|date:"M d, H:i" }}
+                                                            {% endwith %}
+                                                        </small>
+                                                    </td>
+                                                    <td>{{ booking.get_trip_type_display }}</td>
+                                                    <td>
+                                                        <span class="badge bg-danger">
+                                                            <i class="bi bi-x-circle me-1"></i>
+                                                            {{ booking.get_status_display }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge bg-{{ booking.payment_status|yesno:'success,warning' }}">
+                                                            <i class="bi 
+                                                            {% if booking.payment_status %}bi-credit-card
+                                                            {% else %}bi-clock{% endif %} me-1"></i>
+                                                            {% if booking.payment_status %}Paid{% else %}Pending{% endif %}
+                                                        </span><br>
+                                                        <small class="text-muted">${{ booking.total_price }}</small>
+                                                    </td>
+                                                    <td>
+                                                        <div class="btn-group btn-group-sm" role="group">
+                                                            <button class="btn btn-outline-primary view-booking" 
+                                                                    data-booking-id="{{ booking.id }}"
+                                                                    title="View Details">
+                                                                <i class="bi bi-eye"></i>
+                                                            </button>
+                                                            <button class="btn btn-outline-secondary edit-booking"
+                                                                    title="Edit Status"
+                                                                    data-booking-id="{{ booking.id }}">
+                                                                <i class="bi bi-pencil"></i>
+                                                            </button>
+                                                            <button class="btn btn-outline-danger delete-booking"
+                                                                    title="Delete Booking"
+                                                                    data-booking-id="{{ booking.id }}">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
