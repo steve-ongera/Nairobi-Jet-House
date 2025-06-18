@@ -797,6 +797,14 @@ def api_login(request):
 from decimal import Decimal
 from datetime import timedelta
 
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.conf import settings
+import logging
+
+logger = logging.getLogger(__name__)
+
 @require_http_methods(["POST"])
 @login_required
 def create_booking(request):
@@ -989,16 +997,24 @@ def create_booking(request):
                     nationality=passenger_data['nationality']
                 )
 
+            # Send confirmation email to client
+            try:
+                send_booking_email_confirmation(
+                    booking, client_name, client_email, client_phone, 
+                    company_name, flight_legs, passengers_data, 
+                    catering_required, ground_transport
+                )
+                logger.info(f"Confirmation email sent to {client_email} for booking #{booking.id}")
+            except Exception as e:
+                logger.error(f"Failed to send confirmation email for booking #{booking.id}: {str(e)}")
+                # Don't fail the booking creation if email fails
             
             # Log the booking creation
             logger.info(f"Booking created: #{booking.id} by user {request.user.username}")
             
-            # You might want to send confirmation email here
-            # send_booking_confirmation_email(booking)
-            
             return JsonResponse({
                 'success': True,
-                'message': 'Booking request submitted successfully',
+                'message': 'Booking request submitted successfully. A confirmation email has been sent.',
                 'booking_id': booking.id,
                 'total_price': float(total_price),
                 'agent_commission': float(agent_commission),
@@ -1021,6 +1037,121 @@ def create_booking(request):
             'success': False,
             'message': 'An error occurred while processing your booking. Please try again.'
         }, status=500)
+
+
+def send_booking_email_confirmation(booking, client_name, client_email, client_phone, company_name, flight_legs, passengers_data, catering_required, ground_transport):
+    """Send booking confirmation email to client"""
+    
+    subject = f'Flight Booking Confirmation - #{booking.id}'
+    
+    # Create email context
+    context = {
+        'booking': booking,
+        'client_name': client_name,
+        'client_email': client_email,
+        'client_phone': client_phone,
+        'company_name': company_name,
+        'flight_legs': flight_legs,
+        'passengers': passengers_data,
+        'catering_required': catering_required,
+        'ground_transport': ground_transport,
+        'total_price': booking.total_price,
+        'status': booking.status,
+    }
+    
+    # Option 1: Use HTML template (recommended)
+    try:
+        html_message = render_to_string('emails/booking_confirmation.html', context)
+        plain_message = strip_tags(html_message)
+    except:
+        # Fallback to plain text if template doesn't exist
+        plain_message = create_plain_text_confirmation(context)
+        html_message = None
+    
+    # Send email
+    send_mail(
+        subject=subject,
+        message=plain_message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[client_email],
+        html_message=html_message,
+        fail_silently=False,
+    )
+
+
+def create_plain_text_confirmation(context):
+    """Create plain text confirmation email"""
+    booking = context['booking']
+    client_name = context['client_name']
+    flight_legs = context['flight_legs']
+    passengers = context['passengers']
+    
+    message = f"""
+Dear {client_name},
+
+Thank you for your flight booking request. Here are your booking details:
+
+BOOKING INFORMATION:
+Booking ID: #{booking.id}
+Status: {booking.status.title()}
+Total Price: ${booking.total_price:,.2f}
+
+FLIGHT DETAILS:
+"""
+    
+    for i, leg in enumerate(flight_legs, 1):
+        leg_type = "Departure" if i == 1 else "Return"
+        message += f"""
+{leg_type} Flight:
+- From: {leg.departure_airport.icao_code}
+- To: {leg.arrival_airport.icao_code}
+- Date & Time: {leg.departure_datetime.strftime('%B %d, %Y at %I:%M %p')}
+- Flight Duration: {leg.flight_hours} hours
+- Price: ${leg.leg_price:,.2f}
+"""
+    
+    message += f"""
+AIRCRAFT DETAILS:
+- Aircraft: {booking.aircraft}
+
+PASSENGER INFORMATION:
+"""
+    
+    for i, passenger in enumerate(passengers, 1):
+        message += f"- Passenger {i}: {passenger['name']}"
+        if passenger['nationality']:
+            message += f" ({passenger['nationality']})"
+        message += "\n"
+    
+    if context.get('catering_required'):
+        message += "\n- Catering: Requested"
+    
+    if context.get('ground_transport'):
+        message += "\n- Ground Transport: Requested"
+    
+    if booking.special_requests:
+        message += f"\nSPECIAL REQUESTS:\n{booking.special_requests}"
+    
+    message += f"""
+
+CONTACT INFORMATION:
+Email: {context['client_email']}
+Phone: {context['client_phone']}
+"""
+    
+    if context.get('company_name'):
+        message += f"Company: {context['company_name']}\n"
+    
+    message += """
+Your booking is currently pending confirmation. We will contact you shortly to finalize the details.
+
+If you have any questions, please don't hesitate to contact us.
+
+Best regards,
+Flight Booking Team
+"""
+    
+    return message
 
 # Alternative login view if you're using email as the username field
 @require_http_methods(["POST"])
