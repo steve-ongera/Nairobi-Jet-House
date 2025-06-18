@@ -3006,6 +3006,36 @@ def leasing_inquiry_detail(request, inquiry_id):
         }
     return JsonResponse(data)
 
+@login_required
+def aircraft_leasing_detail(request, pk):
+    """
+    View to display detailed information about a specific aircraft leasing inquiry.
+    Only accessible by authenticated users.
+    """
+    # Get the specific inquiry or return 404 if not found
+    inquiry = get_object_or_404(AircraftLeasingInquiry, pk=pk)
+    
+    # Prepare document URLs if they exist
+    documents = []
+    if inquiry.supporting_document_1:
+        documents.append({
+            'name': inquiry.supporting_document_1.name.split('/')[-1],
+            'url': inquiry.supporting_document_1.url
+        })
+    if inquiry.supporting_document_2:
+        documents.append({
+            'name': inquiry.supporting_document_2.name.split('/')[-1],
+            'url': inquiry.supporting_document_2.url
+        })
+    
+    context = {
+        'inquiry': inquiry,
+        'documents': documents,
+        'active_tab': 'aircraft_leasing',
+    }
+    
+    return render(request, 'leasing/aircraft_leasing_detail.html', context)
+
 @require_http_methods(["POST"])
 def update_leasing_inquiry(request, inquiry_id):
     try:

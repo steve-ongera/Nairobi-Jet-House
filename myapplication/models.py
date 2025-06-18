@@ -304,12 +304,31 @@ class AirCargoRequest(models.Model):
     def __str__(self):
         return f"Cargo Request #{self.id} - {self.departure} to {self.destination}"
 
+import string
+import random
+from django.db import models
+
+def generate_inquiry_code():
+    """Generate a random 10-character alphanumeric code"""
+    characters = string.ascii_uppercase + string.digits
+    return ''.join(random.choice(characters) for _ in range(10))
+
 class AircraftLeasingInquiry(models.Model):
     LEASING_TYPE_CHOICES = [
         ('private_jet', 'Private Jet Charter'),
         ('group_charter', 'Group Air Charter'),
         ('aircraft_leasing', 'Aircraft Leasing'),
     ]
+    
+    # Auto-generated inquiry code
+    inquiry_code = models.CharField(
+        max_length=10, 
+        blank=True,
+        null=  True, 
+        unique= True  ,
+        default=generate_inquiry_code,
+        editable=True
+    )
     
     leasing_type = models.CharField(max_length=20, choices=LEASING_TYPE_CHOICES)
     name = models.CharField(max_length=100)
@@ -324,9 +343,18 @@ class AircraftLeasingInquiry(models.Model):
     supporting_document_1 = models.FileField(upload_to='aircraft_leasing/documents/', blank=True, null=True)
     supporting_document_2 = models.FileField(upload_to='aircraft_leasing/documents/', blank=True, null=True)
     
-    def __str__(self):
-        return f"Leasing Inquiry #{self.id} - {self.get_leasing_type_display()}"
+    def save(self, *args, **kwargs):
+        # Ensure unique code generation in case of collision
+        if not self.inquiry_code:
+            while True:
+                code = generate_inquiry_code()
+                if not AircraftLeasingInquiry.objects.filter(inquiry_code=code).exists():
+                    self.inquiry_code = code
+                    break
+        super().save(*args, **kwargs)
     
+    def __str__(self):
+        return f"Inquiry {self.inquiry_code} - {self.get_leasing_type_display()}"
 
 
 class GroupInquiry(models.Model):

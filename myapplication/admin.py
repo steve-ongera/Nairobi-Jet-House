@@ -363,7 +363,7 @@ class AirCargoRequestAdmin(admin.ModelAdmin):
 @admin.register(AircraftLeasingInquiry)
 class AircraftLeasingInquiryAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'leasing_type', 'name', 'email', 'telephone', 'created_at'
+        'inquiry_code' , 'leasing_type', 'name', 'email', 'telephone', 'created_at'
     )
     list_filter = ('leasing_type', 'created_at')
     search_fields = ('name', 'email', 'company')

@@ -84,8 +84,9 @@ urlpatterns = [
     path('cargo-requests/<int:request_id>/update/', views.update_cargo_request, name='update_cargo_request'),
     path('cargo-requests/<int:request_id>/delete/', views.delete_cargo_request, name='delete_cargo_request'),
 
-     path('leasing-inquiries/', views.leasing_inquiry_list, name='leasing_inquiry_list'),
+    path('leasing-inquiries/', views.leasing_inquiry_list, name='leasing_inquiry_list'),
     path('leasing-inquiries/<int:inquiry_id>/detail/', views.leasing_inquiry_detail, name='leasing_inquiry_detail'),
+    path('aircraft-leasing/<int:pk>/', views.aircraft_leasing_detail, name='aircraft_leasing_detail'),
     path('leasing-inquiries/<int:inquiry_id>/update/', views.update_leasing_inquiry, name='update_leasing_inquiry'),
     path('leasing-inquiries/<int:inquiry_id>/delete/', views.delete_leasing_inquiry, name='delete_leasing_inquiry'),
 

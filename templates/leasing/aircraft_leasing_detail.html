@@ -1,0 +1,243 @@
+{% extends 'base/base.html'%}
+{% load static %}
+
+{% block content %}
+<div class="pagetitle">
+    <h1><i class="bi bi-airplane me-2"></i>Aircraft Leasing Inquiry Details</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}"><i class="bi bi-house-door"></i> Home</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'leasing_inquiry_list'%}">Leasing Inquiries</a></li>
+            <li class="breadcrumb-item active">Details</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-jet-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-file-text me-2"></i>
+                        Inquiry #{{ inquiry.inquiry_code}} - {{ inquiry.get_leasing_type_display }}
+                    </h5>
+                    <span class="badge bg-light text-dark">
+                        <i class="bi bi-clock-history me-1"></i>
+                        {{ inquiry.created_at|timesince }} ago
+                    </span>
+                </div>
+                
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <!-- Inquiry Details -->
+                        <div class="col-md-6">
+                            <div class="card mb-4 border-jet-primary h-100">
+                                <div class="card-header bg-jet-light d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Basic Information</h6>
+                                    <span class="badge bg-primary">
+                                        {{ inquiry.get_leasing_type_display }}
+                                    </span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-borderless table-sm">
+                                            <tbody>
+                                                <tr>
+                                                    <th width="35%">Submitted On:</th>
+                                                    <td>{{ inquiry.created_at|date:"F j, Y H:i" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Name:</th>
+                                                    <td>{{ inquiry.name }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Company:</th>
+                                                    <td>{{ inquiry.company|default:"-" }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Contact:</th>
+                                                    <td>
+                                                        <a href="mailto:{{ inquiry.email }}" class="d-block">
+                                                            <i class="bi bi-envelope me-1"></i> {{ inquiry.email }}
+                                                        </a>
+                                                        <a href="tel:{{ inquiry.telephone }}" class="d-block mt-1">
+                                                            <i class="bi bi-telephone me-1"></i> {{ inquiry.telephone }}
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <th>Duration:</th>
+                                                    <td>{{ inquiry.duration|default:"Not specified" }}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Requirements -->
+                        <div class="col-md-6">
+                            <div class="card mb-4 border-jet-primary h-100">
+                                <div class="card-header bg-jet-light">
+                                    <h6 class="mb-0"><i class="bi bi-list-check me-2"></i>Requirements</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="requirements-content">
+                                        {{ inquiry.requirements|linebreaks }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Supporting Documents -->
+                    {% if documents %}
+                    <div class="card mb-4 border-jet-primary">
+                        <div class="card-header bg-jet-light d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0"><i class="bi bi-paperclip me-2"></i>Supporting Documents</h6>
+                            <small class="text-muted">{{ documents|length }} file(s) attached</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                {% for doc in documents %}
+                                <div class="col-md-6">
+                                    <div class="document-preview-card border rounded p-3 h-100">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <i class="bi bi-file-earmark-text me-2"></i>
+                                                <strong>{{ doc.name|truncatechars:30 }}</strong>
+                                            </div>
+                                            <a href="{{ doc.url }}" download class="btn btn-sm btn-outline-secondary">
+                                                <i class="bi bi-download"></i>
+                                            </a>
+                                        </div>
+                                        
+                                        {% if doc.url|lower|slice:'-4:' == '.pdf' %}
+                                        <div class="pdf-preview-container border rounded p-2 bg-light text-center">
+                                            <iframe src="{{ doc.url }}#toolbar=0&view=fitH" 
+                                                    class="pdf-preview-frame" 
+                                                    frameborder="0"
+                                                    style="width: 100%; height: 300px;"></iframe>
+                                            <div class="mt-2">
+                                                <small class="text-muted">First page preview - Click to view full PDF</small>
+                                            </div>
+                                        </div>
+                                        {% elif doc.url|lower|slice:'-4:' in '.jpg,.jpeg,.png,.gif' %}
+                                        <div class="image-preview-container text-center">
+                                            <a href="{{ doc.url }}" data-fancybox="gallery">
+                                                <img src="{{ doc.url }}" 
+                                                     alt="{{ doc.name }}" 
+                                                     class="img-fluid rounded border"
+                                                     style="max-height: 300px; object-fit: contain;">
+                                            </a>
+                                        </div>
+                                        {% else %}
+                                        <div class="unsupported-file text-center py-4 bg-light rounded">
+                                            <i class="bi bi-file-earmark-text display-4 text-muted"></i>
+                                            <p class="mt-2 mb-0">Preview not available</p>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        <div class="mt-2 text-end">
+                                            <small class="text-muted">
+                                                <a href="{{ doc.url }}" target="_blank" class="text-decoration-none">
+                                                    View full document <i class="bi bi-box-arrow-up-right ms-1"></i>
+                                                </a>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="card-footer bg-jet-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{% url 'leasing_inquiry_list'%}" class="btn btn-outline-jet">
+                            <i class="bi bi-arrow-left me-1"></i> Back to List
+                        </a>
+                        <div>
+                            <button onclick="window.print()" class="btn btn-jet me-2">
+                                <i class="bi bi-printer me-1"></i> Print
+                            </button>
+                            <a href="mailto:{{ inquiry.email }}?subject=Regarding%20your%20inquiry%20%23{{ inquiry.id }}" 
+                               class="btn btn-jet">
+                                <i class="bi bi-envelope me-1"></i> Respond
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Add this to your base template or here -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
+<script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
+<script>
+    Fancybox.bind("[data-fancybox]", {
+        // Options can go here
+    });
+</script>
+
+<style>
+    .requirements-content {
+        white-space: pre-wrap;
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        border-left: 4px solid var(--jet-primary);
+    }
+    
+    .document-preview-card {
+        transition: all 0.3s ease;
+    }
+    
+    .document-preview-card:hover {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .pdf-preview-container {
+        background: repeating-linear-gradient(
+            45deg,
+            #f8f9fa,
+            #f8f9fa 10px,
+            #e9ecef 10px,
+            #e9ecef 20px
+        );
+    }
+    
+    .pdf-preview-frame {
+        pointer-events: none; /* Prevent interaction with the iframe */
+    }
+    
+    .image-preview-container img {
+        transition: transform 0.3s ease;
+    }
+    
+    .image-preview-container img:hover {
+        transform: scale(1.02);
+    }
+    
+    th {
+        font-weight: 600;
+        color: var(--jet-dark);
+    }
+    
+    .table-sm td, .table-sm th {
+        padding: 0.5rem;
+    }
+    
+    .badge {
+        font-weight: 500;
+        letter-spacing: 0.5px;
+    }
+</style>
+{% endblock %}

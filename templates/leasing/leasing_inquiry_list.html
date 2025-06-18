@@ -48,7 +48,7 @@
                             <tbody>
                                 {% for inquiry in page_obj %}
                                 <tr>
-                                    <td>#{{ inquiry.id }}</td>
+                                    <td><a href="{% url 'aircraft_leasing_detail' inquiry.id %}">#{{ inquiry.inquiry_code }}</a></td>
                                     <td>{{ inquiry.get_leasing_type_display }}</td>
                                     <td>{{ inquiry.name }}</td>
                                     <td>{{ inquiry.company|default:"-" }}</td>
