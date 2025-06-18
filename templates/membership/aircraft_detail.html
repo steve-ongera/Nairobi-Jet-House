@@ -1,0 +1,1153 @@
+{% extends "membership/base.html" %}
+
+{% block content %}
+
+
+<style>
+
+/* Header Styles */
+.chart-header {
+    margin-bottom: 2rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.chart-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0;
+}
+
+/* Utility Classes */
+.d-flex {
+    display: flex;
+}
+
+.justify-content-between {
+    justify-content: space-between;
+}
+
+.align-items-center {
+    align-items: center;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.mb-1 {
+    margin-bottom: 0.25rem;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+
+.mb-3 {
+    margin-bottom: 1rem;
+}
+
+.me-2 {
+    margin-right: 0.5rem;
+}
+
+.py-4 {
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+}
+
+.p-3 {
+    padding: 1rem;
+}
+
+/* Card Styles */
+.stat-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid #e9ecef;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+.stat-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #34495e;
+}
+
+.stat-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+.stat-icon.primary {
+    background-color: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+}
+
+.stat-icon.success {
+    background-color: rgba(46, 204, 113, 0.1);
+    color: #2ecc71;
+}
+
+.stat-icon.warning {
+    background-color: rgba(241, 196, 15, 0.1);
+    color: #f1c40f;
+}
+
+.stat-icon.info {
+    background-color: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+}
+
+/* Stat List Styles */
+.stat-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-weight: 600;
+    color: #2c3e50;
+    font-size: 1rem;
+}
+
+.stat-description {
+    color: #95a5a6;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
+/* Grid Layout */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+/* Chart Container */
+.chart-container {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+    border: 1px solid #e9ecef;
+    overflow: hidden;
+}
+
+.chart-container .chart-header {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    margin-bottom: 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.chart-container .chart-title {
+    font-size: 1.25rem;
+    color: #2c3e50;
+}
+
+/* Gallery Styles */
+.aircraft-gallery {
+    margin-top: 1rem;
+}
+
+.primary-image {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.img-fluid {
+    max-width: 100%;
+    height: auto;
+}
+
+.rounded {
+    border-radius: 0.375rem;
+}
+
+.thumbnail-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.thumbnail-row img {
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    border-radius: 4px;
+}
+
+.thumbnail-row img:hover {
+    transform: scale(1.05);
+    border-color: #3498db;
+}
+
+.img-thumbnail {
+    padding: 0.25rem;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+    max-width: 100%;
+    height: auto;
+}
+
+.gap-2 {
+    gap: 0.5rem;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+/* Table Styles */
+.table-responsive {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.table {
+    width: 100%;
+    margin-bottom: 0;
+    color: #212529;
+    border-collapse: collapse;
+}
+
+.table thead th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    color: #34495e;
+    padding: 1rem;
+    text-align: left;
+    border-top: none;
+}
+
+.table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-top: 1px solid #dee2e6;
+}
+
+.table tbody tr {
+    transition: background-color 0.15s ease-in-out;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(52, 152, 219, 0.05);
+}
+
+.table-light {
+    background-color: #f8f9fa;
+}
+
+/* Badge Styles */
+.badge {
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    font-size: 0.75em;
+    font-weight: 600;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.375rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.bg-success {
+    background-color: #28a745 !important;
+}
+
+.bg-danger {
+    background-color: #dc3545 !important;
+}
+
+.bg-primary {
+    background-color: #007bff !important;
+}
+
+.bg-warning {
+    background-color: #ffc107 !important;
+    color: #212529 !important;
+}
+
+/* Button Styles */
+.btn {
+    display: inline-block;
+    font-weight: 500;
+    color: #212529;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    background-color: transparent;
+    border: 1px solid transparent;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease-in-out;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+}
+
+.btn:hover {
+    text-decoration: none;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    color: #fff;
+    background-color: #0056b3;
+    border-color: #004085;
+    transform: translateY(-1px);
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border-radius: 0.2rem;
+}
+
+.btn-outline-primary {
+    color: #007bff;
+    border-color: #007bff;
+    border-width: 1.5px;
+}
+
+.btn-outline-primary:hover {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-outline-danger {
+    color: #dc3545;
+    border-color: #dc3545;
+    border-width: 1.5px;
+}
+
+.btn-outline-danger:hover {
+    color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.btn-group {
+    position: relative;
+    display: inline-flex;
+    vertical-align: middle;
+}
+
+.btn-group > .btn {
+    position: relative;
+    flex: 1 1 auto;
+}
+
+.btn-group > .btn:not(:first-child) {
+    margin-left: -1px;
+}
+
+.btn-group > .btn:not(:last-child):not(.dropdown-toggle) {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.btn-group > .btn:not(:first-child) {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.btn-group-sm > .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border-radius: 0.2rem;
+}
+
+/* Icon Styles */
+.bi {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    fill: currentColor;
+}
+
+/* Features Content */
+.features-content {
+    line-height: 1.6;
+    color: #34495e;
+    padding: 1rem;
+}
+
+.features-content p {
+    margin-bottom: 1rem;
+}
+
+.features-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* Animation */
+.animate-slide-in {
+    animation: slideIn 0.4s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes slideIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1200px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .stat-card[style*="grid-column: span 2"] {
+        grid-column: span 2 !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .content-wrapper {
+        padding: 1rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .stat-card[style*="grid-column: span 2"] {
+        grid-column: span 1 !important;
+    }
+    
+    .chart-title {
+        font-size: 1.5rem;
+    }
+    
+    .stat-title {
+        font-size: 1rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .btn-group {
+        flex-direction: column;
+    }
+    
+    .btn-group > .btn:not(:first-child) {
+        margin-left: 0;
+        margin-top: -1px;
+    }
+    
+    .btn-group > .btn:not(:last-child):not(.dropdown-toggle) {
+        border-top-right-radius: 0.375rem;
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+    
+    .btn-group > .btn:not(:first-child) {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+        border-bottom-left-radius: 0.375rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 1rem;
+    }
+    
+    .chart-header .d-flex {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .thumbnail-row {
+        justify-content: center;
+    }
+    
+    .stat-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+    
+    .stat-value {
+        font-size: 1.1rem;
+    }
+}
+
+/* Additional Utility Classes */
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.position-relative {
+    position: relative;
+}
+
+.w-100 {
+    width: 100%;
+}
+
+.h-auto {
+    height: auto;
+}
+
+/* Table Specific Enhancements */
+.table tbody tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.table strong {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+/* Status-specific styles */
+.status-completed {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-confirmed {
+    background-color: #cce7ff;
+    color: #004085;
+}
+
+.status-cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+/* Empty state styles */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Focus states for accessibility */
+.btn:focus,
+.table tbody tr:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+    .btn,
+    .animate-slide-in {
+        animation: none !important;
+    }
+    
+    .stat-card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    
+    .table {
+        font-size: 0.8rem;
+    }
+}
+    /* Main Layout Styles */
+
+    
+    /* Header Styles */
+    .chart-header {
+        margin-bottom: 2rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #e0e0e0;
+    }
+    
+    .chart-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+    }
+    
+    /* Card Styles */
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.25rem;
+    }
+    
+    .stat-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #34495e;
+    }
+    
+    .stat-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+    
+    .stat-icon.primary {
+        background-color: rgba(52, 152, 219, 0.1);
+        color: #3498db;
+    }
+    
+    .stat-icon.success {
+        background-color: rgba(46, 204, 113, 0.1);
+        color: #2ecc71;
+    }
+    
+    .stat-icon.warning {
+        background-color: rgba(241, 196, 15, 0.1);
+        color: #f1c40f;
+    }
+    
+    .stat-icon.info {
+        background-color: rgba(52, 152, 219, 0.1);
+        color: #3498db;
+    }
+    
+    /* Stat List Styles */
+    .stat-list {
+        display: grid;
+        gap: 1rem;
+    }
+    
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .stat-label {
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+    
+    .stat-value {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    /* Grid Layout */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    /* Gallery Styles */
+    .aircraft-gallery {
+        margin-top: 1rem;
+    }
+    
+    .primary-image {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .thumbnail-row img {
+        transition: all 0.2s ease;
+        border: 2px solid transparent;
+    }
+    
+    .thumbnail-row img:hover {
+        transform: scale(1.05);
+        border-color: #3498db;
+    }
+    
+    /* Table Styles */
+    .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .table {
+        margin-bottom: 0;
+    }
+    
+    .table thead th {
+        background-color: #f8f9fa;
+        border-bottom-width: 1px;
+        font-weight: 600;
+        color: #34495e;
+        padding: 1rem;
+    }
+    
+    .table tbody td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(52, 152, 219, 0.05);
+    }
+    
+    /* Badge Styles */
+    .badge {
+        padding: 0.35em 0.65em;
+        font-size: 0.75em;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Button Styles */
+    .btn {
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    .btn-outline-primary {
+        border-width: 1.5px;
+    }
+    
+    /* Animation */
+    .animate-slide-in {
+        animation: slideIn 0.4s ease-out forwards;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    
+    @keyframes slideIn {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Responsive Adjustments */
+    @media (max-width: 992px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .stat-card[style*="grid-column: span 2"] {
+            grid-column: span 1 !important;
+        }
+    }
+    
+    /* Features Content */
+    .features-content {
+        line-height: 1.6;
+        color: #34495e;
+    }
+    
+    .features-content p:last-child {
+        margin-bottom: 0;
+    }
+</style>
+
+<main class="content-wrapper">
+    <!-- Aircraft Header -->
+    <div class="chart-header animate-slide-in" style="animation-delay: 0.1s;">
+        <div class="d-flex justify-content-between align-items-center">
+            <div style="margin-bottom: 0.5rem;">
+            <h2 style="font-size: 1.75rem; font-weight: 600; color: #2c3e50; margin: 0 0 0.25rem 0;">
+                {{ aircraft.model_name }}
+            </h2>
+            <div style="color: #6c757d; font-size: 0.9rem;">
+                <span style="display: inline-block; padding: 0.35em 0.65em; font-size: 0.75em; font-weight: 600; letter-spacing: 0.5px; border-radius: 0.25rem; margin-right: 0.5rem; background-color: {% if aircraft.is_active %}#28a745{% else %}#dc3545{% endif %}; color: white;">
+                    {% if aircraft.is_active %}Active{% else %}Inactive{% endif %}
+                </span>
+                Registration: 
+                <strong style="color: #343a40;">{{ aircraft.registration_number }}</strong>
+            </div>
+        </div>
+            <div style="padding-left: 800px;">
+                <a href="#" class="btn btn-primary">
+                    <i class="bi bi-pencil-square"></i> Edit Aircraft
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Aircraft Info -->
+    <div class="stats-grid">
+        <!-- Aircraft Image Card -->
+        <div class="stat-card animate-slide-in" style="grid-column: span 2; animation-delay: 0.2s;">
+            <div class="stat-header">
+                <div class="stat-title">Aircraft Images</div>
+                <div class="stat-icon primary">
+                    <i class="bi bi-images"></i>
+                </div>
+            </div>
+            <div class="aircraft-gallery">
+                {% if primary_image %}
+                <div class="primary-image mb-3">
+                    <img src="{{ primary_image.image.url }}" alt="{{ primary_image.caption|default:'Primary aircraft image' }}" 
+                         class="img-fluid rounded" style="max-height: 300px; width: 100%; object-fit: cover;">
+                </div>
+                {% endif %}
+                
+                {% if other_images %}
+                <div class="thumbnail-row d-flex flex-wrap gap-2">
+                    {% for image in other_images %}
+                    <img src="{{ image.image.url }}" alt="{{ image.caption|default:'Aircraft image' }}" 
+                         class="img-thumbnail" style="height: 80px; width: auto; cursor: pointer;"
+                         onclick="document.querySelector('.primary-image img').src = this.src">
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">No additional images available</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Key Stats Card -->
+        <div class="stat-card animate-slide-in" style="animation-delay: 0.3s;">
+            <div class="stat-header">
+                <div class="stat-title">Key Statistics</div>
+                <div class="stat-icon info">
+                    <i class="bi bi-speedometer2"></i>
+                </div>
+            </div>
+            <div class="stat-list">
+                <div class="stat-item">
+                    <span class="stat-label">Total Flight Hours</span>
+                    <span class="stat-value">{{ total_flight_hours|default:"0" }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Hourly Rate</span>
+                    <span class="stat-value">${{ aircraft.hourly_rate }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Minimum Hours</span>
+                    <span class="stat-value">{{ aircraft.minimum_hours }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Year Manufactured</span>
+                    <span class="stat-value">{{ aircraft.year_manufactured }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Aircraft Type Info -->
+        <div class="stat-card animate-slide-in" style="animation-delay: 0.4s;">
+            <div class="stat-header">
+                <div class="stat-title">Aircraft Type</div>
+                <div class="stat-icon warning">
+                    <i class="bi bi-airplane"></i>
+                </div>
+            </div>
+            <div class="stat-list">
+                <div class="stat-item">
+                    <span class="stat-label">Type</span>
+                    <span class="stat-value">{{ aircraft.aircraft_type.name }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Passenger Capacity</span>
+                    <span class="stat-value">{{ aircraft.aircraft_type.passenger_capacity }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Range</span>
+                    <span class="stat-value">{{ aircraft.aircraft_type.range_nautical_miles }} NM</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Cruise Speed</span>
+                    <span class="stat-value">{{ aircraft.aircraft_type.speed_knots }} knots</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Location and Base Info -->
+    <div class="chart-container animate-slide-in" style="animation-delay: 0.5s;">
+        <div class="chart-header">
+            <h3 class="chart-title">Location Information</h3>
+        </div>
+        <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr);">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title">Base Airport</div>
+                    <div class="stat-icon primary">
+                        <i class="bi bi-house"></i>
+                    </div>
+                </div>
+                <div class="stat-value">{{ aircraft.base_airport }}</div>
+                <div class="stat-description">Home airport (ICAO code)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-title">Current Location</div>
+                    <div class="stat-icon success">
+                        <i class="bi bi-geo-alt"></i>
+                    </div>
+                </div>
+                <div class="stat-value">{{ aircraft.current_location }}</div>
+                <div class="stat-description">Last known position</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Bookings -->
+    <div class="chart-container animate-slide-in" style="animation-delay: 0.6s;">
+        <div class="chart-header">
+            <h3 class="chart-title">Recent Bookings</h3>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Client</th>
+                        <th>Trip Type</th>
+                        <th>Status</th>
+                        <th>Total Price</th>
+                        <th>Your Earnings</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in recent_bookings %}
+                    <tr>
+                        <td><strong>{{ booking.booking_order_id }}</strong></td>
+                        <td>{{ booking.client.get_full_name|default:booking.client.email }}</td>
+                        <td>{{ booking.get_trip_type_display }}</td>
+                        <td>
+                            <span class="badge bg-{% if booking.status == 'completed' %}success{% elif booking.status == 'confirmed' %}primary{% elif booking.status == 'cancelled' %}danger{% else %}warning{% endif %}">
+                                {{ booking.get_status_display }}
+                            </span>
+                        </td>
+                        <td>${{ booking.total_price }}</td>
+                        <td>${{ booking.owner_earnings }}</td>
+                        <td>
+                            <a href="#" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">
+                            No recent bookings found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Availability Schedule -->
+    <div class="chart-container animate-slide-in" style="animation-delay: 0.7s;">
+        <div class="chart-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="chart-title">Availability Schedule</h3>
+                <a href="#" class="btn btn-sm btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add Availability
+                </a>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Start Date/Time</th>
+                        <th>End Date/Time</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for availability in availability_schedule %}
+                    <tr>
+                        <td>{{ availability.start_datetime }}</td>
+                        <td>{{ availability.end_datetime }}</td>
+                        <td>{{ availability.end_datetime|timeuntil:availability.start_datetime }}</td>
+                        <td>
+                            <span class="badge bg-{% if availability.is_available %}success{% else %}danger{% endif %}">
+                                {% if availability.is_available %}Available{% else %}Unavailable{% endif %}
+                            </span>
+                        </td>
+                        <td>{{ availability.notes|default:"-"|truncatechars:30 }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a href="#" class="btn btn-outline-primary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <a href="#" class="btn btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">
+                            No availability schedule set up
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="chart-container animate-slide-in" style="animation-delay: 0.8s;">
+        <div class="chart-header">
+            <h3 class="chart-title">Aircraft Features</h3>
+        </div>
+        <div class="p-3">
+            {% if aircraft.features %}
+            <div class="features-content">
+                {{ aircraft.features|linebreaks }}
+            </div>
+            {% else %}
+            <p class="text-muted">No features description provided</p>
+            {% endif %}
+        </div>
+    </div>
+</main>
+
+<script>
+    // Simple script to stagger animations
+    document.addEventListener('DOMContentLoaded', function() {
+        const animatedElements = document.querySelectorAll('.animate-slide-in');
+        animatedElements.forEach((el, index) => {
+            // The delay is already set inline for each element
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+        });
+    });
+</script>
+{% endblock %}

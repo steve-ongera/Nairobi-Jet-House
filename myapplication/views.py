@@ -4819,3 +4819,40 @@ def manage_aircraft(request):
     aircrafts = request.user.aircrafts.all()
     context = {'aircrafts': aircrafts}
     return render(request, 'membership/manage_aircraft.html', context)
+
+
+def membership_logout(request):
+    """Logs out the current membership user and redirects to login."""
+    logout(request)
+    return redirect('membership_login')
+
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Aircraft, FlightLeg, Booking
+
+@login_required
+def owner_aircraft_detail(request, aircraft_id):
+    aircraft = get_object_or_404(Aircraft, id=aircraft_id, owner=request.user)
+    
+    # Calculate total flight hours and miles
+    flight_legs = FlightLeg.objects.filter(booking__aircraft=aircraft, booking__status='completed')
+    total_flight_hours = sum([leg.flight_hours for leg in flight_legs])
+    
+    # Get recent bookings
+    recent_bookings = Booking.objects.filter(
+        aircraft=aircraft
+    ).order_by('-created_at')[:5]
+    
+    # Get availability schedule
+    availability_schedule = aircraft.availabilities.all().order_by('start_datetime')
+    
+    context = {
+        'aircraft': aircraft,
+        'total_flight_hours': total_flight_hours,
+        'recent_bookings': recent_bookings,
+        'availability_schedule': availability_schedule,
+        'primary_image': aircraft.interior_images.filter(is_primary=True).first(),
+        'other_images': aircraft.interior_images.filter(is_primary=False),
+    }
+    
+    return render(request, 'membership/aircraft_detail.html', context)

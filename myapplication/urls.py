@@ -154,6 +154,8 @@ urlpatterns = [
     path('membership/login/', views.membership_login, name='membership_login'),
     path('membership/dashboard/', views.owner_dashboard, name='owner_dashboard'),
     path('membership/aircraft/', views.manage_aircraft, name='manage_aircraft'),
+    path('membership/logout/', views.membership_logout, name='membership_logout'),
+    path('membership/aircraft/<int:aircraft_id>/', views.owner_aircraft_detail, name='owner_aircraft_detail'),
   
 ]
     
