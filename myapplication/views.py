@@ -1312,7 +1312,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.conf import settings
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 @csrf_exempt
 @require_POST
@@ -1388,9 +1395,21 @@ def submit_leasing_inquiry(request):
         # Save the inquiry
         leasing_inquiry.save()
         
+        # Send confirmation email
+        try:
+            send_leasing_inquiry_confirmation(
+                leasing_inquiry, name, email, company, telephone, 
+                leasing_type, requirements, duration,
+                supporting_document_1, supporting_document_2
+            )
+            logger.info(f"Leasing inquiry confirmation email sent to {email} for inquiry #{leasing_inquiry.id}")
+        except Exception as e:
+            logger.error(f"Failed to send confirmation email for leasing inquiry #{leasing_inquiry.id}: {str(e)}")
+            # Don't fail the inquiry submission if email fails
+        
         return JsonResponse({
             'status': 'success',
-            'message': 'Your leasing inquiry has been submitted successfully!'
+            'message': 'Your leasing inquiry has been submitted successfully! A confirmation email has been sent.'
         })
         
     except Exception as e:
@@ -1398,6 +1417,107 @@ def submit_leasing_inquiry(request):
             'status': 'error',
             'message': f'An error occurred: {str(e)}'
         }, status=500)
+
+
+def send_leasing_inquiry_confirmation(inquiry, name, email, company, telephone, leasing_type, requirements, duration, doc1, doc2):
+    """Send leasing inquiry confirmation email to client"""
+    
+    subject = f'Aircraft Leasing Inquiry Confirmation - #{inquiry.id}'
+    
+    # Create email context
+    context = {
+        'inquiry': inquiry,
+        'name': name,
+        'email': email,
+        'company': company,
+        'telephone': telephone,
+        'leasing_type': leasing_type,
+        'requirements': requirements,
+        'duration': duration,
+        'has_document_1': doc1 is not None,
+        'has_document_2': doc2 is not None,
+        'document_1_name': doc1.name if doc1 else None,
+        'document_2_name': doc2.name if doc2 else None,
+    }
+    
+    # Option 1: Use HTML template (recommended)
+    try:
+        html_message = render_to_string('emails/leasing_inquiry_confirmation.html', context)
+        plain_message = strip_tags(html_message)
+    except:
+        # Fallback to plain text if template doesn't exist
+        plain_message = create_leasing_inquiry_text_confirmation(context)
+        html_message = None
+    
+    # Send email
+    send_mail(
+        subject=subject,
+        message=plain_message,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[email],
+        html_message=html_message,
+        fail_silently=False,
+    )
+
+
+def create_leasing_inquiry_text_confirmation(context):
+    """Create plain text confirmation email for leasing inquiry"""
+    name = context['name']
+    inquiry = context['inquiry']
+    
+    message = f"""
+Dear {name},
+
+Thank you for your aircraft leasing inquiry. We have successfully received your request and will review it shortly.
+
+INQUIRY DETAILS:
+Inquiry ID: #{inquiry.id}
+Leasing Type: {context['leasing_type'].replace('_', ' ').title()}
+Name: {name}
+"""
+    
+    if context['company']:
+        message += f"Company: {context['company']}\n"
+    
+    message += f"""Email: {context['email']}
+Phone: {context['telephone']}
+"""
+    
+    if context['duration']:
+        message += f"Duration: {context['duration']}\n"
+    
+    message += f"""
+REQUIREMENTS:
+{context['requirements']}
+"""
+    
+    if context['has_document_1'] or context['has_document_2']:
+        message += "\nSUPPORTING DOCUMENTS:\n"
+        if context['has_document_1']:
+            message += f"- {context['document_1_name']}\n"
+        if context['has_document_2']:
+            message += f"- {context['document_2_name']}\n"
+    
+    message += f"""
+WHAT HAPPENS NEXT:
+• Our leasing team will review your inquiry within 24-48 hours
+• We will contact you to discuss your requirements in detail
+• A customized leasing proposal will be prepared based on your needs
+• We'll schedule a consultation to finalize the terms
+
+If you have any urgent questions or need to provide additional information, please don't hesitate to contact us.
+
+Thank you for considering our aircraft leasing services.
+
+Best regards,
+Aircraft Leasing Team
+
+---
+This is an automated confirmation. Please do not reply to this email.
+For inquiries, please contact us through our main channels.
+"""
+    
+    return message
 
 
 import json

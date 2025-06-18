@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aircraft Leasing Inquiry Confirmation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        .content {
+            padding: 30px;
+        }
+        .inquiry-id {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 0 5px 5px 0;
+        }
+        .section {
+            margin: 25px 0;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #fafafa;
+        }
+        .section h3 {
+            color: #2c3e50;
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+        }
+        .section h3.contact::before {
+            content: "👤";
+            margin-right: 10px;
+        }
+        .section h3.requirements::before {
+            content: "📋";
+            margin-right: 10px;
+        }
+        .section h3.documents::before {
+            content: "📎";
+            margin-right: 10px;
+        }
+        .section h3.next-steps::before {
+            content: "🚀";
+            margin-right: 10px;
+        }
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .contact-item {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 3px solid #2196f3;
+        }
+        .contact-label {
+            font-weight: bold;
+            color: #1976d2;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        .contact-value {
+            color: #333;
+            font-size: 14px;
+        }
+        .leasing-type {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .requirements-box {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin: 15px 0;
+            font-style: italic;
+            color: #555;
+            line-height: 1.8;
+        }
+        .document-list {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .document-item {
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 3px;
+            margin: 8px 0;
+            background: #f9f9f9;
+            display: flex;
+            align-items: center;
+        }
+        .document-item::before {
+            content: "📄";
+            margin-right: 10px;
+        }
+        .next-steps {
+            background: #e8f5e8;
+            border: 1px solid #4CAF50;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .next-steps h4 {
+            color: #2e7d2e;
+            margin: 0 0 15px 0;
+        }
+        .next-steps ul {
+            margin: 0;
+            padding-left: 20px;
+            color: #2e7d2e;
+        }
+        .next-steps li {
+            margin: 8px 0;
+        }
+        .footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        .footer p {
+            margin: 5px 0;
+        }
+        .highlight {
+            background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        @media (max-width: 600px) {
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>✈️ Inquiry Received!</h1>
+            <p>Thank you for your aircraft leasing inquiry</p>
+        </div>
+
+        <!-- Content -->
+        <div class="content">
+            <div class="inquiry-id">
+                <h2 style="margin: 0; color: #1976d2;">Inquiry ID: #{{ inquiry.id }}</h2>
+                <p style="margin: 5px 0 0 0;">Submitted successfully on {{ inquiry.created_at|date:"F d, Y" }} at {{ inquiry.created_at|time:"g:i A" }}</p>
+            </div>
+
+            <p>Dear <strong>{{ name }}</strong>,</p>
+            <p>Thank you for your interest in our aircraft leasing services. We have successfully received your inquiry and our team will review it shortly.</p>
+
+            <!-- Leasing Type -->
+            <div class="leasing-type">
+                🛩️ {{ leasing_type|title }} Leasing
+            </div>
+
+            <!-- Contact Information -->
+            <div class="section">
+                <h3 class="contact">Contact Information</h3>
+                <div class="contact-grid">
+                    <div class="contact-item">
+                        <div class="contact-label">Full Name</div>
+                        <div class="contact-value">{{ name }}</div>
+                    </div>
+                    {% if company %}
+                    <div class="contact-item">
+                        <div class="contact-label">Company</div>
+                        <div class="contact-value">{{ company }}</div>
+                    </div>
+                    {% endif %}
+                    <div class="contact-item">
+                        <div class="contact-label">Email Address</div>
+                        <div class="contact-value">{{ email }}</div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-label">Phone Number</div>
+                        <div class="contact-value">{{ telephone }}</div>
+                    </div>
+                    {% if duration %}
+                    <div class="contact-item">
+                        <div class="contact-label">Duration</div>
+                        <div class="contact-value">{{ duration }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Requirements -->
+            <div class="section">
+                <h3 class="requirements">Your Requirements</h3>
+                <div class="requirements-box">
+                    "{{ requirements }}"
+                </div>
+            </div>
+
+            <!-- Supporting Documents -->
+            {% if has_document_1 or has_document_2 %}
+            <div class="section">
+                <h3 class="documents">Supporting Documents</h3>
+                <div class="document-list">
+                    {% if has_document_1 %}
+                    <div class="document-item">
+                        {{ document_1_name }}
+                    </div>
+                    {% endif %}
+                    {% if has_document_2 %}
+                    <div class="document-item">
+                        {{ document_2_name }}
+                    </div>
+                    {% endif %}
+                </div>
+                <p style="color: #666; font-size: 12px; margin: 10px 0 0 0;">
+                    📌 Your documents have been securely uploaded and will be reviewed by our team.
+                </p>
+            </div>
+            {% endif %}
+
+            <!-- Next Steps -->
+            <div class="section">
+                <h3 class="next-steps">What Happens Next?</h3>
+                <div class="next-steps">
+                    <h4>📅 Timeline & Process</h4>
+                    <ul>
+                        <li><strong>Within 24-48 hours:</strong> Our leasing team will review your inquiry</li>
+                        <li><strong>Initial Contact:</strong> We'll reach out to discuss your requirements in detail</li>
+                        <li><strong>Custom Proposal:</strong> A tailored leasing proposal will be prepared</li>
+                        <li><strong>Consultation:</strong> We'll schedule a meeting to finalize terms and conditions</li>
+                        <li><strong>Agreement:</strong> Complete the leasing process with all necessary documentation</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Important Notice -->
+            <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h4 style="color: #856404; margin: 0 0 10px 0;">📞 Need Immediate Assistance?</h4>
+                <p style="color: #856404; margin: 0;">
+                    If you have urgent questions or need to provide additional information, 
+                    please don't hesitate to contact our leasing department directly.
+                </p>
+            </div>
+
+            <p>We appreciate your interest in our services and look forward to working with you to find the perfect aircraft leasing solution for your needs.</p>
+            
+            <p style="margin-top: 30px;">
+                Best regards,<br>
+                <strong>Aircraft Leasing Team</strong>
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Aircraft Leasing Services</strong></p>
+            <p>Professional Aviation Solutions</p>
+            <p style="font-size: 12px; opacity: 0.8;">
+                This is an automated confirmation. Please do not reply to this email.
+            </p>
+            <p>© {{ "now"|date:"Y" }} All rights reserved</p>
+        </div>
+    </div>
+</body>
+</html>
