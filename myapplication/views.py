@@ -693,12 +693,21 @@ def api_login(request):
             data = json.loads(request.body)
             email = data.get('email', '').strip().lower()
             password = data.get('password', '')
+            is_guest = data.get('is_guest', False)
             remember_me = data.get('remember_me', False)
         else:
             # Handle form data
             email = request.POST.get('email', '').strip().lower()
             password = request.POST.get('password', '')
             remember_me = request.POST.get('remember_me') == 'on'
+
+            # Handle guest login
+        if is_guest:
+                guest_email = settings.GUEST_EMAIL  # Add to your settings.py
+                guest_password = settings.GUEST_PASSWORD  # Add to your settings.py
+                email = guest_email
+                password = guest_password
+
 
         # Validate input
         if not email or not password:

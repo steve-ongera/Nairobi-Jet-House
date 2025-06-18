@@ -782,11 +782,14 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Login Required</h5>
+        <h5 class="modal-title">Login or Continue as Guest</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <p class="mb-3">Please log in to continue with your booking.</p>
+        <div class="alert alert-info mb-4">
+          <i class="bi bi-info-circle-fill me-2"></i>
+          You can login with your account or continue as guest to book immediately.
+        </div>
         
         <form id="loginForm">
           <div class="mb-3">
@@ -802,7 +805,7 @@
             <label class="form-check-label" for="rememberMe">Remember me</label>
           </div>
           
-          <div class="d-grid gap-2">
+          <div class="d-grid gap-2 mb-3">
             <button type="submit" class="btn btn-primary" id="loginSubmitBtn">
               <span class="btn-text">Login</span>
               <span class="btn-spinner" style="display: none;">
@@ -811,9 +814,28 @@
               </span>
             </button>
           </div>
+          
+          <div class="d-flex align-items-center mb-3">
+            <hr class="flex-grow-1">
+            <span class="mx-3 text-muted">OR</span>
+            <hr class="flex-grow-1">
+          </div>
+          
+          <div class="d-grid gap-2">
+            <button type="button" class="btn btn-success" id="guestLoginBtn">
+              <span class="btn-text">
+                <i class="bi bi-person-check me-2"></i>
+                Continue as Guest
+              </span>
+              <span class="btn-spinner" style="display: none;">
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                Continuing as Guest...
+              </span>
+            </button>
+          </div>
         </form>
         
-        <hr>
+        <hr class="mt-4">
         <div class="text-center">
           <p class="mb-2">Don't have an account?</p>
           <button type="button" class="btn btn-outline-primary btn-sm" onclick="showSignupModal()">
@@ -826,6 +848,74 @@
     </div>
   </div>
 </div>
+
+<style>
+  /* Add this if you're not already using Bootstrap Icons */
+  @import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css");
+  
+  /* Style for the guest button */
+  #guestLoginBtn {
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  
+  #guestLoginBtn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+</style>
+
+<script>
+// Updated guest login function
+function handleGuestLogin() {
+    const guestBtn = document.getElementById('guestLoginBtn');
+    const btnText = guestBtn.querySelector('.btn-text');
+    const btnSpinner = guestBtn.querySelector('.btn-spinner');
+    
+    // Show loading state
+    btnText.style.display = 'none';
+    btnSpinner.style.display = 'inline-flex';
+    guestBtn.disabled = true;
+    
+    // Perform guest login
+    fetch('/api/login/', {
+        method: 'POST',
+        body: JSON.stringify({
+            is_guest: true,  // This tells the backend to use guest credentials
+            remember_me: false
+        }),
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Close login modal and open booking modal
+            bootstrap.Modal.getInstance(document.getElementById('loginModal')).hide();
+            setTimeout(() => {
+                openBookingModal();
+            }, 300);
+        } else {
+            alert('Guest login failed. Please try again or create an account.');
+        }
+    })
+    .catch(error => {
+        console.error('Guest login error:', error);
+        alert('Guest login failed. Please try again.');
+    })
+    .finally(() => {
+        // Reset button state
+        btnText.style.display = 'inline';
+        btnSpinner.style.display = 'none';
+        guestBtn.disabled = false;
+    });
+}
+
+// Add event listener for guest login button
+document.getElementById('guestLoginBtn').addEventListener('click', handleGuestLogin);
+</script>
 
 <!-- Signup Modal -->
 <div id="signupModal" class="modal fade" tabindex="-1" data-bs-backdrop="static">
