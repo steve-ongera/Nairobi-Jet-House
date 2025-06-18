@@ -1,31 +1,88 @@
 {% extends "membership/base.html" %}
 
 {% block content %}
-<div class="card">
-    <h2>Welcome, {{ request.user.get_full_name }}</h2>
-    <p>Member since: {{ dashboard.joined_date|date:"F j, Y" }}</p>
-</div>
+<main class="content-wrapper">
+    <!-- Welcome Card -->
+    <div class="stat-card animate-slide-in">
+        <div class="stat-header">
+            <div class="stat-title">Welcome, {{ request.user.get_full_name }}</div>
+            <div class="stat-icon primary">
+                <i class="bi bi-person-circle"></i>
+            </div>
+        </div>
+        <div class="stat-value">Member since: {{ dashboard.joined_date|date:"F j, Y" }}</div>
+    </div>
 
-<div class="card">
-    <h3>Fleet Overview</h3>
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
-        <div class="card">
-            <h4>Total Aircraft</h4>
-            <p style="font-size: 2rem;">{{ dashboard.total_aircraft }}</p>
+    <!-- Statistics Cards -->
+    <div class="stats-grid animate-slide-in">
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-title">Total Aircraft</div>
+                <div class="stat-icon primary">
+                    <i class="bi bi-airplane"></i>
+                </div>
+            </div>
+            <div class="stat-value">{{ dashboard.total_aircraft }}</div>
         </div>
-        <div class="card">
-            <h4>Active Aircraft</h4>
-            <p style="font-size: 2rem;">{{ dashboard.active_aircraft }}</p>
+        
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-title">Active Aircraft</div>
+                <div class="stat-icon success">
+                    <i class="bi bi-airplane-fill"></i>
+                </div>
+            </div>
+            <div class="stat-value">{{ dashboard.active_aircraft }}</div>
         </div>
-        <div class="card">
-            <h4>Last Access</h4>
-            <p>{{ dashboard.last_accessed|timesince }} ago</p>
+        
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-title">Last Access</div>
+                <div class="stat-icon info">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+            </div>
+            <div class="stat-value">{{ dashboard.last_accessed|timesince }} ago</div>
         </div>
     </div>
-</div>
-
-<div class="card">
-    <h3>Recent Activity</h3>
-    <p>Flight data will appear here</p>
-</div>
+    
+    <!-- Recent Activities Section -->
+    <div class="chart-container animate-slide-in">
+        <div class="chart-header">
+            <h3 class="chart-title">Recent Activity</h3>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Aircraft</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Last Activity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>5Y-NJH</strong></td>
+                        <td>Gulfstream G650</td>
+                        <td><span class="badge bg-success">Available</span></td>
+                        <td>Today, 14:30</td>
+                    </tr>
+                    <tr>
+                        <td><strong>5Y-CJX</strong></td>
+                        <td>Citation X</td>
+                        <td><span class="badge bg-primary">In Maintenance</span></td>
+                        <td>Yesterday, 09:15</td>
+                    </tr>
+                    <tr>
+                        <td><strong>5Y-KAR</strong></td>
+                        <td>King Air 350</td>
+                        <td><span class="badge bg-warning">Scheduled</span></td>
+                        <td>Jun 15, 2025</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
 {% endblock %}
