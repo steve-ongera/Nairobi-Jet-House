@@ -4797,19 +4797,27 @@ def membership_login(request):
     
     return render(request, 'membership/login.html')
 
+
 @login_required
 def owner_dashboard(request):
     if request.user.user_type != 'owner':
+        messages.error(request, "Access denied: only owners can view the dashboard.")
         return redirect('membership_login')
-    
-    dashboard = request.user.owner_dashboard
+
+    try:
+        dashboard = request.user.owner_dashboard
+    except AttributeError:
+        messages.error(request, "Dashboard not found. Please contact support or try again later.")
+        return redirect('membership_login')
+
     aircrafts = request.user.aircrafts.all()
-    
+
     context = {
         'dashboard': dashboard,
         'aircrafts': aircrafts
     }
     return render(request, 'membership/dashboard.html', context)
+
 
 @login_required
 def manage_aircraft(request):

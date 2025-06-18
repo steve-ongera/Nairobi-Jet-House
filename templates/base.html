@@ -158,17 +158,8 @@
       </nav>
       
       
-
-     {% if user.is_authenticated %}
-          <a href="{% url 'logout' %}" class="btn btn-primary" style="background-color: #ffffff; color: #1a4b8c; border: none; padding: 6px 22px; border-radius: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.2s ease; font-size: 0.9rem; text-decoration: none; display: inline-block;">
-              Logout
-          </a>
-      {% else %}
-          <a href="{% url 'index' %}" class="btn btn-primary" style="background-color: #ffffff; color: #1a4b8c; border: none; padding: 6px 22px; border-radius: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.2s ease; font-size: 0.9rem; text-decoration: none; display: inline-block;">
-              Login
-          </a>
-      {% endif %}
-
+    <a href="{% url 'membership_login'%}" class="btn btn-primary" style="background-color: #ffffff; color: #1a4b8c; border: none; padding: 6px 22px; border-radius: 50px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; transition: all 0.2s ease; font-size: 0.9rem; text-decoration: none; display: inline-block;"> Membership</a>
+     
     </div>
   </div>
 </header>

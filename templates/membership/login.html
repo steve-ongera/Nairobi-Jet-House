@@ -101,6 +101,17 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
                 {% endif %}
+
+                {% if messages %}
+                {% for message in messages %}
+                     <div class="alert alert-danger alert-dismissible fade show mb-4">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+                {% endif %}
+
                 
                 <form method="POST" class="needs-validation" novalidate>
                     {% csrf_token %}
@@ -146,7 +157,7 @@
                                 Remember me
                             </label>
                         </div>
-                        <a href="{% url 'index'%}" class="text-decoration-none">Reteurn Home</a>
+                        <a href="{% url 'index'%}" class="text-decoration-none">Return Home</a>
                     </div>
                     
                     <!-- Submit Button -->
