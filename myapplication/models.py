@@ -319,6 +319,10 @@ class AircraftLeasingInquiry(models.Model):
     requirements = models.TextField()
     duration = models.CharField(max_length=100, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    # Supporting Documents (up to 2 documents)
+    supporting_document_1 = models.FileField(upload_to='aircraft_leasing/documents/', blank=True, null=True)
+    supporting_document_2 = models.FileField(upload_to='aircraft_leasing/documents/', blank=True, null=True)
     
     def __str__(self):
         return f"Leasing Inquiry #{self.id} - {self.get_leasing_type_display()}"

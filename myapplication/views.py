@@ -397,6 +397,7 @@ def contact_us(request):
 def services(request):
     return render(request, 'service.html') 
 
+
 def aircraft_leasing(request):
     return render(request, 'aircraft_leasing.html') 
 
@@ -1164,33 +1165,99 @@ def submit_cargo_request(request):
             'message': str(e)
         }, status=400)
 
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+import os
+
 @csrf_exempt
 @require_POST
 def submit_leasing_inquiry(request):
     try:
-        data = json.loads(request.body)
+        # Get form data
+        leasing_type = request.POST.get('leasing_type')
+        name = request.POST.get('name')
+        company = request.POST.get('company', '')
+        email = request.POST.get('email')
+        telephone = request.POST.get('telephone')
+        requirements = request.POST.get('requirements')
+        duration = request.POST.get('duration', '')
         
+        # Validate required fields
+        if not all([leasing_type, name, email, telephone, requirements]):
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Please fill in all required fields.'
+            }, status=400)
+        
+        # Create the leasing inquiry object
         leasing_inquiry = AircraftLeasingInquiry(
-            leasing_type=data['leasing_type'],
-            name=data['name'],
-            company=data.get('company', ''),
-            email=data['email'],
-            telephone=data['telephone'],
-            requirements=data['requirements'],
-            duration=data.get('duration', '')
+            leasing_type=leasing_type,
+            name=name,
+            company=company,
+            email=email,
+            telephone=telephone,
+            requirements=requirements,
+            duration=duration
         )
+        
+        # Handle file uploads
+        supporting_document_1 = request.FILES.get('supporting_document_1')
+        supporting_document_2 = request.FILES.get('supporting_document_2')
+        
+        # Validate file types and sizes
+        allowed_extensions = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png']
+        max_file_size = 10 * 1024 * 1024  # 10MB
+        
+        def validate_file(file):
+            if file:
+                # Check file size
+                if file.size > max_file_size:
+                    return False, f"File {file.name} is too large. Maximum size is 10MB."
+                
+                # Check file extension
+                file_extension = os.path.splitext(file.name)[1].lower()
+                if file_extension not in allowed_extensions:
+                    return False, f"File {file.name} has an invalid format. Allowed formats: PDF, DOC, DOCX, JPG, PNG."
+            
+            return True, None
+        
+        # Validate files
+        if supporting_document_1:
+            is_valid, error_msg = validate_file(supporting_document_1)
+            if not is_valid:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': error_msg
+                }, status=400)
+            leasing_inquiry.supporting_document_1 = supporting_document_1
+        
+        if supporting_document_2:
+            is_valid, error_msg = validate_file(supporting_document_2)
+            if not is_valid:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': error_msg
+                }, status=400)
+            leasing_inquiry.supporting_document_2 = supporting_document_2
+        
+        # Save the inquiry
         leasing_inquiry.save()
         
         return JsonResponse({
             'status': 'success',
             'message': 'Your leasing inquiry has been submitted successfully!'
         })
+        
     except Exception as e:
         return JsonResponse({
             'status': 'error',
-            'message': str(e)
-        }, status=400)
-    
+            'message': f'An error occurred: {str(e)}'
+        }, status=500)
 
 
 import json
