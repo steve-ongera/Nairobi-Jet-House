@@ -406,6 +406,59 @@ class InquiryAdmin(admin.ModelAdmin):
     date_hierarchy = 'travel_date'
     ordering = ('-submitted_at',)
 
+from django.contrib import admin
+from .models import (
+    OwnerDashboard,
+    AircraftPerformance,
+    FlightRoute,
+    MaintenanceTicket,
+    OwnerNotification
+)
+
+
+@admin.register(OwnerDashboard)
+class OwnerDashboardAdmin(admin.ModelAdmin):
+    list_display = ('owner', 'joined_date', 'last_accessed', 'total_aircraft_display', 'active_aircraft_display')
+    readonly_fields = ('joined_date', 'last_accessed')
+
+    def total_aircraft_display(self, obj):
+        return obj.total_aircraft
+    total_aircraft_display.short_description = 'Total Aircraft'
+
+    def active_aircraft_display(self, obj):
+        return obj.active_aircraft
+    active_aircraft_display.short_description = 'Active Aircraft'
+
+
+@admin.register(AircraftPerformance)
+class AircraftPerformanceAdmin(admin.ModelAdmin):
+    list_display = ('aircraft', 'total_flight_hours', 'total_revenue', 'last_maintenance', 'next_maintenance_due', 'nautical_miles')
+    search_fields = ('aircraft__registration_number',)
+
+
+@admin.register(FlightRoute)
+class FlightRouteAdmin(admin.ModelAdmin):
+    list_display = ('aircraft', 'departure', 'destination', 'date', 'flight_hours', 'nautical_miles', 'passengers')
+    list_filter = ('date', 'departure', 'destination')
+    search_fields = ('aircraft__registration_number', 'booking_reference')
+    date_hierarchy = 'date'
+
+
+@admin.register(MaintenanceTicket)
+class MaintenanceTicketAdmin(admin.ModelAdmin):
+    list_display = ('aircraft', 'title', 'status', 'created_by', 'created_at', 'completed_at')
+    list_filter = ('status', 'created_at', 'completed_at')
+    search_fields = ('title', 'aircraft__registration_number', 'created_by__username')
+    readonly_fields = ('created_at',)
+
+
+@admin.register(OwnerNotification)
+class OwnerNotificationAdmin(admin.ModelAdmin):
+    list_display = ('owner', 'message', 'related_aircraft', 'is_read', 'created_at')
+    list_filter = ('is_read', 'created_at')
+    search_fields = ('owner__username', 'message')
+    readonly_fields = ('created_at',)
+
 
 # Custom admin site configuration
 admin.site.site_header = "Private Jet Booking Administration"

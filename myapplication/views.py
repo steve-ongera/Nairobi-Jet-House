@@ -4777,3 +4777,45 @@ def live_tracking(request):
     }
     
     return render(request, 'aircraft/live_tracking.html', context)
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login
+
+def membership_login(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        user = authenticate(request, username=email, password=password)
+        
+        if user is not None and user.user_type == 'owner':
+            login(request, user)
+            return redirect('owner_dashboard')
+        else:
+            return render(request, 'membership/login.html', {'error': 'Invalid credentials or not an owner'})
+    
+    return render(request, 'membership/login.html')
+
+@login_required
+def owner_dashboard(request):
+    if request.user.user_type != 'owner':
+        return redirect('membership_login')
+    
+    dashboard = request.user.owner_dashboard
+    aircrafts = request.user.aircrafts.all()
+    
+    context = {
+        'dashboard': dashboard,
+        'aircrafts': aircrafts
+    }
+    return render(request, 'membership/dashboard.html', context)
+
+@login_required
+def manage_aircraft(request):
+    if request.user.user_type != 'owner':
+        return redirect('membership_login')
+    
+    aircrafts = request.user.aircrafts.all()
+    context = {'aircrafts': aircrafts}
+    return render(request, 'membership/manage_aircraft.html', context)

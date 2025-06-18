@@ -1,0 +1,40 @@
+{% extends "membership/base.html" %}
+
+{% block content %}
+<div class="card">
+    <h2>My Aircraft Fleet</h2>
+    
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="background-color: var(--light);">
+                <th style="padding: 0.75rem; text-align: left;">Registration</th>
+                <th style="padding: 0.75rem; text-align: left;">Model</th>
+                <th style="padding: 0.75rem; text-align: left;">Status</th>
+                <th style="padding: 0.75rem; text-align: left;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for aircraft in aircrafts %}
+            <tr style="border-bottom: 1px solid #eee;">
+                <td style="padding: 0.75rem;">{{ aircraft.registration_number }}</td>
+                <td style="padding: 0.75rem;">{{ aircraft.model_name }}</td>
+                <td style="padding: 0.75rem;">
+                    {% if aircraft.is_active %}
+                    <span style="color: var(--success);">Active</span>
+                    {% else %}
+                    <span style="color: var(--danger);">Inactive</span>
+                    {% endif %}
+                </td>
+                <td style="padding: 0.75rem;">
+                    <a href="#" class="btn" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">View</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="padding: 1rem; text-align: center;">No aircraft registered</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

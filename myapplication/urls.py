@@ -151,7 +151,10 @@ urlpatterns = [
     # path('ajax/check-availability/', views.ajax_check_availability, name='ajax_check_availability'),
     # path('ajax/calculate-price/', views.ajax_calculate_price, name='ajax_calculate_price'),
     path('ajax/calculate-flight-hours/', views.ajax_calculate_flight_hours, name='ajax_calculate_flight_hours'),  # New URL
-    
+    path('membership/login/', views.membership_login, name='membership_login'),
+    path('membership/dashboard/', views.owner_dashboard, name='owner_dashboard'),
+    path('membership/aircraft/', views.manage_aircraft, name='manage_aircraft'),
+  
 ]
     
     

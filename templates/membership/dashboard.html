@@ -1,0 +1,31 @@
+{% extends "membership/base.html" %}
+
+{% block content %}
+<div class="card">
+    <h2>Welcome, {{ request.user.get_full_name }}</h2>
+    <p>Member since: {{ dashboard.joined_date|date:"F j, Y" }}</p>
+</div>
+
+<div class="card">
+    <h3>Fleet Overview</h3>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;">
+        <div class="card">
+            <h4>Total Aircraft</h4>
+            <p style="font-size: 2rem;">{{ dashboard.total_aircraft }}</p>
+        </div>
+        <div class="card">
+            <h4>Active Aircraft</h4>
+            <p style="font-size: 2rem;">{{ dashboard.active_aircraft }}</p>
+        </div>
+        <div class="card">
+            <h4>Last Access</h4>
+            <p>{{ dashboard.last_accessed|timesince }} ago</p>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Recent Activity</h3>
+    <p>Flight data will appear here</p>
+</div>
+{% endblock %}
