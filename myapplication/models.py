@@ -425,3 +425,134 @@ class Inquiry(models.Model):
     
     def __str__(self):
         return f"Inquiry from {self.full_name} ({self.submitted_at.strftime('%Y-%m-%d')})"
+    
+# membership and aircraft tracking system
+class OwnerDashboard(models.Model):
+    """Central hub for all owner operations"""
+    owner = models.OneToOneField(
+        'User', 
+        on_delete=models.CASCADE,
+        limit_choices_to={'user_type': 'owner'},
+        related_name='owner_dashboard'
+    )
+    joined_date = models.DateField(auto_now_add=True)
+    last_accessed = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name_plural = "Owner Dashboards"
+    
+    def __str__(self):
+        return f"{self.owner}'s Aircraft Dashboard"
+
+    @property
+    def total_aircraft(self):
+        return self.owner.aircrafts.count()
+
+    @property
+    def active_aircraft(self):
+        return self.owner.aircrafts.filter(is_active=True).count()
+    
+
+class AircraftPerformance(models.Model):
+    """Tracks all operational metrics for a single aircraft"""
+    aircraft = models.OneToOneField(
+        'Aircraft',
+        on_delete=models.CASCADE,
+        related_name='performance'
+    )
+    total_flight_hours = models.DecimalField(max_digits=9, decimal_places=1, default=0)
+    total_revenue = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    last_maintenance = models.DateField(null=True, blank=True)
+    next_maintenance_due = models.DateField(null=True, blank=True)
+    nautical_miles = models.PositiveIntegerField(default=0)
+    
+    def update_metrics(self):
+        """Auto-calculates metrics from existing bookings"""
+        from django.db.models import Sum
+        legs = self.aircraft.bookings.all().aggregate(
+            total_hours=Sum('flight_hours'),
+            total_rev=Sum('owner_earnings')
+        )
+        self.total_flight_hours = legs['total_hours'] or 0
+        self.total_revenue = legs['total_rev'] or 0
+        self.save()
+    
+    def __str__(self):
+        return f"{self.aircraft} Performance"
+    
+
+class FlightRoute(models.Model):
+    """Tracks where each aircraft has flown"""
+    aircraft = models.ForeignKey(
+        'Aircraft',
+        on_delete=models.CASCADE,
+        related_name='flight_history'
+    )
+    departure = models.CharField(max_length=100)  # Airport code
+    destination = models.CharField(max_length=100)
+    date = models.DateField()
+    flight_hours = models.DecimalField(max_digits=5, decimal_places=1)
+    nautical_miles = models.PositiveIntegerField()
+    passengers = models.PositiveSmallIntegerField()
+    booking_reference = models.CharField(max_length=20, blank=True)
+    
+    class Meta:
+        ordering = ['-date']
+    
+    def __str__(self):
+        return f"{self.aircraft}: {self.departure}→{self.destination} ({self.date})"
+    
+
+class MaintenanceTicket(models.Model):
+    """Owner-initiated maintenance requests"""
+    STATUS_CHOICES = [
+        ('requested', 'Requested'),
+        ('scheduled', 'Scheduled'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed')
+    ]
+    
+    aircraft = models.ForeignKey(
+        'Aircraft',
+        on_delete=models.CASCADE,
+        related_name='maintenance_tickets'
+    )
+    title = models.CharField(max_length=100)
+    description = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='requested')
+    created_by = models.ForeignKey(
+        'User',
+        on_delete=models.SET_NULL,
+        null=True,
+        limit_choices_to={'user_type': 'owner'}
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    
+    def __str__(self):
+        return f"{self.aircraft} - {self.title}"
+    
+
+class OwnerNotification(models.Model):
+    """Real-time alerts for owners"""
+    owner = models.ForeignKey(
+        'User',
+        on_delete=models.CASCADE,
+        limit_choices_to={'user_type': 'owner'},
+        related_name='notifications'
+    )
+    message = models.CharField(max_length=200)
+    related_aircraft = models.ForeignKey(
+        'Aircraft',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"Alert for {self.owner}"
