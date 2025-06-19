@@ -1325,8 +1325,8 @@ FLIGHT DETAILS:
         leg_type = "Departure" if i == 1 else "Return"
         message += f"""
 {leg_type} Flight:
-- From: {leg.departure_airport.icao_code}
-- To: {leg.arrival_airport.icao_code}
+- From: {leg.departure_airport.name} ({leg.departure_airport.icao_code})
+- To: {leg.arrival_airport.name} ({leg.arrival_airport.icao_code})
 - Date & Time: {leg.departure_datetime.strftime('%B %d, %Y at %I:%M %p')}
 - Flight Duration: {leg.flight_hours} hours
 - Price: ${leg.leg_price:,.2f}

@@ -180,9 +180,9 @@
                 {% for leg in flight_legs %}
                 <div class="flight-route">
                     <div class="route-info">
-                        <span>{{ leg.departure_airport.icao_code }}</span>
+                        <span> {{ leg.departure_airport.name }} ({{ leg.departure_airport.icao_code }})</span>
                         <span class="arrow">→</span>
-                        <span>{{ leg.arrival_airport.icao_code }}</span>
+                        <span> {{ leg.arrival_airport.name }} ({{ leg.arrival_airport.icao_code }})</span>
                         {% if leg.sequence == 1 %}
                             <span style="margin-left: 10px; color: #4CAF50; font-size: 12px;">(DEPARTURE)</span>
                         {% else %}
