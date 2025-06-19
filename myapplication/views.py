@@ -797,6 +797,232 @@ def api_login(request):
 from decimal import Decimal
 from datetime import timedelta
 
+#before the next changes this was previous view 
+# @require_http_methods(["POST"])
+# @login_required
+# def create_booking(request):
+#     """Handle booking creation"""
+#     try:
+#         # Parse form data
+#         data = request.POST
+        
+#         # Extract booking details
+#         aircraft_id = data.get('aircraft_id')
+#         departure_airport_code = data.get('departure_airport')
+#         arrival_airport_code = data.get('arrival_airport')
+#         departure_datetime_str = data.get('departure_datetime')
+#         return_datetime_str = data.get('return_datetime')
+#         trip_type = data.get('trip_type', 'one_way')
+#         passenger_count = int(data.get('passenger_count', 1))
+        
+#         # Client information
+#         client_name = data.get('client_name', '').strip()
+#         client_email = data.get('client_email', '').strip().lower()
+#         client_phone = data.get('client_phone', '').strip()
+#         company_name = data.get('company_name', '').strip()
+        
+#         # Flight preferences
+#         departure_time = data.get('departure_time')
+#         return_time = data.get('return_time')
+#         special_requests = data.get('special_requests', '').strip()
+#         catering_required = data.get('catering_required') == 'on'
+#         ground_transport = data.get('ground_transport') == 'on'
+        
+#         # Commission rate (you may want to set this based on user/business logic)
+#         commission_rate = Decimal(data.get('commission_rate', '10.00'))  # Default 10%
+        
+#         # Validation
+#         errors = []
+        
+#         if not aircraft_id:
+#             errors.append("Aircraft selection is required")
+        
+#         if not client_name:
+#             errors.append("Client name is required")
+        
+#         if not client_email:
+#             errors.append("Client email is required")
+#         else:
+#             try:
+#                 validate_email(client_email)
+#             except ValidationError:
+#                 errors.append("Please enter a valid email address")
+        
+#         if not client_phone:
+#             errors.append("Phone number is required")
+        
+#         if not departure_datetime_str:
+#             errors.append("Departure date and time is required")
+        
+#         if trip_type == 'round_trip' and not return_datetime_str:
+#             errors.append("Return date and time is required for round trip")
+        
+#         if passenger_count < 1:
+#             errors.append("At least one passenger is required")
+        
+#         # Validate passenger information
+#         passengers_data = []
+#         for i in range(1, passenger_count + 1):
+#             passenger_name = data.get(f'passenger_{i}_name', '').strip()
+#             passenger_dob = data.get(f'passenger_{i}_dob', '').strip()
+#             passenger_passport = data.get(f'passenger_{i}_passport', '').strip()
+#             passenger_nationality = data.get(f'passenger_{i}_nationality', '').strip()
+            
+#             if not passenger_name:
+#                 errors.append(f"Passenger {i} name is required")
+            
+#             passengers_data.append({
+#                 'name': passenger_name,
+#                 'date_of_birth': passenger_dob if passenger_dob else None,
+#                 'passport_number': passenger_passport,
+#                 'nationality': passenger_nationality
+#             })
+        
+#         if errors:
+#             return JsonResponse({
+#                 'success': False,
+#                 'message': 'Please correct the following errors: ' + '; '.join(errors)
+#             }, status=400)
+        
+#         # Get related objects
+#         try:
+#             aircraft = get_object_or_404(Aircraft, id=aircraft_id)
+#             departure_airport = get_object_or_404(Airport, icao_code=departure_airport_code)
+#             arrival_airport = get_object_or_404(Airport, icao_code=arrival_airport_code)
+#         except Exception as e:
+#             return JsonResponse({
+#                 'success': False,
+#                 'message': f'Invalid aircraft or airport selection: {str(e)}'
+#             }, status=400)
+        
+#         # Parse datetime strings
+#         try:
+#             departure_datetime = datetime.strptime(departure_datetime_str, '%Y-%m-%d %H:%M')
+#             departure_datetime = timezone.make_aware(departure_datetime)
+            
+#             return_datetime = None
+#             if return_datetime_str:
+#                 return_datetime = datetime.strptime(return_datetime_str, '%Y-%m-%d %H:%M')
+#                 return_datetime = timezone.make_aware(return_datetime)
+#         except ValueError as e:
+#             return JsonResponse({
+#                 'success': False,
+#                 'message': f'Invalid date format: {str(e)}'
+#             }, status=400)
+        
+#         # Calculate flight hours (you may need to implement this based on your business logic)
+#         def calculate_flight_hours(departure_airport, arrival_airport):
+#             # This is a placeholder - implement your actual flight time calculation
+#             # You might want to use distance calculation or a lookup table
+#             return Decimal('2.5')  # Default 2.5 hours
+        
+#         # Calculate pricing
+#         base_hourly_rate = aircraft.hourly_rate if hasattr(aircraft, 'hourly_rate') else Decimal('1000.00')
+#         flight_hours = calculate_flight_hours(departure_airport, arrival_airport)
+#         leg_price = base_hourly_rate * flight_hours
+        
+#         # Calculate total price based on trip type
+#         if trip_type == 'round_trip':
+#             total_price = leg_price * 2
+#         else:
+#             total_price = leg_price
+        
+#         # Calculate commission and owner earnings
+#         agent_commission = total_price * (commission_rate / 100)
+#         owner_earnings = total_price - agent_commission
+        
+#         # Create booking with transaction
+#         with transaction.atomic():
+#             # Create booking
+#             booking = Booking.objects.create(
+#                 client=request.user,  # Changed from 'user' to 'client'
+#                 aircraft=aircraft,
+#                 trip_type=trip_type,
+#                 commission_rate=commission_rate,
+#                 total_price=total_price,
+#                 agent_commission=agent_commission,
+#                 owner_earnings=owner_earnings,
+#                 special_requests=special_requests,
+#                 status='pending'
+#             )
+            
+#             # Create flight legs
+#             flight_legs = []
+            
+#             # First leg (departure)
+#             arrival_datetime = departure_datetime + timedelta(hours=float(flight_hours))
+#             first_leg = FlightLeg.objects.create(
+#                 booking=booking,
+#                 departure_airport=departure_airport,
+#                 arrival_airport=arrival_airport,
+#                 departure_datetime=departure_datetime,
+#                 arrival_datetime=arrival_datetime,
+#                 flight_hours=flight_hours,
+#                 passenger_count=passenger_count,
+#                 leg_price=leg_price,
+#                 sequence=1
+#             )
+#             flight_legs.append(first_leg)
+            
+#             # Second leg for round trip
+#             if trip_type == 'round_trip' and return_datetime:
+#                 return_arrival_datetime = return_datetime + timedelta(hours=float(flight_hours))
+#                 second_leg = FlightLeg.objects.create(
+#                     booking=booking,
+#                     departure_airport=arrival_airport,  # Swap airports for return
+#                     arrival_airport=departure_airport,
+#                     departure_datetime=return_datetime,
+#                     arrival_datetime=return_arrival_datetime,
+#                     flight_hours=flight_hours,
+#                     passenger_count=passenger_count,
+#                     leg_price=leg_price,
+#                     sequence=2
+#                 )
+#                 flight_legs.append(second_leg)
+            
+#             # Create passenger records (assuming you have a Passenger model)
+#             for i, passenger_data in enumerate(passengers_data):
+#                 Passenger.objects.create(
+#                     booking=booking,
+#                     name=passenger_data['name'],
+#                     date_of_birth=passenger_data['date_of_birth'],
+#                     passport_number=passenger_data['passport_number'],
+#                     nationality=passenger_data['nationality']
+#                 )
+
+            
+#             # Log the booking creation
+#             logger.info(f"Booking created: #{booking.id} by user {request.user.username}")
+            
+#             # You might want to send confirmation email here
+#             # send_booking_confirmation_email(booking)
+            
+#             return JsonResponse({
+#                 'success': True,
+#                 'message': 'Booking request submitted successfully',
+#                 'booking_id': booking.id,
+#                 'total_price': float(total_price),
+#                 'agent_commission': float(agent_commission),
+#                 'owner_earnings': float(owner_earnings),
+#                 'flight_legs': [
+#                     {
+#                         'sequence': leg.sequence,
+#                         'departure': f"{leg.departure_airport.icao_code}",
+#                         'arrival': f"{leg.arrival_airport.icao_code}",
+#                         'departure_time': leg.departure_datetime.isoformat(),
+#                         'flight_hours': float(leg.flight_hours),
+#                         'leg_price': float(leg.leg_price)
+#                     } for leg in flight_legs
+#                 ]
+#             })
+    
+#     except Exception as e:
+#         logger.error(f"Booking creation error: {str(e)}")
+#         return JsonResponse({
+#             'success': False,
+#             'message': 'An error occurred while processing your booking. Please try again.'
+#         }, status=500)
+
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
@@ -917,16 +1143,12 @@ def create_booking(request):
                 'message': f'Invalid date format: {str(e)}'
             }, status=400)
         
-        # Calculate flight hours (you may need to implement this based on your business logic)
-        def calculate_flight_hours(departure_airport, arrival_airport):
-            # This is a placeholder - implement your actual flight time calculation
-            # You might want to use distance calculation or a lookup table
-            return Decimal('2.5')  # Default 2.5 hours
+        # Calculate flight hours using your existing function
+        flight_hours = Decimal(str(estimate_flight_time(departure_airport, arrival_airport, aircraft)))
         
-        # Calculate pricing
-        base_hourly_rate = aircraft.hourly_rate if hasattr(aircraft, 'hourly_rate') else Decimal('1000.00')
-        flight_hours = calculate_flight_hours(departure_airport, arrival_airport)
-        leg_price = base_hourly_rate * flight_hours
+        # Calculate pricing using your existing function that handles minimum hours
+        leg_price = Decimal(str(calculate_base_price(aircraft, flight_hours, trip_type)))
+        
         
         # Calculate total price based on trip type
         if trip_type == 'round_trip':
