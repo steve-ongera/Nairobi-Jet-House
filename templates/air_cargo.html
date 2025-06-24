@@ -307,7 +307,7 @@
                 transition: all 0.2s;
             ">Return</span>
         </label>
-        
+        <!--
         <label style="flex: 1;">
             <input name="request_type" type="radio" value="multileg" style="display: none;">
             <span style="
@@ -320,7 +320,7 @@
                 cursor: pointer;
                 transition: all 0.2s;
             ">Multileg</span>
-        </label>
+        </label>-->
     </div>
 </div>
             
@@ -503,7 +503,8 @@
 </div>
 
 <script>
-// Declare modal instances globally
+
+  // Declare modal instances globally
 let cargoModal, leasingModal;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -570,7 +571,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 special_requirements: formData.get('special_requirements')
             };
             
-            submitForm('/submit-cargo-request/', data, cargoModal);
+            submitForm('/submit-cargo-request/', data, cargoModal, 'cargo-request-form');
         });
     }
     
@@ -591,12 +592,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 duration: formData.get('duration')
             };
             
-            submitForm('/submit-leasing-inquiry/', data, leasingModal);
+            submitForm('/submit-leasing-inquiry/', data, leasingModal, 'leasing-inquiry-form');
         });
     }
     
-    // Generic form submission function
-    function submitForm(url, data, modalInstance) {
+    // Enhanced form submission function with better success handling
+    function submitForm(url, data, modalInstance, formId) {
         fetch(url, {
             method: 'POST',
             headers: {
@@ -608,11 +609,28 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                showToast(data.message, 'success');
-                if (modalInstance) modalInstance.close();
-                // Reset the form if needed
-                const formId = url.includes('cargo') ? 'cargo-request-form' : 'leasing-inquiry-form';
-                document.getElementById(formId)?.reset();
+                // Show enhanced success message
+                showEnhancedSuccessMessage(data.message || 'Request submitted successfully!');
+                
+                // Close modal after a short delay to let user see the success message
+                if (modalInstance) {
+                    setTimeout(() => {
+                        modalInstance.close();
+                    }, 1500);
+                }
+                
+                // Reset the form
+                const form = document.getElementById(formId);
+                if (form) {
+                    form.reset();
+                    
+                    // Reset custom styling on form options
+                    form.querySelectorAll('.form-section span').forEach(span => {
+                        span.style.backgroundColor = '#f8f9fa';
+                        span.style.color = 'inherit';
+                        span.style.borderColor = '#ddd';
+                    });
+                }
             } else {
                 showToast(data.message, 'error');
             }
@@ -622,7 +640,58 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Simple toast notification
+    // Enhanced success message function
+    function showEnhancedSuccessMessage(message, duration = 6000) {
+        const toast = document.createElement('div');
+        toast.className = 'toast success enhanced';
+        toast.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="bi bi-check-circle-fill" style="font-size: 18px; color: #ffffff;"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        // Enhanced styling
+        Object.assign(toast.style, {
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            backgroundColor: '#28a745',
+            color: 'white',
+            padding: '15px 20px',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            zIndex: '10000',
+            opacity: '0',
+            transform: 'translateX(300px)',
+            transition: 'all 0.3s ease',
+            fontFamily: 'Arial, sans-serif',
+            fontSize: '14px',
+            maxWidth: '350px',
+            minWidth: '250px'
+        });
+        
+        document.body.appendChild(toast);
+        
+        // Animate in
+        setTimeout(() => {
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateX(0)';
+        }, 10);
+        
+        // Animate out and remove
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(300px)';
+            setTimeout(() => {
+                if (document.body.contains(toast)) {
+                    document.body.removeChild(toast);
+                }
+            }, 300);
+        }, duration);
+    }
+
+    // Original toast notification (kept for error messages)
     function showToast(message, type) {
         const toast = document.createElement('div');
         toast.className = `toast ${type}`;
@@ -655,8 +724,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         return cookieValue;
     }
+
+    // Make functions available globally if needed
+    window.showEnhancedSuccessMessage = showEnhancedSuccessMessage;
+    window.showToast = showToast;
 });
 
+// Form section styling (your existing code)
 document.querySelectorAll('.form-section label').forEach(label => {
     const span = label.querySelector('span');
     

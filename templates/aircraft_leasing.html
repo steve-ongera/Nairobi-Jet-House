@@ -192,129 +192,141 @@
 
 
 <!-- Aircraft Leasing Modal -->
-<div id="leasing-modal" class="modal">
-    <div class="modal-content request-form" style="width: 90%; max-width: 1200px; height: 85vh; max-height: none; border-radius: 8px; position: relative; overflow-y: auto;">
+<div id="leasing-modal" class="modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); overflow: hidden; animation: fadeIn 0.3s ease-in-out;">
+    <div class="modal-content request-form" style="width: 90%; max-width: 1200px; height: 85vh; max-height: 90vh; border-radius: 8px; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: #fefefe; padding: 30px; box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3); overflow: hidden; display: flex; flex-direction: column;">
         <!-- Close Button -->
         <button class="close-modal" style="position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 24px; cursor: pointer; color: #666; z-index: 10; padding: 5px; line-height: 1;">
             ×
         </button>
         
-        <div class="form-header">
-            <h3>Aircraft Leasing Inquiry</h3>
+        <div class="form-header" style="text-align: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid #eaeaea;">
+            <h3 style="color: #2c3e50; font-size: 24px; font-weight: 600; margin: 0;">Aircraft Leasing Inquiry</h3>
         </div>
         
-        <form id="leasing-inquiry-form" enctype="multipart/form-data">
-            {% csrf_token %}
-            
-            <div class="form-section">
-              <h4 style="margin-bottom: 12px; font-size: 1.1rem; color: #333; font-weight: 500;">Service Type</h4>
-              <div style="display: flex; gap: 8px;">
-                  <label style="flex: 1;">
-                      <input name="leasing_type" type="radio" value="private_jet" checked style="display: none;">
-                      <span style="
-                          display: block;
-                          padding: 10px;
-                          text-align: center;
-                          background-color: #1a6fc9;
-                          color: white;
-                          border: 1px solid #155a9e;
-                          border-radius: 4px;
-                          cursor: pointer;
-                          transition: all 0.2s;
-                          font-size: 0.9rem;
-                      ">Private Jet Charter</span>
-                  </label>
-                  
-                  <label style="flex: 1;">
-                      <input name="leasing_type" type="radio" value="group_charter" style="display: none;">
-                      <span style="
-                          display: block;
-                          padding: 10px;
-                          text-align: center;
-                          background-color: #f8f9fa;
-                          border: 1px solid #ddd;
-                          border-radius: 4px;
-                          cursor: pointer;
-                          transition: all 0.2s;
-                          font-size: 0.9rem;
-                      ">Group Air Charter</span>
-                  </label>
-                  
-                  <label style="flex: 1;">
-                      <input name="leasing_type" type="radio" value="aircraft_leasing" style="display: none;">
-                      <span style="
-                          display: block;
-                          padding: 10px;
-                          text-align: center;
-                          background-color: #f8f9fa;
-                          border: 1px solid #ddd;
-                          border-radius: 4px;
-                          cursor: pointer;
-                          transition: all 0.2s;
-                          font-size: 0.9rem;
-                      ">Aircraft Leasing</span>
-                  </label>
+        <div style="overflow-y: auto; flex: 1; padding-right: 10px; scrollbar-width: none; -ms-overflow-style: none;">
+            <form id="leasing-inquiry-form" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="form-section" style="margin-bottom: 25px; padding: 20px; background-color: #f9f9f9; border-radius: 6px;">
+                  <h4 style="margin-bottom: 12px; font-size: 1.1rem; color: #333; font-weight: 500;">Service Type</h4>
+                  <div style="display: flex; gap: 8px;">
+                      <label style="flex: 1;">
+                          <input name="leasing_type" type="radio" value="private_jet" checked style="display: none;">
+                          <span style="
+                              display: block;
+                              padding: 10px;
+                              text-align: center;
+                              background-color: #1a6fc9;
+                              color: white;
+                              border: 1px solid #155a9e;
+                              border-radius: 4px;
+                              cursor: pointer;
+                              transition: all 0.2s;
+                              font-size: 0.9rem;
+                          ">Private Jet Charter</span>
+                      </label>
+                      
+                      <label style="flex: 1;">
+                          <input name="leasing_type" type="radio" value="group_charter" style="display: none;">
+                          <span style="
+                              display: block;
+                              padding: 10px;
+                              text-align: center;
+                              background-color: #f8f9fa;
+                              border: 1px solid #ddd;
+                              border-radius: 4px;
+                              cursor: pointer;
+                              transition: all 0.2s;
+                              font-size: 0.9rem;
+                          ">Group Air Charter</span>
+                      </label>
+                      
+                      <label style="flex: 1;">
+                          <input name="leasing_type" type="radio" value="aircraft_leasing" style="display: none;">
+                          <span style="
+                              display: block;
+                              padding: 10px;
+                              text-align: center;
+                              background-color: #f8f9fa;
+                              border: 1px solid #ddd;
+                              border-radius: 4px;
+                              cursor: pointer;
+                              transition: all 0.2s;
+                              font-size: 0.9rem;
+                          ">Aircraft Leasing</span>
+                      </label>
+                  </div>
               </div>
-          </div>
-            
-            <div class="form-section">
-                <h4>Contact Information</h4>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="leasing_name">Your Name *</label>
-                        <input id="leasing_name" name="name" type="text" required>
+                
+                <div class="form-section" style="margin-bottom: 25px; padding: 20px; background-color: #f9f9f9; border-radius: 6px;">
+                    <h4 style="color: #3498db; margin-top: 0; margin-bottom: 15px; font-size: 18px; font-weight: 500;">Contact Information</h4>
+                    <div class="form-row" style="display: flex; flex-wrap: wrap; margin: 0 -10px;">
+                        <div class="form-group" style="flex: 1; min-width: 200px; margin: 0 10px 15px;">
+                            <label for="leasing_name" style="display: block; margin-bottom: 8px; color: #555; font-size: 14px; font-weight: 500;">Your Name *</label>
+                            <input id="leasing_name" name="name" type="text" required style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; transition: border 0.3s; box-sizing: border-box;">
+                        </div>
+                        <div class="form-group" style="flex: 1; min-width: 200px; margin: 0 10px 15px;">
+                            <label for="leasing_company" style="display: block; margin-bottom: 8px; color: #555; font-size: 14px; font-weight: 500;">Company</label>
+                            <input id="leasing_company" name="company" type="text" style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; transition: border 0.3s; box-sizing: border-box;">
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="leasing_company">Company</label>
-                        <input id="leasing_company" name="company" type="text">
+                    <div class="form-row" style="display: flex; flex-wrap: wrap; margin: 0 -10px;">
+                        <div class="form-group" style="flex: 1; min-width: 200px; margin: 0 10px 15px;">
+                            <label for="leasing_email" style="display: block; margin-bottom: 8px; color: #555; font-size: 14px; font-weight: 500;">Email *</label>
+                            <input id="leasing_email" name="email" type="email" required style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; transition: border 0.3s; box-sizing: border-box;">
+                        </div>
+                        <div class="form-group" style="flex: 1; min-width: 200px; margin: 0 10px 15px;">
+                            <label for="leasing_telephone" style="display: block; margin-bottom: 8px; color: #555; font-size: 14px; font-weight: 500;">Telephone *</label>
+                            <input id="leasing_telephone" name="telephone" type="tel" required style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; transition: border 0.3s; box-sizing: border-box;">
+                        </div>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="leasing_email">Email *</label>
-                        <input id="leasing_email" name="email" type="email" required>
+                
+                <div class="form-section" style="margin-bottom: 25px; padding: 20px; background-color: #f9f9f9; border-radius: 6px;">
+                    <h4 style="color: #3498db; margin-top: 0; margin-bottom: 15px; font-size: 18px; font-weight: 500;">Requirements</h4>
+                    <div class="form-group" style="flex: 1; min-width: 200px; margin: 0 10px 15px;">
+                        <label for="requirements" style="display: block; margin-bottom: 8px; color: #555; font-size: 14px; font-weight: 500;">Your Requirements *</label>
+                        <textarea id="requirements" name="requirements" required style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; min-height: 100px; resize: vertical; box-sizing: border-box;"></textarea>
                     </div>
-                    <div class="form-group">
-                        <label for="leasing_telephone">Telephone *</label>
-                        <input id="leasing_telephone" name="telephone" type="tel" required>
+                    <div class="form-group" style="flex: 1; min-width: 200px; margin: 0 10px 15px;">
+                        <label for="duration" style="display: block; margin-bottom: 8px; color: #555; font-size: 14px; font-weight: 500;">Duration</label>
+                        <input id="duration" name="duration" type="text" style="width: 100%; padding: 10px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; transition: border 0.3s; box-sizing: border-box;">
                     </div>
                 </div>
-            </div>
-            
-            <div class="form-section">
-                <h4>Requirements</h4>
-                <div class="form-group">
-                    <label for="requirements">Your Requirements *</label>
-                    <textarea id="requirements" name="requirements" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="duration">Duration</label>
-                    <input id="duration" name="duration" type="text">
-                </div>
-            </div>
 
-            <div class="form-section">
-                <h4>Supporting Documents</h4>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="supporting_document_1">Supporting Document 1</label>
-                        <input id="supporting_document_1" name="supporting_document_1" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
-                        <small style="color: #666; font-size: 12px;">Accepted formats: PDF, DOC, DOCX, JPG, PNG (Max 10MB)</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="supporting_document_2">Supporting Document 2</label>
-                        <input id="supporting_document_2" name="supporting_document_2" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
-                        <small style="color: #666; font-size: 12px;">Accepted formats: PDF, DOC, DOCX, JPG, PNG (Max 10MB)</small>
+                <div class="form-section" style="margin-bottom: 25px; padding: 20px; background-color: #f9f9f9; border-radius: 6px;">
+                    <h4 style="color: #3498db; margin-top: 0; margin-bottom: 15px; font-size: 18px; font-weight: 500;">Supporting Documents</h4>
+                    <div class="form-row" style="display: flex; flex-wrap: wrap; margin: 0 -10px;">
+                        <div class="form-group" style="flex: 1; min-width: 200px; margin: 0 10px 15px;">
+                            <label for="supporting_document_1" style="display: block; margin-bottom: 8px; color: #555; font-size: 14px; font-weight: 500;">Supporting Document 1</label>
+                            <input id="supporting_document_1" name="supporting_document_1" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; background-color: #fff; cursor: pointer; transition: border 0.3s; box-sizing: border-box;">
+                            <small style="color: #666; font-size: 12px; display: block; margin-top: 5px; line-height: 1.4;">Accepted formats: PDF, DOC, DOCX, JPG, PNG (Max 10MB)</small>
+                        </div>
+                        <div class="form-group" style="flex: 1; min-width: 200px; margin: 0 10px 15px;">
+                            <label for="supporting_document_2" style="display: block; margin-bottom: 8px; color: #555; font-size: 14px; font-weight: 500;">Supporting Document 2</label>
+                            <input id="supporting_document_2" name="supporting_document_2" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; background-color: #fff; cursor: pointer; transition: border 0.3s; box-sizing: border-box;">
+                            <small style="color: #666; font-size: 12px; display: block; margin-top: 5px; line-height: 1.4;">Accepted formats: PDF, DOC, DOCX, JPG, PNG (Max 10MB)</small>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="form-actions" style="text-align: center;">
-                <button type="submit" class="btn-submit">Submit Inquiry</button>
-            </div>
-        </form>
+                
+                <div class="form-actions" style="text-align: center; margin-top: 20px;">
+                    <button type="submit" class="btn-submit" style="background-color: #3498db; color: white; border: none; padding: 12px 25px; font-size: 16px; border-radius: 4px; cursor: pointer; transition: background-color 0.3s; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Submit Inquiry</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
+
+<style>
+/* Hide scrollbar but allow scrolling */
+.modal-content::-webkit-scrollbar {
+    width: 0 !important;
+    display: none;
+}
+
+
+</style>
 
 <script>
 // Declare modal instances globally
@@ -1466,6 +1478,10 @@ label[required]::after {
     color: #333;
 }
 
+.modal-content::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+}
   
 </style>
 {% endblock %}

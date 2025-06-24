@@ -207,9 +207,19 @@
       -->
 
       <!-- Hero Section with timed video background -->
+<!-- Hero Section with timed video background -->
 <section class="hero" id="home">
   <div class="container">
-    <h2 class="h1 hero-title">Travel across hidden lands</h2>
+        <h2 style="
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: 700;
+        line-height: 1.2;
+        margin: 0 0 0.5rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: inherit;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    ">Travel across hidden lands</h2>
     <p class="hero-text">
       Discover the freedom of personalized travel. Nairobi Jet House connects you to Africa, Europe, and beyond with 
       luxury, safety, and efficiency at the heart of every flight.
@@ -222,7 +232,7 @@
   
   <!-- Video Background Element -->
   <div class="video-background">
-    <video autoplay muted loop playsinline>
+    <video autoplay muted playsinline>
       <source src="{% static 'assets/videos/jet-taking-off.mp4' %}" type="video/mp4">
       <!-- Fallback image if video doesn't load -->
       <img src="{% static 'assets/images/hero-banner.jpg' %}" alt="Private Jet">
@@ -231,6 +241,7 @@
 </section>
 
 <style>
+  /* Your existing CSS remains unchanged */
   .hero {
     position: relative;
     background-image: url("{% static 'assets/images/hero-banner.jpg' %}");
@@ -293,24 +304,127 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const videoBackground = document.querySelector('.video-background');
+    const videoSources = [
+      "{% static 'assets/videos/video-one.mp4' %}",
+      "{% static 'assets/videos/video-two.mp4' %}",
+      "{% static 'assets/videos/video-three.mp4' %}",
+      "{% static 'assets/videos/video-four.mp4' %}",
+      "{% static 'assets/videos/video-five.mp4' %}",
+      "{% static 'assets/videos/video-six.mp4' %}",
+      "{% static 'assets/videos/video-seven.mp4' %}"
+    ];
     
-    // Preload and start the video immediately (but hidden)
+    // Preload videos to prevent broken pipes
+    const preloadedVideos = [];
+    videoSources.forEach(src => {
+      const v = document.createElement('video');
+      v.src = src;
+      v.preload = 'auto';
+      v.load();
+      preloadedVideos.push(v);
+    });
+
     if (videoBackground) {
       const video = videoBackground.querySelector('video');
       if (video) {
+        // Configure video for reliable playback
+        video.muted = true; // Required for autoplay in most browsers
+        video.playsInline = true; // For iOS compatibility
+        video.preload = 'auto';
+        
+        let currentVideoIndex = 0;
+        let videoTimeout;
+        let retryCount = 0;
+        const MAX_RETRIES = 3;
+        
+        // Improved error handling
+        function handlePlayError(error) {
+          console.log("Video play error:", error);
+          retryCount++;
+          
+          if (retryCount <= MAX_RETRIES) {
+            console.log(`Retrying... (${retryCount}/${MAX_RETRIES})`);
+            setTimeout(() => {
+              video.load();
+              video.play().catch(handlePlayError);
+            }, 1000 * retryCount);
+          } else {
+            console.log("Max retries reached, moving to next video");
+            retryCount = 0;
+            playNextVideo();
+          }
+        }
+        
+        // More robust playNextVideo function
+        function playNextVideo() {
+          clearTimeout(videoTimeout);
+          retryCount = 0;
+          
+          currentVideoIndex = (currentVideoIndex + 1) % videoSources.length;
+          
+          // Use preloaded video element
+          video.src = videoSources[currentVideoIndex];
+          video.load();
+          
+          const playPromise = video.play();
+          
+          if (playPromise !== undefined) {
+            playPromise
+              .then(_ => {
+                // On successful play
+                videoTimeout = setTimeout(playNextVideo, 5000);
+              })
+              .catch(handlePlayError);
+          }
+        }
+        
+        // Enhanced event listeners
+        video.addEventListener('ended', playNextVideo);
+        video.addEventListener('error', function() {
+          console.log("Video error occurred:", video.error);
+          playNextVideo();
+        });
+        
+        // Start with first video
+        video.src = videoSources[0];
         video.load();
-        video.play().catch(e => console.log("Video autoplay prevented:", e));
+        
+        const initialPlayPromise = video.play();
+        if (initialPlayPromise !== undefined) {
+          initialPlayPromise
+            .then(_ => {
+              videoTimeout = setTimeout(playNextVideo, 5000);
+            })
+            .catch(handlePlayError);
+        }
+        
+        // Fallback if all else fails
+        const fallbackTimer = setTimeout(() => {
+          if (video.paused) {
+            console.log("Fallback activation - forcing video play");
+            video.play().catch(handlePlayError);
+          }
+        }, 5000);
+        
+        // Clean up on page exit
+        window.addEventListener('beforeunload', function() {
+          clearTimeout(videoTimeout);
+          clearTimeout(fallbackTimer);
+          if (video) {
+            video.pause();
+            video.removeAttribute('src');
+            video.load();
+          }
+        });
       }
     }
     
-    // Show video after 20 seconds
+    // Show video after 3 seconds
     setTimeout(function() {
       document.body.classList.add('video-active');
-    }, 3000); // 20000 milliseconds = 20 seconds
+    }, 3000);
   });
 </script>
-
-
 
 
 
