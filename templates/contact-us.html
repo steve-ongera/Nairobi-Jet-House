@@ -5,9 +5,6 @@
 {% block description %}Get in touch with Nairobi Jet House for private jet charters, inquiries, and personalized flight services across Africa and beyond.{% endblock %}
 
 {% block content %}
-<br>
-<br>
-<br>
 <div class="message-container" id="system-messages">
     {% for message in messages %}
     <div class="alert-message alert-{{ message.tags }}">
@@ -17,28 +14,31 @@
     {% endfor %}
 </div>
 
-<section class="contact-section">
-  <div class="container">
-
-    <div class="contact-banner">
-      <img src="{% static 'assets/images/New-Private-Jet-with-Eyemask-1.jpg' %}" alt="Contact Nairobi Jet House" class="contact-img">
-      
-      <div class="contact-banner-content">
-        <h2 style="color:white;" class="h2 section-title">Your Journey Begins Here</h2>
-        <p class="contact-banner-text">
-          Our team is available 24/7 to arrange your perfect flight experience.
-        </p>
+<section class="hero-banner">
+  <div class="hero-image-wrapper">
+    <img src="{% static 'assets/images/New-Private-Jet-with-Eyemask-1.jpg' %}" alt="Nairobi Jet House Private Jet" class="hero-image">
+    <div class="hero-overlay"></div>
+    <div class="hero-content container">
+      <h1 class="hero-title">Contact Nairobi Jet House</h1>
+      <p class="hero-subtitle">Your exclusive journey begins with a conversation</p>
+      <div class="hero-cta">
+        <a href="tel:+254780729617" class="cta-button">
+          <ion-icon name="call-outline"></ion-icon>
+          Call Now
+        </a>
       </div>
     </div>
+  </div>
+</section>
 
+<section class="contact-section">
+  <div class="container">
     <div class="contact-content">
-
       <div class="contact-grid">
-
         <div class="contact-info">
-          <h2 class="h2 section-title" style="font-size: 2.5rem; font-weight: 700; color: #1a4b8c; margin-bottom: 1.5rem; position: relative; display: inline-block;">
-            Contact Information
-            <span style="content: ''; display: block; width: 60px; height: 4px; background: #3498db; margin-top: 0.8rem;"></span>
+          <h2 class="section-heading">
+            <span class="heading-text">Contact Information</span>
+            <span class="heading-underline"></span>
           </h2>
           
           <div class="contact-info-item">
@@ -46,7 +46,7 @@
               <ion-icon name="location-outline"></ion-icon>
             </div>
             <div class="contact-info-content">
-              <h3 class="h3 contact-info-title">Headquarters</h3>
+              <h3 class="contact-info-title">Headquarters</h3>
               <p class="contact-info-text">
                 Wilson Airport, Nairobi, Kenya<br>
                 Private Terminal 2
@@ -59,10 +59,10 @@
               <ion-icon name="call-outline"></ion-icon>
             </div>
             <div class="contact-info-content">
-              <h3 class="h3 contact-info-title">Phone</h3>
+              <h3 class="contact-info-title">Phone</h3>
               <p class="contact-info-text">
-                <a href="tel:+254780729617" style="color: #1a4b8c; text-decoration: none;">+254 780 729 617</a><br>
-                <a href="tel:+254724878136" style="color: #1a4b8c; text-decoration: none;">+254 724 878 136</a>
+                <a href="tel:+254780729617" class="contact-link">+254 780 729 617</a><br>
+                <a href="tel:+254724878136" class="contact-link">+254 724 878 136</a>
               </p>
             </div>
           </div>
@@ -72,10 +72,9 @@
               <ion-icon name="mail-outline"></ion-icon>
             </div>
             <div class="contact-info-content">
-              <h3 class="h3 contact-info-title">Email</h3>
+              <h3 class="contact-info-title">Email</h3>
               <p class="contact-info-text">
-                <a href="mailto:nairobijethouse@gmail.com" style="color: #1a4b8c; text-decoration: none;">nairobijethouse@gmail.com</a><br>
-                <!--<a href="mailto:bookings@nairobi.jet" style="color: #1a4b8c; text-decoration: none;">bookings@nairobi.jet</a>-->
+                <a href="mailto:nairobijethouse@gmail.com" class="contact-link">nairobijethouse@gmail.com</a>
               </p>
             </div>
           </div>
@@ -85,7 +84,7 @@
               <ion-icon name="time-outline"></ion-icon>
             </div>
             <div class="contact-info-content">
-              <h3 class="h3 contact-info-title">Operating Hours</h3>
+              <h3 class="contact-info-title">Operating Hours</h3>
               <p class="contact-info-text">
                 24/7 Operations Center<br>
                 Office Hours: 8:00 AM - 6:00 PM EAT
@@ -95,9 +94,9 @@
         </div>
 
         <div class="contact-form">
-          <h2 class="h2 section-title" style="font-size: 2.5rem; font-weight: 700; color: #1a4b8c; margin-bottom: 1.5rem; position: relative; display: inline-block;">
-            Send Us a Message
-            <span style="content: ''; display: block; width: 60px; height: 4px; background: #3498db; margin-top: 0.8rem;"></span>
+          <h2 class="section-heading">
+            <span class="heading-text">Send Us a Message</span>
+            <span class="heading-underline"></span>
           </h2>
           
           <form method="post" class="form">
@@ -128,19 +127,23 @@
               <textarea name="message" placeholder="Your Message" rows="5" required class="form-control"></textarea>
             </div>
             
-            <button type="submit" class="btn btn-primary">Send Message</button>
+            <button type="submit" class="btn btn-primary">
+              <span>Send Message</span>
+              <ion-icon name="send-outline"></ion-icon>
+            </button>
           </form>
         </div>
-
       </div>
-
     </div>
-
   </div>
 </section>
 
 <section class="map-section">
   <div class="container">
+    <h2 class="section-heading">
+      <span class="heading-text">Our Location</span>
+      <span class="heading-underline"></span>
+    </h2>
     <div class="map-wrapper">
       <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.847268876093!2d36.81321531575387!3d-1.2687358359802353!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f173c0a1f9de7%3A0xad2c84df1f7f2ec8!2sWilson%20Airport!5e0!3m2!1sen!2ske!4v1620000000000!5m2!1sen!2ske" 
               width="100%" 
@@ -154,124 +157,302 @@
 </section>
 
 <style>
-  .contact-section {
-    padding: 60px 0;
+  /* Typography */
+  :root {
+    --primary-color: #1a4b8c;
+    --secondary-color: #3498db;
+    --accent-color: #e67e22;
+    --text-color: #333;
+    --light-text: #777;
+    --background-light: #f9f9f9;
+    --border-radius: 8px;
+    --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
   }
   
-  .contact-banner {
+  body {
+    font-family: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+    color: var(--text-color);
+    line-height: 1.6;
+  }
+  
+  h1, h2, h3, h4 {
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+  
+  /* Hero Banner */
+  .hero-banner {
     position: relative;
-    margin-bottom: 40px;
-    border-radius: 16px;
+    margin-bottom: 60px;
+  }
+  
+  .hero-image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 70vh;
+    min-height: 500px;
     overflow: hidden;
   }
   
-  .contact-img {
+  .hero-image {
     width: 100%;
-    height: 400px;
+    height: 100%;
     object-fit: cover;
+    object-position: center;
   }
   
-  .contact-banner-content {
+  .hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 100%);
+  }
+  
+  .hero-content {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
-    background: linear-gradient(transparent, rgba(0,0,0,0.8));
-    padding: 40px;
+    padding: 60px;
     color: white;
+    z-index: 2;
+  }
+  
+  .hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  
+  .hero-subtitle {
+    font-size: 1.5rem;
+    max-width: 600px;
+    margin-bottom: 2rem;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+  
+  .cta-button {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--accent-color);
+    color: white;
+    padding: 15px 30px;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+  }
+  
+  .cta-button:hover {
+    background-color: #d35400;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  }
+  
+  .cta-button ion-icon {
+    margin-right: 10px;
+    font-size: 1.2rem;
+  }
+  
+  /* Section Styling */
+  .section-heading {
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    text-align: center;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .heading-underline {
+    width: 80px;
+    height: 4px;
+    background: var(--secondary-color);
+    margin-top: 1rem;
+  }
+  
+  .contact-section {
+    padding: 80px 0;
   }
   
   .contact-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 50px;
+    gap: 60px;
     margin-top: 40px;
   }
   
-  @media (max-width: 768px) {
+  @media (max-width: 992px) {
     .contact-grid {
       grid-template-columns: 1fr;
     }
+    
+    .hero-title {
+      font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+      font-size: 1.2rem;
+    }
   }
   
+  /* Contact Info */
   .contact-info-item {
     display: flex;
     align-items: flex-start;
     margin-bottom: 30px;
+    transition: var(--transition);
+  }
+  
+  .contact-info-item:hover {
+    transform: translateX(5px);
   }
   
   .contact-info-icon {
-    font-size: 24px;
-    color: #3498db;
+    font-size: 1.8rem;
+    color: var(--secondary-color);
     margin-right: 20px;
     margin-top: 5px;
+    flex-shrink: 0;
   }
   
   .contact-info-title {
     font-size: 1.2rem;
-    color: #1a4b8c;
-    margin-bottom: 5px;
+    color: var(--primary-color);
+    margin-bottom: 8px;
+    font-weight: 600;
   }
   
   .contact-info-text {
     font-size: 1.05rem;
-    color: #555;
+    color: var(--light-text);
     line-height: 1.6;
   }
   
+  .contact-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: var(--transition);
+    font-weight: 500;
+  }
+  
+  .contact-link:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
+  }
+  
+  /* Form Styling */
   .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 25px;
   }
   
   .form-control {
     width: 100%;
-    padding: 12px 15px;
+    padding: 15px 20px;
     border: 1px solid #ddd;
-    border-radius: 4px;
+    border-radius: var(--border-radius);
     font-size: 1rem;
-    transition: all 0.3s ease;
+    transition: var(--transition);
+    background-color: var(--background-light);
   }
   
   .form-control:focus {
-    border-color: #3498db;
+    border-color: var(--secondary-color);
     outline: none;
-    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    background-color: white;
   }
   
   textarea.form-control {
-    min-height: 150px;
+    min-height: 180px;
+    resize: vertical;
+  }
+  
+  select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 1rem;
   }
   
   .btn-primary {
-    background-color: #1a4b8c;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--primary-color);
     color: white;
     border: none;
-    padding: 12px 30px;
-    border-radius: 4px;
+    padding: 15px 30px;
+    border-radius: var(--border-radius);
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: var(--transition);
+    width: 100%;
   }
   
   .btn-primary:hover {
     background-color: #0d3a73;
-    transform: translateY(-2px);
-  }
-  
-  .map-section {
-    padding: 0 0 60px;
-  }
-  
-  .map-wrapper {
-    border-radius: 12px;
-    overflow: hidden;
+    transform: translateY(-3px);
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
   }
   
-  .map-iframe {
-    display: block;
+  .btn-primary ion-icon {
+    margin-left: 10px;
+    font-size: 1.2rem;
+  }
+  
+  /* Map Section */
+  .map-section {
+    padding: 0 0 80px;
+  }
+  
+  .map-wrapper {
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--box-shadow);
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .hero-content {
+      padding: 40px 20px;
+    }
+    
+    .hero-title {
+      font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+      font-size: 1.1rem;
+    }
+    
+    .section-heading {
+      font-size: 2rem;
+    }
+    
+    .contact-section {
+      padding: 60px 0;
+    }
   }
 </style>
+
+<script>
+  // Close message functionality
+  document.querySelectorAll('.close-message').forEach(button => {
+    button.addEventListener('click', function() {
+      this.parentElement.style.opacity = '0';
+      setTimeout(() => {
+        this.parentElement.remove();
+      }, 300);
+    });
+  });
+</script>
 {% endblock %}
