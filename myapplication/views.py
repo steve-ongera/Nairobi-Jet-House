@@ -439,23 +439,54 @@ def private_jet_charter(request):
 
 from django.views.decorators.csrf import csrf_protect
 from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_protect
+from django.contrib import messages
+from .models import GroupInquiry
 
 @csrf_protect
 def group_charter(request):
     if request.method == 'POST':
-        group_name = request.POST.get('group_name')
-        contact_email = request.POST.get('contact_email')
-        passenger_count = request.POST.get('passenger_count')
-        travel_date = request.POST.get('travel_date')
-
-        GroupInquiry.objects.create(
-            group_name=group_name,
-            contact_email=contact_email,
-            passenger_count=passenger_count,
-            travel_date=travel_date
-        )
-        return redirect('index')  # or your success page
-
+        try:
+            # Basic Information
+            group_name = request.POST.get('group_name')
+            contact_email = request.POST.get('contact_email')
+            passenger_count = request.POST.get('passenger_count')
+            travel_date = request.POST.get('travel_date')
+            
+            # Travel Type and Details
+            travel_type = request.POST.get('travel_type')
+            departure = request.POST.get('departure')
+            destination = request.POST.get('destination')
+            departure_time = request.POST.get('departure_time')
+            
+            # Contact Information
+            telephone = request.POST.get('telephone')
+            special_requirements = request.POST.get('special_requirements')
+            
+            # Create the GroupInquiry object
+            GroupInquiry.objects.create(
+                group_name=group_name,
+                contact_email=contact_email,
+                passenger_count=passenger_count,
+                travel_date=travel_date,
+                travel_type=travel_type if travel_type else None,
+                departure=departure if departure else None,
+                destination=destination if destination else None,
+                departure_time=departure_time if departure_time else None,
+                telephone=telephone if telephone else None,
+                special_requirements=special_requirements if special_requirements else None,
+            )
+            
+            # Add success message
+            messages.success(request, 'Your group inquiry has been submitted successfully! We will contact you shortly.')
+            return redirect('index')
+            
+        except Exception as e:
+            # Add error message
+            messages.error(request, 'There was an error submitting your inquiry. Please try again.')
+            return render(request, 'group_charter.html')
+    
     return render(request, 'group_charter.html')
 
 from django.contrib.auth import logout

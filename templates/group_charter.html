@@ -305,30 +305,145 @@
       </div>
       <div id="group-inquiry" class="cta-form">
         <h3>Group Inquiry</h3>
-        <form method="POST">
-          {% csrf_token %}
-          <div class="form-group mb-3">
-            <input type="text" id="group_name" name="group_name" class="form-control" placeholder="Group Name" required>
-          </div>
-          <div class="form-group mb-3">
-            <input type="email" id="contact_email" name="contact_email" class="form-control" placeholder="Contact Email" required>
-          </div>
-          <div class="form-row d-flex gap-3 mb-3">
-            <div class="form-group flex-fill">
-              <input type="number" id="passenger_count" name="passenger_count" class="form-control" placeholder="Passenger Count" min="10" required>
+        
+        <!-- Display Messages -->
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <div class="form-group flex-fill">
-              <input type="date" id="travel_date" name="travel_date" class="form-control" placeholder="Travel Date(s)" required>
+          {% endfor %}
+        {% endif %}
+        
+        <form method="POST" style="margin: 0; padding: 0;">
+            {% csrf_token %}
+            
+            <!-- First Row: Group Name + Contact Info -->
+            <div class="form-row" style="display: flex; gap: 12px; margin-bottom: 16px;">
+              <div class="form-group" style="flex: 1;">
+                <input type="text" id="group_name" name="group_name" class="form-control" placeholder="Group Name" required 
+                      style="width: 100%; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 14px;">
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <input type="email" id="contact_email" name="contact_email" class="form-control" placeholder="Contact Email" required
+                      style="width: 100%; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 14px;">
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <input type="tel" id="telephone" name="telephone" class="form-control" placeholder="Phone"
+                      style="width: 100%; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 14px;">
+              </div>
             </div>
-          </div>
-          <button type="submit" class="btn btn-primary">Request Group Proposal</button>
-        </form>
+            
+            <!-- Second Row: Travel Details -->
+            <div class="form-row" style="display: flex; gap: 12px; margin-bottom: 16px;">
+              <div class="form-group" style="flex: 1;">
+                <input type="number" id="passenger_count" name="passenger_count" class="form-control" placeholder="Passengers" min="10" required
+                      style="width: 100%; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 14px;">
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <select id="travel_type" name="travel_type" class="form-control"
+                        style="width: 100%; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 14px; appearance: none; background-image: url('data:image/svg+xml;charset=utf8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 4 5\'%3E%3Cpath fill=\'%23666\' d=\'m2 0-2 2h4zm0 5 2-2h-4z\'/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 12px center; background-size: 8px 10px;">
+                  <option value="">Travel Type</option>
+                  <option value="corporate">Corporate</option>
+                  <option value="group">Group</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <input type="date" id="travel_date" name="travel_date" class="form-control" placeholder="Travel Date" required
+                      style="width: 100%; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 14px;">
+              </div>
+            </div>
+            
+            <!-- Third Row: Locations -->
+            <div class="form-row" style="display: flex; gap: 12px; margin-bottom: 16px;">
+              <div class="form-group" style="flex: 1;">
+                <input type="text" id="departure" name="departure" class="form-control" placeholder="From"
+                      style="width: 100%; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 14px;">
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <input type="text" id="destination" name="destination" class="form-control" placeholder="To"
+                      style="width: 100%; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 14px;">
+              </div>
+              <div class="form-group" style="flex: 1;">
+                <input type="time" id="departure_time" name="departure_time" class="form-control" placeholder="Time"
+                      style="width: 100%; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 14px;">
+              </div>
+            </div>
+            
+            <!-- Special Requirements -->
+            <div class="form-group" style="margin-bottom: 16px;">
+              <textarea id="special_requirements" name="special_requirements" class="form-control" rows="2" placeholder="Special Requirements"
+                        style="width: 100%; padding: 10px 12px; border: 1px solid #e0e0e0; border-radius: 4px; font-size: 14px; min-height: 80px; resize: vertical;"></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;  border: none; border-radius: 4px; font-size: 14px; cursor: pointer;">Request Group Proposal</button>
+          </form>
 
+          <!-- Responsive behavior using media queries in style tag -->
+          <style>
+          @media (max-width: 992px) {
+            .form-row {
+              flex-wrap: wrap !important;
+            }
+            .form-group {
+              min-width: 48% !important;
+              flex: none !important;
+            }
+          }
+
+          @media (max-width: 576px) {
+            .form-group {
+              min-width: 100% !important;
+            }
+          }
+          </style>
       </div>
     </div>
   </div>
 </section>
 
+<style>
+/* Enhanced styles that maintain original look while adding new fields */
+.cta-form .form-control {
+  padding: 0.75rem 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.cta-form select.form-control {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='%23666' d='m2 0-2 2h4zm0 5 2-2h-4z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 8px 10px;
+  padding-right: 2rem;
+}
+
+.cta-form textarea.form-control {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.cta-form .alert {
+  margin-bottom: 1rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .cta-form .form-row {
+    flex-direction: column;
+    gap: 0.75rem !important;
+  }
+  
+  .cta-form .form-row .form-group {
+    width: 100% !important;
+  }
+}
+</style>
 <style>
   /* Breadcrumb */
   .breadcrumb-nav {

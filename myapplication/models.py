@@ -358,15 +358,44 @@ class AircraftLeasingInquiry(models.Model):
 
 
 class GroupInquiry(models.Model):
+    TRAVEL_TYPE_CHOICES = [
+        ('corporate', 'Corporate Travel'),
+        ('group', 'Group Travel'),
+    ]
+    
+    # Basic Information
     group_name = models.CharField(max_length=100)
     contact_email = models.EmailField()
     passenger_count = models.PositiveIntegerField()
     travel_date = models.DateField()
-
     submitted_at = models.DateTimeField(auto_now_add=True)
+    
+    # Travel Type
+    travel_type = models.CharField(max_length=20,choices=TRAVEL_TYPE_CHOICES,null=True,blank=True,) 
+    departure = models.CharField(max_length=200,null=True,blank=True)
+    destination = models.CharField(max_length=200,null=True,blank=True,)
+    departure_time = models.TimeField(null=True,blank=True,)
+    
+    # Contact Information
+    telephone = models.CharField(max_length=20,  null=True, blank=True)    
+    special_requirements = models.TextField(null=True,blank=True,)
+    
 
     def __str__(self):
-        return f"{self.group_name} - {self.contact_email}"
+        travel_type_display = self.get_travel_type_display() if self.travel_type else "Unspecified"
+        return f"{self.group_name} - {travel_type_display} - {self.contact_email}"
+    
+    def get_passenger_count_display(self):
+        """Return a formatted passenger count string"""
+        return f"{self.passenger_count} passenger{'s' if self.passenger_count != 1 else ''}"
+    
+    def is_corporate_travel(self):
+        """Check if this is corporate travel"""
+        return self.travel_type == 'corporate'
+    
+    def is_group_travel(self):
+        """Check if this is group travel"""
+        return self.travel_type == 'group'
     
 
 from django.db import models
