@@ -245,12 +245,18 @@
         Our meticulously maintained aircraft offer the perfect balance of performance, comfort, and style for every travel need.
       </p>
       
-      <!-- Category Filter -->
-      <div class="category-filter">
+      <!-- Category Filter - Improved with inline styles -->
+      <div class="category-filter" style="margin: 15px 0;">
         <form method="get" action="." class="filter-form">
-          <div class="form-group">
-            <label for="category">Filter by Category:</label>
-            <select name="category" id="category" onchange="this.form.submit()">
+          <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+            <label for="category" style="margin: 0; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+              <i class="bi bi-funnel" style="font-size: 14px;"></i> Filter by Category:
+            </label>
+            <select name="category" id="category" onchange="this.form.submit()" 
+                    style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; 
+                           background-color: #fff; cursor: pointer; min-width: 180px; position: relative;
+                           appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" fill=\"currentColor\" class=\"bi bi-chevron-down\" viewBox=\"0 0 16 16\"><path fill-rule=\"evenodd\" d=\"M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z\"/></svg>');
+                           background-repeat: no-repeat; background-position: right 8px center; padding-right: 30px;">
               <option value="">All Categories</option>
               {% for value, label in category_choices %}
                 <option value="{{ value }}" {% if selected_category == value %}selected{% endif %}>
@@ -263,6 +269,7 @@
       </div>
     </div>
 
+    <!-- Rest of your content remains exactly the same -->
     <div class="fleet-grid">
       {% for aircraft in page_obj %}
       <div class="fleet-card">
@@ -297,38 +304,38 @@
       {% endfor %}
     </div>
 
-  <!-- Pagination -->
-{% if page_obj.has_other_pages %}
-<div style="margin: 30px 0; text-align: center; font-size: 14px; font-family: 'Segoe UI', Roboto, sans-serif;">
-  <span style="display: inline-flex; align-items: center; gap: 8px;">
-    {% if page_obj.has_previous %}
-      <a href="?page=1{% if selected_category %}&category={{ selected_category }}{% endif %}" 
-         style="padding: 6px 10px; border: 1px solid #e0e0e0; border-radius: 4px; text-decoration: none; color: #2c3e50; transition: all 0.2s ease; background: #f8f9fa;">
-        &laquo;
-      </a>
-      <a href="?page={{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}" 
-         style="padding: 6px 10px; border: 1px solid #e0e0e0; border-radius: 4px; text-decoration: none; color: #2c3e50; transition: all 0.2s ease; background: #f8f9fa;">
-        &lsaquo;
-      </a>
-    {% endif %}
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div style="margin: 30px 0; text-align: center; font-size: 14px; font-family: 'Segoe UI', Roboto, sans-serif;">
+      <span style="display: inline-flex; align-items: center; gap: 8px;">
+        {% if page_obj.has_previous %}
+          <a href="?page=1{% if selected_category %}&category={{ selected_category }}{% endif %}" 
+             style="padding: 6px 10px; border: 1px solid #e0e0e0; border-radius: 4px; text-decoration: none; color: #2c3e50; transition: all 0.2s ease; background: #f8f9fa;">
+            &laquo;
+          </a>
+          <a href="?page={{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}" 
+             style="padding: 6px 10px; border: 1px solid #e0e0e0; border-radius: 4px; text-decoration: none; color: #2c3e50; transition: all 0.2s ease; background: #f8f9fa;">
+            &lsaquo;
+          </a>
+        {% endif %}
 
-    <span style="padding: 6px 12px; color: #555;">
-      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-    </span>
+        <span style="padding: 6px 12px; color: #555;">
+          Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
 
-    {% if page_obj.has_next %}
-      <a href="?page={{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}" 
-         style="padding: 6px 10px; border: 1px solid #e0e0e0; border-radius: 4px; text-decoration: none; color: #2c3e50; transition: all 0.2s ease; background: #f8f9fa;">
-        &rsaquo;
-      </a>
-      <a href="?page={{ page_obj.paginator.num_pages }}{% if selected_category %}&category={{ selected_category }}{% endif %}" 
-         style="padding: 6px 10px; border: 1px solid #e0e0e0; border-radius: 4px; text-decoration: none; color: #2c3e50; transition: all 0.2s ease; background: #f8f9fa;">
-        &raquo;
-      </a>
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}" 
+             style="padding: 6px 10px; border: 1px solid #e0e0e0; border-radius: 4px; text-decoration: none; color: #2c3e50; transition: all 0.2s ease; background: #f8f9fa;">
+            &rsaquo;
+          </a>
+          <a href="?page={{ page_obj.paginator.num_pages }}{% if selected_category %}&category={{ selected_category }}{% endif %}" 
+             style="padding: 6px 10px; border: 1px solid #e0e0e0; border-radius: 4px; text-decoration: none; color: #2c3e50; transition: all 0.2s ease; background: #f8f9fa;">
+            &raquo;
+          </a>
+        {% endif %}
+      </span>
+    </div>
     {% endif %}
-  </span>
-</div>
-{% endif %}
   </div>
 </section>
 
