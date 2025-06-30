@@ -139,6 +139,12 @@ class Booking(models.Model):
     payment_status = models.BooleanField(default=False)
     special_requests = models.TextField(blank=True)
     booking_order_id =  models.CharField(max_length=10, blank=True, null=True)
+
+    # New fields for empty leg functionality
+    is_empty_leg = models.BooleanField(default=False)
+    return_date = models.DateTimeField(null=True, blank=True)
+    return_time = models.TimeField(null=True, blank=True)
+    stay_duration_days = models.PositiveIntegerField(null=True, blank=True)
     
     def generate_booking_order_id(self):
         """Generate a unique 10-character alphanumeric booking order ID"""

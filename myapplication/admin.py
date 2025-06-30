@@ -203,54 +203,70 @@ class FlightLegInline(admin.TabularInline):
     fields = ('sequence', 'departure_airport', 'arrival_airport', 'departure_datetime', 'arrival_datetime', 'flight_hours', 'passenger_count', 'leg_price')
     ordering = ('sequence',)
 
-
 @admin.register(Booking)
 class BookingAdmin(admin.ModelAdmin):
     """Booking Admin"""
-    list_display = ('id', 'client', 'aircraft', 'trip_type', 'status', 'total_price', 'payment_status', 'created_at', 'flight_legs_count')
-    list_filter = ('status', 'trip_type', 'payment_status', 'created_at', 'aircraft__aircraft_type')
-    search_fields = ('client__username', 'client__email', 'aircraft__registration_number', 'id')
-    readonly_fields = ('created_at', 'updated_at', 'flight_legs_count', 'total_flight_hours')
+    list_display = (
+        'id', 'client', 'aircraft', 'trip_type', 'status',
+        'total_price', 'payment_status', 'is_empty_leg',
+        'booking_order_id', 'created_at', 'flight_legs_count'
+    )
+    list_filter = (
+        'status', 'trip_type', 'payment_status',
+        'is_empty_leg', 'created_at', 'aircraft__aircraft_type'
+    )
+    search_fields = (
+        'client__username', 'client__email',
+        'aircraft__registration_number', 'id', 'booking_order_id'
+    )
+    readonly_fields = (
+        'created_at', 'updated_at',
+        'flight_legs_count', 'total_flight_hours',
+        'booking_order_id'
+    )
     date_hierarchy = 'created_at'
-    
+
     fieldsets = (
         ('Booking Information', {
-            'fields': ('client', 'aircraft', 'trip_type', 'status')
+            'fields': ('client', 'aircraft', 'trip_type', 'status', 'is_empty_leg')
+        }),
+        ('Trip Details', {
+            'fields': ('return_date', 'return_time', 'stay_duration_days')
         }),
         ('Financial Details', {
             'fields': ('total_price', 'commission_rate', 'agent_commission', 'owner_earnings', 'payment_status')
         }),
         ('Additional Information', {
-            'fields': ('special_requests',)
+            'fields': ('special_requests', 'booking_order_id')
         }),
         ('Timestamps & Statistics', {
             'fields': ('created_at', 'updated_at', 'flight_legs_count', 'total_flight_hours'),
             'classes': ('collapse',)
-        })
+        }),
     )
-    
+
     inlines = [FlightLegInline]
     actions = ['mark_as_confirmed', 'mark_as_completed', 'mark_as_paid']
-    
+
     def flight_legs_count(self, obj):
         return obj.flight_legs.count()
     flight_legs_count.short_description = 'Flight Legs'
-    
+
     def total_flight_hours(self, obj):
         total = obj.flight_legs.aggregate(total_hours=Sum('flight_hours'))['total_hours']
         return f"{total or 0} hours"
     total_flight_hours.short_description = 'Total Hours'
-    
+
     def mark_as_confirmed(self, request, queryset):
         queryset.update(status='confirmed')
         self.message_user(request, f"{queryset.count()} bookings marked as confirmed.")
     mark_as_confirmed.short_description = "Mark selected bookings as confirmed"
-    
+
     def mark_as_completed(self, request, queryset):
         queryset.update(status='completed')
         self.message_user(request, f"{queryset.count()} bookings marked as completed.")
     mark_as_completed.short_description = "Mark selected bookings as completed"
-    
+
     def mark_as_paid(self, request, queryset):
         queryset.update(payment_status=True)
         self.message_user(request, f"{queryset.count()} bookings marked as paid.")

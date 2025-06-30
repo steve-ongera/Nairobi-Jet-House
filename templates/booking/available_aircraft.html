@@ -464,7 +464,10 @@
 
   <div class="aircraft-grid">
     {% for aircraft_info in aircraft_list %}
-    <div class="aircraft-card" data-category="{{ aircraft_info.aircraft.aircraft_type.name|lower }}">
+    <div class="aircraft-card" data-category="{{ aircraft_info.aircraft.aircraft_type.name|lower }}"  data-is-empty-leg="{{ is_empty_leg|yesno:'true,false' }}"
+     data-empty-leg-return-date="{{ empty_leg_return_date|default:'' }}"
+     data-empty-leg-return-time="{{ empty_leg_return_time|default:'' }}"
+     data-stay-duration-days="{{ stay_duration_days|default:'' }}">
       <div class="aircraft-header">
         <div class="aircraft-info">
           <h3>{{ aircraft_info.aircraft.model_name }}</h3>
@@ -736,6 +739,12 @@
                 </div>
               </div>
             </div>
+
+            <!-- Add these hidden fields to your booking form -->
+            <input type="hidden" name="is_empty_leg" value="{{ is_empty_leg|default:'false' }}">
+            <input type="hidden" name="empty_leg_return_date" value="{{ empty_leg_return_date|default:'' }}">
+            <input type="hidden" name="empty_leg_return_time" value="{{ empty_leg_return_time|default:'' }}">
+            <input type="hidden" name="stay_duration_days" value="{{ stay_duration_days|default:'' }}">
 
             <!-- Submit Button -->
             <div class="d-grid gap-2">
@@ -1182,7 +1191,12 @@ function bookAircraft(aircraftId) {
                 type: card.querySelector('.aircraft-type').textContent,
                 registration: card.querySelector('.feature-list li:first-child').textContent.split(': ')[1],
                 totalPrice: card.querySelector('.price-main').textContent.replace('$', '').replace(',', ''),
-                basePrice: card.querySelector('.price-details').textContent.split('$')[1].split(' ')[0]
+                basePrice: card.querySelector('.price-details').textContent.split('$')[1].split(' ')[0],
+
+                isEmptyLeg: card.dataset.isEmptyLeg === 'true',
+                emptyLegReturnDate: card.dataset.emptyLegReturnDate,
+                emptyLegReturnTime: card.dataset.emptyLegReturnTime,
+                stayDurationDays: card.dataset.stayDurationDays
             };
         }
     });
@@ -1348,6 +1362,20 @@ document.getElementById('bookingForm').addEventListener('submit', function(e) {
     submitBtn.disabled = true;
     
     const formData = new FormData(this);
+
+    // Add empty leg data from the selected aircraft
+    if (selectedAircraftData) {
+        formData.append('is_empty_leg', selectedAircraftData.isEmptyLeg);
+        if (selectedAircraftData.emptyLegReturnDate) {
+            formData.append('empty_leg_return_date', selectedAircraftData.emptyLegReturnDate);
+        }
+        if (selectedAircraftData.emptyLegReturnTime) {
+            formData.append('empty_leg_return_time', selectedAircraftData.emptyLegReturnTime);
+        }
+        if (selectedAircraftData.stayDurationDays) {
+            formData.append('stay_duration_days', selectedAircraftData.stayDurationDays);
+        }
+    }
     
     fetch('/api/create-booking/', {  // You'll need to create this endpoint
         method: 'POST',

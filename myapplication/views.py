@@ -17,6 +17,8 @@ from django.utils import timezone
 from .models import Aircraft, Airport, Availability
 from django.shortcuts import render, redirect
 from .forms import GroupInquiryForm
+from decimal import Decimal
+
 
 def find_aircraft(request):
     if request.method == 'POST':
@@ -28,9 +30,15 @@ def find_aircraft(request):
         departure_time = request.POST.get('departure_time', '09:00')  # Default time if not provided
         trip_type = request.POST.get('trip_type', 'one_way')
         
-        # Handle return trip data
-        return_date = request.POST.get('return_date') if trip_type == 'round_trip' else None
-        return_time = request.POST.get('return_time', '17:00') if trip_type == 'round_trip' else None
+        # Handle empty leg data
+        is_empty_leg = request.POST.get('is_empty_leg') == 'true'
+        empty_leg_return_date = request.POST.get('return_date') if is_empty_leg else None
+        empty_leg_return_time = request.POST.get('return_time') if is_empty_leg else None
+        stay_duration_days = request.POST.get('stay_duration_days') if is_empty_leg else None
+        
+        # Handle regular round trip data
+        return_date = request.POST.get('round_trip_return_date') if trip_type == 'round_trip' else None
+        return_time = request.POST.get('round_trip_return_time', '17:00') if trip_type == 'round_trip' else None
         
         # Validate required fields
         if not all([departure_icao, arrival_icao, departure_date, passenger_count]):
@@ -81,9 +89,18 @@ def find_aircraft(request):
             # Estimate flight time (simplified calculation)
             estimated_flight_hours = estimate_flight_time(departure_airport, arrival_airport, aircraft)
 
-            
             # Calculate base price
             base_price = calculate_base_price(aircraft, estimated_flight_hours, trip_type)
+
+            # Apply empty leg pricing if applicable
+            if is_empty_leg:
+                # Convert base_price to Decimal for consistent calculations
+                one_way_price = Decimal(str(base_price))  # This is the initial price (e.g., 9000 from Nairobi to Mombasa)
+                return_leg_discount = one_way_price * Decimal('0.25')  # 25% discount on return
+                discounted_return_price = one_way_price - return_leg_discount  # Return leg at 75% of original price
+                
+                base_price = one_way_price + discounted_return_price  # Total: original + discounted return
+                # This equals: base_price * 1.75 (original + 75% of original)
             
             aircraft_info = {
                 'aircraft': aircraft,
@@ -91,7 +108,9 @@ def find_aircraft(request):
                 'base_price': base_price,
                 'total_price': base_price * (2 if trip_type == 'round_trip' else 1),
                 'can_accommodate': aircraft.aircraft_type.passenger_capacity >= passenger_count,
-                'availability_status': get_availability_status(aircraft, departure_date_start, departure_date_end)
+                'availability_status': get_availability_status(aircraft, departure_date_start, departure_date_end),
+                'is_empty_leg': is_empty_leg,  # Pass this to template
+                'original_price': calculate_base_price(aircraft, estimated_flight_hours, trip_type) if is_empty_leg else None
             }
             aircraft_with_details.append(aircraft_info)
         
@@ -110,7 +129,13 @@ def find_aircraft(request):
             'client_name': request.POST.get('client_name'),
             'special_requests': request.POST.get('special_requests'),
             'search_performed': True,
-            'total_results': len(aircraft_with_details)
+            'total_results': len(aircraft_with_details),
+            
+            # Empty leg specific context
+            'is_empty_leg': is_empty_leg,
+            'empty_leg_return_date': empty_leg_return_date,
+            'empty_leg_return_time': empty_leg_return_time,
+            'stay_duration_days': stay_duration_days,
         }
         
         if not aircraft_with_details:
@@ -1062,10 +1087,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 @require_http_methods(["POST"])
 @login_required
 def create_booking(request):
-    """Handle booking creation"""
+    """Handle booking creation with empty leg support"""
     try:
         # Parse form data
         data = request.POST
@@ -1078,6 +1104,12 @@ def create_booking(request):
         return_datetime_str = data.get('return_datetime')
         trip_type = data.get('trip_type', 'one_way')
         passenger_count = int(data.get('passenger_count', 1))
+        
+        # Empty leg specific data
+        is_empty_leg = data.get('is_empty_leg') == 'true'
+        empty_leg_return_date = data.get('empty_leg_return_date')
+        empty_leg_return_time = data.get('empty_leg_return_time')
+        stay_duration_days = data.get('stay_duration_days')
         
         # Client information
         client_name = data.get('client_name', '').strip()
@@ -1180,6 +1212,9 @@ def create_booking(request):
         # Calculate pricing using your existing function that handles minimum hours
         leg_price = Decimal(str(calculate_base_price(aircraft, flight_hours, trip_type)))
         
+        # Apply empty leg discount if applicable
+        if is_empty_leg:
+            leg_price = leg_price * Decimal('0.25')  # 25% discount for empty leg
         
         # Calculate total price based on trip type
         if trip_type == 'round_trip':
@@ -1191,11 +1226,23 @@ def create_booking(request):
         agent_commission = total_price * (commission_rate / 100)
         owner_earnings = total_price - agent_commission
         
+        # Process empty leg return date/time if provided
+        empty_leg_return_datetime = None
+        if is_empty_leg and empty_leg_return_date and empty_leg_return_time:
+            try:
+                empty_leg_return_datetime = datetime.strptime(
+                    f"{empty_leg_return_date} {empty_leg_return_time}", 
+                    '%Y-%m-%d %H:%M'
+                )
+                empty_leg_return_datetime = timezone.make_aware(empty_leg_return_datetime)
+            except ValueError:
+                pass  # If parsing fails, just leave as None
+        
         # Create booking with transaction
         with transaction.atomic():
-            # Create booking
+            # Create booking with empty leg fields
             booking = Booking.objects.create(
-                client=request.user,  # Changed from 'user' to 'client'
+                client=request.user,
                 aircraft=aircraft,
                 trip_type=trip_type,
                 commission_rate=commission_rate,
@@ -1203,7 +1250,13 @@ def create_booking(request):
                 agent_commission=agent_commission,
                 owner_earnings=owner_earnings,
                 special_requests=special_requests,
-                status='pending'
+                status='pending',
+                
+                # Empty leg specific fields
+                is_empty_leg=is_empty_leg,
+                return_date=empty_leg_return_datetime.date() if empty_leg_return_datetime else None,
+                return_time=empty_leg_return_datetime.time() if empty_leg_return_datetime else None,
+                stay_duration_days=int(stay_duration_days) if stay_duration_days else None,
             )
             
             # Create flight legs
@@ -1240,7 +1293,7 @@ def create_booking(request):
                 )
                 flight_legs.append(second_leg)
             
-            # Create passenger records (assuming you have a Passenger model)
+            # Create passenger records
             for i, passenger_data in enumerate(passengers_data):
                 Passenger.objects.create(
                     booking=booking,
@@ -1263,15 +1316,16 @@ def create_booking(request):
                 # Don't fail the booking creation if email fails
             
             # Log the booking creation
-            logger.info(f"Booking created: #{booking.id} by user {request.user.username}")
+            logger.info(f"Booking created: #{booking.id} by user {request.user.username} - Empty Leg: {is_empty_leg}")
             
             return JsonResponse({
                 'success': True,
-                'message': 'Booking request submitted successfully. A confirmation email has been sent.',
+                'message': f'{"Empty leg booking" if is_empty_leg else "Booking"} request submitted successfully. A confirmation email has been sent.',
                 'booking_id': booking.id,
                 'total_price': float(total_price),
                 'agent_commission': float(agent_commission),
                 'owner_earnings': float(owner_earnings),
+                'is_empty_leg': is_empty_leg,
                 'flight_legs': [
                     {
                         'sequence': leg.sequence,

@@ -951,6 +951,7 @@
 
 
 <!-- Custom Modal -->
+
 <!-- Custom Modal -->
 <div id="bookJetModal" class="custom-modal">
   <div class="custom-modal-content">
@@ -972,6 +973,18 @@
             
             <input type="radio" name="trip_type" id="multi_leg" value="multi_leg">
             <label for="multi_leg" class="btn-option">Multi-leg</label>
+          </div>
+        </div>
+
+        <!-- Empty Leg Option (only visible for One Way trips) -->
+        <div id="empty_leg_section" class="form-group empty-leg-section">
+          <div class="empty-leg-toggle">
+            <input type="checkbox" id="is_empty_leg" name="is_empty_leg" value="true">
+            <label for="is_empty_leg" class="empty-leg-label">
+              <span class="checkmark"></span>
+              <strong>Empty Leg Flight</strong>
+              <small class="help-text">Book an empty leg flight for significant savings (up to 25% off)</small>
+            </label>
           </div>
         </div>
         
@@ -1022,16 +1035,47 @@
             <input type="time" id="departure_time" name="departure_time" required>
           </div>
         </div>
+
+        <!-- Empty Leg Additional Fields -->
+        <div id="empty_leg_fields" class="empty-leg-fields" style="display: none;">
+          <div class="form-row">
+            <div class="form-col">
+              <label for="return_date">Return Date</label>
+              <input type="date" id="return_date" name="return_date">
+              <small class="help-text">When do you plan to return? (helps us coordinate the empty leg)</small>
+            </div>
+            <div class="form-col">
+              <label for="return_time">Return Time</label>
+              <input type="time" id="return_time" name="return_time">
+            </div>
+            <div class="form-col">
+              <label for="stay_duration_days">Stay Duration (Days)</label>
+              <input type="number" id="stay_duration_days" name="stay_duration_days" min="1">
+              <small class="help-text">How many days will you stay at destination?</small>
+            </div>
+          </div>
+          
+          <div class="empty-leg-info">
+            <div class="info-box">
+              <h6>Empty Leg Benefits:</h6>
+              <ul>
+                <li>Up to 25% savings compared to regular charter</li>
+                <li>Pay once for complete round trip with 25% return discount</li>
+                <li>Last-minute availability for flexible travelers</li>
+              </ul>
+            </div>
+          </div>
+        </div>
         
         <!-- Return date fields for round trip -->
         <div id="return_fields" class="form-row" style="display: none;">
           <div class="form-col">
-            <label for="return_date">Return Date</label>
-            <input type="date" id="return_date" name="return_date">
+            <label for="round_trip_return_date">Return Date</label>
+            <input type="date" id="round_trip_return_date" name="round_trip_return_date">
           </div>
           <div class="form-col">
-            <label for="return_time">Return Time</label>
-            <input type="time" id="return_time" name="return_time">
+            <label for="round_trip_return_time">Return Time</label>
+            <input type="time" id="round_trip_return_time" name="round_trip_return_time">
           </div>
         </div>
         
@@ -1060,18 +1104,355 @@
   </div>
 </div>
 
-<script>
-  // Airport Autocomplete Enhancement
-// This script converts existing select elements into searchable autocomplete inputs
-// while maintaining all original functionality
+<style>
+/* Empty Leg Specific Styles */
+.empty-leg-section {
+  background: linear-gradient(135deg, #f8f9ff 0%, #e8f4f8 100%);
+  border: 2px solid #e3f2fd;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  transition: all 0.3s ease;
+}
 
+.empty-leg-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.empty-leg-label {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  padding-left: 30px;
+}
+
+.empty-leg-label .checkmark {
+  position: absolute;
+  left: 0;
+  top: 2px;
+  height: 20px;
+  width: 20px;
+  background-color: #fff;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.empty-leg-label .checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 6px;
+  top: 2px;
+  width: 6px;
+  height: 12px;
+  border: solid #007bff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+#is_empty_leg {
+  display: none;
+}
+
+#is_empty_leg:checked ~ .empty-leg-label .checkmark {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+#is_empty_leg:checked ~ .empty-leg-label .checkmark:after {
+  display: block;
+  border-color: white;
+}
+
+.empty-leg-label strong {
+  color: #007bff;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.help-text {
+  color: #666;
+  font-size: 12px;
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.empty-leg-fields {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+  border-left: 4px solid #007bff;
+}
+
+.info-box {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.info-box h6 {
+  color: #007bff;
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.info-box ul {
+  margin: 0;
+  padding-left: 16px;
+  list-style-type: none;
+}
+
+.info-box li {
+  position: relative;
+  padding: 4px 0;
+  font-size: 13px;
+  color: #555;
+}
+
+.info-box li:before {
+  content: "✈";
+  position: absolute;
+  left: -16px;
+  color: #007bff;
+  font-size: 12px;
+}
+
+/* Form styling enhancements */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.form-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-col label {
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #333;
+}
+
+
+/* Modal styles */
+.custom-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+}
+
+.custom-modal-content {
+  background-color: white;
+  margin: 2% auto;
+  padding: 0;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.custom-modal-header {
+  padding: 20px 30px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.custom-modal-header h5 {
+  margin: 0;
+  color: #333;
+  font-size: 20px;
+}
+
+.custom-close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #999;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-modal-body {
+  padding: 30px;
+}
+
+.custom-modal-footer {
+  padding: 20px 30px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.custom-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.custom-btn.primary {
+  background: #007bff;
+  color: white;
+}
+
+.custom-btn.primary:hover {
+  background: #0056b3;
+}
+
+.custom-btn.secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.custom-btn.secondary:hover {
+  background: #545b62;
+}
+
+/* Form inputs */
+input, select, textarea {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .custom-modal-content {
+    width: 95%;
+    margin: 5% auto;
+  }
+  
+  .custom-modal-body {
+    padding: 20px;
+  }
+}
+</style>
+
+<script>
+// Airport Autocomplete Enhancement
 (function() {
     'use strict';
     
-    // Wait for DOM to be fully loaded
     document.addEventListener('DOMContentLoaded', function() {
         initializeAirportAutocomplete();
+        initializeTripTypeHandlers();
+        initializeEmptyLegHandlers();
     });
+    
+    // Trip type handlers
+    function initializeTripTypeHandlers() {
+        const tripTypeRadios = document.querySelectorAll('input[name="trip_type"]');
+        const returnFields = document.getElementById('return_fields');
+        const emptyLegSection = document.getElementById('empty_leg_section');
+        
+        tripTypeRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                // Handle return fields for round trip
+                if (this.value === 'round_trip') {
+                    returnFields.style.display = 'flex';
+                    emptyLegSection.style.display = 'none';
+                    // Clear empty leg checkbox
+                    document.getElementById('is_empty_leg').checked = false;
+                    hideEmptyLegFields();
+                } else if (this.value === 'one_way') {
+                    returnFields.style.display = 'none';
+                    emptyLegSection.style.display = 'block';
+                } else {
+                    returnFields.style.display = 'none';
+                    emptyLegSection.style.display = 'none';
+                    // Clear empty leg checkbox
+                    document.getElementById('is_empty_leg').checked = false;
+                    hideEmptyLegFields();
+                }
+            });
+        });
+    }
+    
+    // Empty leg handlers
+    function initializeEmptyLegHandlers() {
+        const emptyLegCheckbox = document.getElementById('is_empty_leg');
+        const emptyLegFields = document.getElementById('empty_leg_fields');
+        
+        emptyLegCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                showEmptyLegFields();
+            } else {
+                hideEmptyLegFields();
+            }
+        });
+    }
+    
+    function showEmptyLegFields() {
+        const emptyLegFields = document.getElementById('empty_leg_fields');
+        emptyLegFields.style.display = 'block';
+        
+        // Add animation
+        emptyLegFields.style.opacity = '0';
+        emptyLegFields.style.transform = 'translateY(-10px)';
+        setTimeout(() => {
+            emptyLegFields.style.transition = 'all 0.3s ease';
+            emptyLegFields.style.opacity = '1';
+            emptyLegFields.style.transform = 'translateY(0)';
+        }, 10);
+    }
+    
+    function hideEmptyLegFields() {
+        const emptyLegFields = document.getElementById('empty_leg_fields');
+        emptyLegFields.style.display = 'none';
+        
+        // Clear empty leg specific fields
+        document.getElementById('return_date').value = '';
+        document.getElementById('return_time').value = '';
+        document.getElementById('stay_duration_days').value = '';
+    }
     
     function initializeAirportAutocomplete() {
         const departureSelect = document.getElementById('departure_airport');
@@ -1320,7 +1701,7 @@
             });
         }
         
-        // Validation support - only show validation errors when form is actually submitted
+        // Validation support
         let hasBeenSubmitted = false;
         
         const checkValidity = () => {
@@ -1333,7 +1714,6 @@
             }
         };
         
-        // Only validate after first submit attempt
         if (form) {
             form.addEventListener('submit', function(e) {
                 hasBeenSubmitted = true;
@@ -1344,7 +1724,6 @@
             });
         }
         
-        // Clear validation message when user starts typing or selects
         input.addEventListener('input', () => {
             if (hasBeenSubmitted) {
                 checkValidity();
@@ -1352,7 +1731,6 @@
         });
     }
 })();
-
 </script>
 
 <!-- Login Modal -->
