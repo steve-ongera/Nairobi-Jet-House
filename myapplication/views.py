@@ -1211,10 +1211,16 @@ def create_booking(request):
         
         # Calculate pricing using your existing function that handles minimum hours
         leg_price = Decimal(str(calculate_base_price(aircraft, flight_hours, trip_type)))
-        
-        # Apply empty leg discount if applicable
+
+        # Apply empty leg pricing if applicable
         if is_empty_leg:
-            leg_price = leg_price * Decimal('0.25')  # 25% discount for empty leg
+            # Convert leg_price to Decimal for consistent calculations
+            one_way_price = Decimal(str(leg_price))  # This is the initial price (e.g., 9000 from Nairobi to Mombasa)
+            return_leg_discount = one_way_price * Decimal('0.25')  # 25% discount on return
+            discounted_return_price = one_way_price - return_leg_discount  # Return leg at 75% of original price
+            
+            leg_price = one_way_price + discounted_return_price  # Total: original + discounted return
+            # This equals: leg_price * 1.75 (original + 75% of original)
         
         # Calculate total price based on trip type
         if trip_type == 'round_trip':
