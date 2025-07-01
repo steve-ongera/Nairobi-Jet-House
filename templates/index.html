@@ -594,6 +594,53 @@
 
         </div>
       </section>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        const section = document.querySelector('.popular');
+        
+        // Initially hide all elements that will be animated
+        const elementsToAnimate = [
+          section.querySelector('.section-subtitle'),
+          section.querySelector('.section-title'),
+          section.querySelector('.section-text'),
+          ...section.querySelectorAll('.popular-list li'),
+          section.querySelector('.btn')
+        ];
+        
+        // Set initial state for all elements
+        elementsToAnimate.forEach(el => {
+          if (el) {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+          }
+        });
+        
+        // Function to animate elements in sequence
+        function animateElements() {
+          elementsToAnimate.forEach((el, index) => {
+            if (el) {
+              setTimeout(() => {
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+              }, index * 200); // 200ms delay between each element
+            }
+          });
+        }
+        
+        // Intersection Observer to trigger animation when section comes into view
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              animateElements();
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.1 });
+        
+        observer.observe(section);
+      });
+      </script>
 
 
 
