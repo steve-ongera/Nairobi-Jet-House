@@ -508,6 +508,18 @@
             <label for="multi_leg" class="btn-option">Multi-leg</label>
           </div>
         </div>
+
+        <!-- Empty Leg Option (only visible for One Way trips) -->
+        <div id="empty_leg_section" class="form-group empty-leg-section">
+          <div class="empty-leg-toggle">
+            <input type="checkbox" id="is_empty_leg" name="is_empty_leg" value="true">
+            <label for="is_empty_leg" class="empty-leg-label">
+              <span class="checkmark"></span>
+              <strong>Empty Leg Flight</strong>
+              <small class="help-text">Book an empty leg flight for significant savings (up to 25% off)</small>
+            </label>
+          </div>
+        </div>
         
         <div class="form-row">
           <div class="form-col">
@@ -556,16 +568,47 @@
             <input type="time" id="departure_time" name="departure_time" required>
           </div>
         </div>
+
+        <!-- Empty Leg Additional Fields -->
+        <div id="empty_leg_fields" class="empty-leg-fields" style="display: none;">
+          <div class="form-row">
+            <div class="form-col">
+              <label for="return_date">Return Date</label>
+              <input type="date" id="return_date" name="return_date">
+              <small class="help-text">When do you plan to return? (helps us coordinate the empty leg)</small>
+            </div>
+            <div class="form-col">
+              <label for="return_time">Return Time</label>
+              <input type="time" id="return_time" name="return_time">
+            </div>
+            <div class="form-col">
+              <label for="stay_duration_days">Stay Duration (Days)</label>
+              <input type="number" id="stay_duration_days" name="stay_duration_days" min="1">
+              <small class="help-text">How many days will you stay at destination?</small>
+            </div>
+          </div>
+          
+          <div class="empty-leg-info">
+            <div class="info-box">
+              <h6>Empty Leg Benefits:</h6>
+              <ul>
+                <li>Up to 25% savings compared to regular charter</li>
+                <li>Pay once for complete round trip with 25% return discount</li>
+                <li>Last-minute availability for flexible travelers</li>
+              </ul>
+            </div>
+          </div>
+        </div>
         
         <!-- Return date fields for round trip -->
         <div id="return_fields" class="form-row" style="display: none;">
           <div class="form-col">
-            <label for="return_date">Return Date</label>
-            <input type="date" id="return_date" name="return_date">
+            <label for="round_trip_return_date">Return Date</label>
+            <input type="date" id="round_trip_return_date" name="round_trip_return_date">
           </div>
           <div class="form-col">
-            <label for="return_time">Return Time</label>
-            <input type="time" id="return_time" name="return_time">
+            <label for="round_trip_return_time">Return Time</label>
+            <input type="time" id="round_trip_return_time" name="round_trip_return_time">
           </div>
         </div>
         
@@ -596,6 +639,7 @@
 
 
 
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   // Existing modal functionality
@@ -604,23 +648,84 @@ document.addEventListener('DOMContentLoaded', function() {
   const closeBtn = document.querySelector('.custom-close-btn');
   const secondaryBtn = document.querySelector('.custom-btn.secondary');
   
-  // Trip type handling
+  // Trip type handling with empty leg support
   const tripTypeRadios = document.querySelectorAll('input[name="trip_type"]');
   const returnFields = document.getElementById('return_fields');
+  const emptyLegSection = document.getElementById('empty_leg_section');
   
   tripTypeRadios.forEach(radio => {
     radio.addEventListener('change', function() {
+      // Handle return fields for round trip
       if (this.value === 'round_trip') {
         returnFields.style.display = 'flex';
+        emptyLegSection.style.display = 'none';
         document.getElementById('return_date').required = true;
         document.getElementById('return_time').required = true;
-      } else {
+        // Clear empty leg checkbox
+        document.getElementById('is_empty_leg').checked = false;
+        hideEmptyLegFields();
+      } else if (this.value === 'one_way') {
         returnFields.style.display = 'none';
+        emptyLegSection.style.display = 'block';
         document.getElementById('return_date').required = false;
         document.getElementById('return_time').required = false;
+      } else {
+        returnFields.style.display = 'none';
+        emptyLegSection.style.display = 'none';
+        document.getElementById('return_date').required = false;
+        document.getElementById('return_time').required = false;
+        // Clear empty leg checkbox
+        document.getElementById('is_empty_leg').checked = false;
+        hideEmptyLegFields();
       }
     });
   });
+  
+  // Empty leg handlers
+  const emptyLegCheckbox = document.getElementById('is_empty_leg');
+  const emptyLegFields = document.getElementById('empty_leg_fields');
+  
+  if (emptyLegCheckbox) {
+    emptyLegCheckbox.addEventListener('change', function() {
+      if (this.checked) {
+        showEmptyLegFields();
+      } else {
+        hideEmptyLegFields();
+      }
+    });
+  }
+  
+  function showEmptyLegFields() {
+    const emptyLegFields = document.getElementById('empty_leg_fields');
+    if (emptyLegFields) {
+      emptyLegFields.style.display = 'block';
+      
+      // Add animation
+      emptyLegFields.style.opacity = '0';
+      emptyLegFields.style.transform = 'translateY(-10px)';
+      setTimeout(() => {
+        emptyLegFields.style.transition = 'all 0.3s ease';
+        emptyLegFields.style.opacity = '1';
+        emptyLegFields.style.transform = 'translateY(0)';
+      }, 10);
+    }
+  }
+  
+  function hideEmptyLegFields() {
+    const emptyLegFields = document.getElementById('empty_leg_fields');
+    if (emptyLegFields) {
+      emptyLegFields.style.display = 'none';
+      
+      // Clear empty leg specific fields
+      const returnDate = document.getElementById('return_date');
+      const returnTime = document.getElementById('return_time');
+      const stayDuration = document.getElementById('stay_duration_days');
+      
+      if (returnDate) returnDate.value = '';
+      if (returnTime) returnTime.value = '';
+      if (stayDuration) stayDuration.value = '';
+    }
+  }
   
   // Prevent selecting same airport for departure and arrival
   const departureSelect = document.getElementById('departure_airport');
@@ -650,42 +755,52 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  departureSelect.addEventListener('change', updateAirportOptions);
-  arrivalSelect.addEventListener('change', updateAirportOptions);
+  if (departureSelect && arrivalSelect) {
+    departureSelect.addEventListener('change', updateAirportOptions);
+    arrivalSelect.addEventListener('change', updateAirportOptions);
+  }
   
   // Set minimum date to today
   const today = new Date().toISOString().split('T')[0];
-  document.getElementById('departure_date').min = today;
-  document.getElementById('return_date').min = today;
+  const departureDateField = document.getElementById('departure_date');
+  const returnDateField = document.getElementById('return_date');
+  
+  if (departureDateField) departureDateField.min = today;
+  if (returnDateField) returnDateField.min = today;
   
   // Update return date minimum when departure date changes
-  document.getElementById('departure_date').addEventListener('change', function() {
-    document.getElementById('return_date').min = this.value;
-  });
+  if (departureDateField && returnDateField) {
+    departureDateField.addEventListener('change', function() {
+      returnDateField.min = this.value;
+    });
+  }
   
   // Form validation
-  document.getElementById('jetBookingForm').addEventListener('submit', function(e) {
-    const departureAirport = document.getElementById('departure_airport').value;
-    const arrivalAirport = document.getElementById('arrival_airport').value;
-    
-    if (departureAirport === arrivalAirport) {
-      e.preventDefault();
-      alert('Please select different departure and arrival airports.');
-      return false;
-    }
-    
-    const tripType = document.querySelector('input[name="trip_type"]:checked').value;
-    if (tripType === 'round_trip') {
-      const departureDate = new Date(document.getElementById('departure_date').value);
-      const returnDate = new Date(document.getElementById('return_date').value);
+  const jetBookingForm = document.getElementById('jetBookingForm');
+  if (jetBookingForm) {
+    jetBookingForm.addEventListener('submit', function(e) {
+      const departureAirport = document.getElementById('departure_airport').value;
+      const arrivalAirport = document.getElementById('arrival_airport').value;
       
-      if (returnDate <= departureDate) {
+      if (departureAirport === arrivalAirport) {
         e.preventDefault();
-        alert('Return date must be after departure date.');
+        alert('Please select different departure and arrival airports.');
         return false;
       }
-    }
-  });
+      
+      const tripType = document.querySelector('input[name="trip_type"]:checked').value;
+      if (tripType === 'round_trip') {
+        const departureDate = new Date(document.getElementById('departure_date').value);
+        const returnDate = new Date(document.getElementById('return_date').value);
+        
+        if (returnDate <= departureDate) {
+          e.preventDefault();
+          alert('Return date must be after departure date.');
+          return false;
+        }
+      }
+    });
+  }
   
   // Open modal
   if (openBtn) {
@@ -723,8 +838,16 @@ function closeModal(modalId) {
 }
 
 // Event Listeners
-document.getElementById('loginBtn').addEventListener('click', () => openModal('loginModal'));
-document.getElementById('signupBtn').addEventListener('click', () => openModal('signupModal'));
+const loginBtn = document.getElementById('loginBtn');
+const signupBtn = document.getElementById('signupBtn');
+
+if (loginBtn) {
+  loginBtn.addEventListener('click', () => openModal('loginModal'));
+}
+
+if (signupBtn) {
+  signupBtn.addEventListener('click', () => openModal('signupModal'));
+}
 
 document.querySelectorAll('.close-modal').forEach(btn => {
   btn.addEventListener('click', function() {
@@ -732,17 +855,24 @@ document.querySelectorAll('.close-modal').forEach(btn => {
   });
 });
 
-document.getElementById('showSignup').addEventListener('click', (e) => {
-  e.preventDefault();
-  closeModal('loginModal');
-  openModal('signupModal');
-});
+const showSignupLink = document.getElementById('showSignup');
+const showLoginLink = document.getElementById('showLogin');
 
-document.getElementById('showLogin').addEventListener('click', (e) => {
-  e.preventDefault();
-  closeModal('signupModal');
-  openModal('loginModal');
-});
+if (showSignupLink) {
+  showSignupLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    closeModal('loginModal');
+    openModal('signupModal');
+  });
+}
+
+if (showLoginLink) {
+  showLoginLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    closeModal('signupModal');
+    openModal('loginModal');
+  });
+}
 
 // Close modal when clicking outside
 window.addEventListener('click', (e) => {
@@ -752,63 +882,69 @@ window.addEventListener('click', (e) => {
 });
 
 // AJAX Form Submission
-document.getElementById('loginForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const email = document.getElementById('loginEmail').value;
-  const password = document.getElementById('loginPassword').value;
-  
-  fetch('/api/auth/login/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': getCookie('csrftoken'),
-    },
-    body: JSON.stringify({
-      email: email,
-      password: password
+const loginForm = document.getElementById('loginForm');
+if (loginForm) {
+  loginForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+    
+    fetch('/api/auth/login/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken'),
+      },
+      body: JSON.stringify({
+        email: email,
+        password: password
+      })
     })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      window.location.reload(); // Or redirect
-    } else {
-      alert(data.message || 'Login failed');
-    }
-  })
-  .catch(error => console.error('Error:', error));
-});
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        window.location.reload(); // Or redirect
+      } else {
+        alert(data.message || 'Login failed');
+      }
+    })
+    .catch(error => console.error('Error:', error));
+  });
+}
 
-document.getElementById('signupForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const name = document.getElementById('signupName').value;
-  const email = document.getElementById('signupEmail').value;
-  const password = document.getElementById('signupPassword').value;
-  
-  fetch('/api/auth/register/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': getCookie('csrftoken'),
-    },
-    body: JSON.stringify({
-      name: name,
-      email: email,
-      password: password
+const signupForm = document.getElementById('signupForm');
+if (signupForm) {
+  signupForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const name = document.getElementById('signupName').value;
+    const email = document.getElementById('signupEmail').value;
+    const password = document.getElementById('signupPassword').value;
+    
+    fetch('/api/auth/register/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': getCookie('csrftoken'),
+      },
+      body: JSON.stringify({
+        name: name,
+        email: email,
+        password: password
+      })
     })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      alert('Registration successful! Please login.');
-      closeModal('signupModal');
-      openModal('loginModal');
-    } else {
-      alert(data.message || 'Registration failed');
-    }
-  })
-  .catch(error => console.error('Error:', error));
-});
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('Registration successful! Please login.');
+        closeModal('signupModal');
+        openModal('loginModal');
+      } else {
+        alert(data.message || 'Registration failed');
+      }
+    })
+    .catch(error => console.error('Error:', error));
+  });
+}
 
 // CSRF Token Helper (for Django)
 function getCookie(name) {
@@ -825,7 +961,6 @@ function getCookie(name) {
   }
   return cookieValue;
 }
-
 </script>
 <!-- jQuery first if needed -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -1438,237 +1573,7 @@ function getCookie(name) {
 }
 </style>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Existing modal functionality
-  const modal = document.getElementById('bookJetModal');
-  const openBtn = document.getElementById('bookNowButton');
-  const closeBtn = document.querySelector('.custom-close-btn');
-  const secondaryBtn = document.querySelector('.custom-btn.secondary');
-  
-  // Trip type handling
-  const tripTypeRadios = document.querySelectorAll('input[name="trip_type"]');
-  const returnFields = document.getElementById('return_fields');
-  
-  tripTypeRadios.forEach(radio => {
-    radio.addEventListener('change', function() {
-      if (this.value === 'round_trip') {
-        returnFields.style.display = 'flex';
-        document.getElementById('return_date').required = true;
-        document.getElementById('return_time').required = true;
-      } else {
-        returnFields.style.display = 'none';
-        document.getElementById('return_date').required = false;
-        document.getElementById('return_time').required = false;
-      }
-    });
-  });
-  
-  // Prevent selecting same airport for departure and arrival
-  const departureSelect = document.getElementById('departure_airport');
-  const arrivalSelect = document.getElementById('arrival_airport');
-  
-  function updateAirportOptions() {
-    const departureValue = departureSelect.value;
-    const arrivalValue = arrivalSelect.value;
-    
-    // Reset all options to be enabled
-    Array.from(departureSelect.options).forEach(option => {
-      option.disabled = false;
-    });
-    Array.from(arrivalSelect.options).forEach(option => {
-      option.disabled = false;
-    });
-    
-    // Disable selected options in the other dropdown
-    if (departureValue) {
-      const arrivalOption = arrivalSelect.querySelector(`option[value="${departureValue}"]`);
-      if (arrivalOption) arrivalOption.disabled = true;
-    }
-    
-    if (arrivalValue) {
-      const departureOption = departureSelect.querySelector(`option[value="${arrivalValue}"]`);
-      if (departureOption) departureOption.disabled = true;
-    }
-  }
-  
-  departureSelect.addEventListener('change', updateAirportOptions);
-  arrivalSelect.addEventListener('change', updateAirportOptions);
-  
-  // Set minimum date to today
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('departure_date').min = today;
-  document.getElementById('return_date').min = today;
-  
-  // Update return date minimum when departure date changes
-  document.getElementById('departure_date').addEventListener('change', function() {
-    document.getElementById('return_date').min = this.value;
-  });
-  
-  // Form validation
-  document.getElementById('jetBookingForm').addEventListener('submit', function(e) {
-    const departureAirport = document.getElementById('departure_airport').value;
-    const arrivalAirport = document.getElementById('arrival_airport').value;
-    
-    if (departureAirport === arrivalAirport) {
-      e.preventDefault();
-      alert('Please select different departure and arrival airports.');
-      return false;
-    }
-    
-    const tripType = document.querySelector('input[name="trip_type"]:checked').value;
-    if (tripType === 'round_trip') {
-      const departureDate = new Date(document.getElementById('departure_date').value);
-      const returnDate = new Date(document.getElementById('return_date').value);
-      
-      if (returnDate <= departureDate) {
-        e.preventDefault();
-        alert('Return date must be after departure date.');
-        return false;
-      }
-    }
-  });
-  
-  // Open modal
-  if (openBtn) {
-    openBtn.addEventListener('click', function() {
-      modal.style.display = 'block';
-      document.body.style.overflow = 'hidden';
-    });
-  }
-  
-  // Close modal
-  function closeModal() {
-    modal.style.display = 'none';
-    document.body.style.overflow = '';
-  }
-  
-  if (closeBtn) closeBtn.addEventListener('click', closeModal);
-  if (secondaryBtn) secondaryBtn.addEventListener('click', closeModal);
-  
-  window.addEventListener('click', function(event) {
-    if (event.target === modal) {
-      closeModal();
-    }
-  });
-});
 
-// Modal Toggle Functions
-function openModal(modalId) {
-  document.getElementById(modalId).style.display = 'flex';
-  document.body.style.overflow = 'hidden';
-}
-
-function closeModal(modalId) {
-  document.getElementById(modalId).style.display = 'none';
-  document.body.style.overflow = 'auto';
-}
-
-// Event Listeners
-document.getElementById('loginBtn').addEventListener('click', () => openModal('loginModal'));
-document.getElementById('signupBtn').addEventListener('click', () => openModal('signupModal'));
-
-document.querySelectorAll('.close-modal').forEach(btn => {
-  btn.addEventListener('click', function() {
-    closeModal(this.closest('.auth-modal').id);
-  });
-});
-
-document.getElementById('showSignup').addEventListener('click', (e) => {
-  e.preventDefault();
-  closeModal('loginModal');
-  openModal('signupModal');
-});
-
-document.getElementById('showLogin').addEventListener('click', (e) => {
-  e.preventDefault();
-  closeModal('signupModal');
-  openModal('loginModal');
-});
-
-// Close modal when clicking outside
-window.addEventListener('click', (e) => {
-  if (e.target.classList.contains('auth-modal')) {
-    closeModal(e.target.id);
-  }
-});
-
-// AJAX Form Submission
-document.getElementById('loginForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const email = document.getElementById('loginEmail').value;
-  const password = document.getElementById('loginPassword').value;
-  
-  fetch('/api/auth/login/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': getCookie('csrftoken'),
-    },
-    body: JSON.stringify({
-      email: email,
-      password: password
-    })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      window.location.reload(); // Or redirect
-    } else {
-      alert(data.message || 'Login failed');
-    }
-  })
-  .catch(error => console.error('Error:', error));
-});
-
-document.getElementById('signupForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const name = document.getElementById('signupName').value;
-  const email = document.getElementById('signupEmail').value;
-  const password = document.getElementById('signupPassword').value;
-  
-  fetch('/api/auth/register/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': getCookie('csrftoken'),
-    },
-    body: JSON.stringify({
-      name: name,
-      email: email,
-      password: password
-    })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      alert('Registration successful! Please login.');
-      closeModal('signupModal');
-      openModal('loginModal');
-    } else {
-      alert(data.message || 'Registration failed');
-    }
-  })
-  .catch(error => console.error('Error:', error));
-});
-
-// CSRF Token Helper (for Django)
-function getCookie(name) {
-  let cookieValue = null;
-  if (document.cookie && document.cookie !== '') {
-    const cookies = document.cookie.split(';');
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      if (cookie.substring(0, name.length + 1) === (name + '=')) {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
-      }
-    }
-  }
-  return cookieValue;
-}
-
-</script>
 <!-- jQuery first if needed -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <!-- Then Bootstrap -->
@@ -1907,6 +1812,152 @@ input[type="radio"]:checked + .btn-option {
   color: #1a6fc9;
   cursor: pointer;
 }
+
+
+/* Empty Leg Specific Styles */
+.empty-leg-section {
+  background: linear-gradient(135deg, #f8f9ff 0%, #e8f4f8 100%);
+  border: 2px solid #e3f2fd;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  transition: all 0.3s ease;
+}
+
+.empty-leg-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.empty-leg-label {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  padding-left: 30px;
+}
+
+.empty-leg-label .checkmark {
+  position: absolute;
+  left: 0;
+  top: 2px;
+  height: 20px;
+  width: 20px;
+  background-color: #fff;
+  border: 2px solid #ddd;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.empty-leg-label .checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 6px;
+  top: 2px;
+  width: 6px;
+  height: 12px;
+  border: solid #007bff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+#is_empty_leg {
+  display: none;
+}
+
+#is_empty_leg:checked ~ .empty-leg-label .checkmark {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+#is_empty_leg:checked ~ .empty-leg-label .checkmark:after {
+  display: block;
+  border-color: white;
+}
+
+.empty-leg-label strong {
+  color: #007bff;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.help-text {
+  color: #666;
+  font-size: 12px;
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.empty-leg-fields {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+  border-left: 4px solid #007bff;
+}
+
+.info-box {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.info-box h6 {
+  color: #007bff;
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.info-box ul {
+  margin: 0;
+  padding-left: 16px;
+  list-style-type: none;
+}
+
+.info-box li {
+  position: relative;
+  padding: 4px 0;
+  font-size: 13px;
+  color: #555;
+}
+
+.info-box li:before {
+  content: "✈";
+  position: absolute;
+  left: -16px;
+  color: #007bff;
+  font-size: 12px;
+}
+
+/* Form styling enhancements */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.form-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-col label {
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #333;
+}
+
 </style>
 
 <script>
