@@ -112,7 +112,7 @@
       </ul>
 
       
-      <nav class="navbar" data-navbar>
+      <nav class="navbar" data-navbar style="background-color: transparent !important;">
         <div class="navbar-top">
           <a href="{% url 'index' %}" class="logo" style="text-decoration: none;">
             <img src="{% static 'assets/images/logo-blue.svg'%}" alt="Nairobi Jet House logo">
@@ -123,34 +123,34 @@
           </button>
         </div>
         
-        <ul class="navbar-list" style="display: flex; gap: 10px; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch;">
+        <ul class="navbar-list" style="display: flex; gap: 10px; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; background-color: transparent !important;">
           <li style="white-space: nowrap; flex-shrink: 0;">
-            <a href="{% url 'index'%}" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem; display: inline-block;">
+            <a href="{% url 'index'%}" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem; display: inline-block; background-color: transparent !important;">
               Home
             </a>
           </li>
           <li style="white-space: nowrap; flex-shrink: 0;">
-            <a href="{% url 'private_jet_charter'%}" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem; display: inline-block;">
+            <a href="{% url 'private_jet_charter'%}" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem; display: inline-block; background-color: transparent !important;">
               Private Jet
             </a>
           </li>
           <li style="white-space: nowrap; flex-shrink: 0;">
-            <a href="{% url 'group_charter'%}" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem; display: inline-block;">
+            <a href="{% url 'group_charter'%}" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem; display: inline-block; background-color: transparent !important;">
               Group Charter
             </a>
           </li>
           <li style="white-space: nowrap; flex-shrink: 0;">
-            <a href="{% url 'aircraft_leasing'%}" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem; display: inline-block;">
+            <a href="{% url 'aircraft_leasing'%}" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem; display: inline-block; background-color: transparent !important;">
               Aircraft Leasing & sales
             </a>
           </li>
           <li style="white-space: nowrap; flex-shrink: 0;">
-            <a href="{% url 'air_cargo'%}" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem; display: inline-block;">
+            <a href="{% url 'air_cargo'%}" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem; display: inline-block; background-color: transparent !important;">
               Air Cargo
             </a>
           </li>
           <li style="white-space: nowrap; flex-shrink: 0;">
-            <a href="{% url 'contact-us'%}" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem; display: inline-block;">
+            <a href="{% url 'contact-us'%}" class="navbar-link" data-nav-link style="color: #ffffff; text-decoration: none; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; padding: 10px 15px; transition: all 0.2s ease; font-size: 0.9rem; display: inline-block; background-color: transparent !important;">
               contact us
             </a>
           </li>
@@ -162,6 +162,24 @@
      
     </div>
   </div>
+
+  <style>
+    /* Prevent color change on click/focus */
+    .header:active,
+    .header:focus,
+    .navbar:active,
+    .navbar:focus,
+    .navbar-list:active,
+    .navbar-list:focus,
+    .navbar-link:active,
+    .navbar-link:focus {
+      background-color: #1a4b8c !important;
+    }
+    
+    .navbar-link:hover {
+      background-color: rgba(255,255,255,0.1) !important;
+    }
+  </style>
 </header>
 
 
